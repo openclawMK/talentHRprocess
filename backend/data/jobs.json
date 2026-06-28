@@ -1,0 +1,318 @@
+[
+  {
+    "job_id": "job_001",
+    "role_title": "Outlet Supervisor",
+    "industry": "F&B",
+    "location": "Kuala Lumpur",
+    "requirements": {
+      "experience_years_min": 2,
+      "experience_years_preferred": 3,
+      "education_level_min": "SPM",
+      "required_skills": [
+        "customer service",
+        "cash handling",
+        "team supervision",
+        "opening closing procedures"
+      ],
+      "preferred_skills": [
+        "POS system",
+        "inventory management",
+        "staff scheduling"
+      ],
+      "key_responsibilities": [
+        "Manage outlet team of 8-12 staff",
+        "Handle customer escalations",
+        "Open and close procedures",
+        "Daily cash reconciliation"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 21,
+      "ideal_max": 40,
+      "max": 55
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "F&B experience (years)",
+        "weight": 0.18,
+        "source": "cv",
+        "description": "Years of relevant food & beverage industry experience"
+      },
+      {
+        "id": "c2",
+        "name": "Team supervision",
+        "weight": 0.16,
+        "source": "cv",
+        "description": "Direct supervisory experience managing a team"
+      },
+      {
+        "id": "c3",
+        "name": "Cash handling & reconciliation",
+        "weight": 0.1,
+        "source": "cv",
+        "description": "Experience with daily cash management and POS systems"
+      },
+      {
+        "id": "c4",
+        "name": "Outlet operations knowledge",
+        "weight": 0.08,
+        "source": "cv",
+        "description": "Opening/closing, inventory, scheduling, SOP compliance"
+      },
+      {
+        "id": "c5",
+        "name": "Age fit",
+        "weight": 0.1,
+        "source": "cv",
+        "description": "Candidate age relative to the preferred age band for the role"
+      },
+      {
+        "id": "c6",
+        "name": "Stress tolerance & composure",
+        "weight": 0.15,
+        "source": "ocean",
+        "description": "Low Neuroticism — handles peak-hour pressure without breaking down"
+      },
+      {
+        "id": "c7",
+        "name": "Initiative & problem solving",
+        "weight": 0.08,
+        "source": "ocean",
+        "description": "High Conscientiousness — proactive, follows through without being told"
+      },
+      {
+        "id": "c8",
+        "name": "Guest complaint resolution",
+        "weight": 0.1,
+        "source": "interview",
+        "description": "Situational judgment: how candidate handles escalated complaints"
+      },
+      {
+        "id": "c9",
+        "name": "Leadership style",
+        "weight": 0.05,
+        "source": "interview",
+        "description": "How candidate motivates and manages team members"
+      }
+    ],
+    "thresholds": {
+      "green": 70,
+      "red": 40
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 3,
+      "avg_team_size": 9
+    },
+    "criteria_generated_by": "template",
+    "criteria_locked": false
+  },
+  {
+    "job_id": "job_002",
+    "role_title": "Cashier",
+    "industry": "F&B / Retail",
+    "location": "Kuala Lumpur",
+    "requirements": {
+      "experience_years_min": 0,
+      "experience_years_preferred": 1,
+      "education_level_min": "SPM",
+      "required_skills": [
+        "cash handling",
+        "customer service",
+        "accuracy",
+        "basic maths"
+      ],
+      "preferred_skills": [
+        "POS system",
+        "product knowledge"
+      ],
+      "key_responsibilities": [
+        "Process customer transactions",
+        "Handle cash and card payments",
+        "Maintain accurate till records",
+        "Assist customers with queries"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 18,
+      "ideal_max": 35,
+      "max": 50
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Accuracy & attention to detail",
+        "weight": 0.22,
+        "source": "cv",
+        "description": "Track record of accurate transaction and record keeping"
+      },
+      {
+        "id": "c2",
+        "name": "Customer interaction quality",
+        "weight": 0.18,
+        "source": "cv",
+        "description": "Customer service experience at the front line"
+      },
+      {
+        "id": "c3",
+        "name": "Cash handling experience",
+        "weight": 0.18,
+        "source": "cv",
+        "description": "Hands-on cash and card payment handling"
+      },
+      {
+        "id": "c4",
+        "name": "Age fit",
+        "weight": 0.1,
+        "source": "cv",
+        "description": "Candidate age relative to the preferred age band for the role"
+      },
+      {
+        "id": "c5",
+        "name": "Reliability & punctuality record",
+        "weight": 0.12,
+        "source": "ocean",
+        "description": "High Conscientiousness — dependable attendance and punctuality"
+      },
+      {
+        "id": "c6",
+        "name": "Composure under queue pressure",
+        "weight": 0.1,
+        "source": "ocean",
+        "description": "Low Neuroticism — stays calm during busy periods"
+      },
+      {
+        "id": "c7",
+        "name": "Upselling willingness",
+        "weight": 0.1,
+        "source": "interview",
+        "description": "Openness to suggest add-ons and promotions at the till"
+      }
+    ],
+    "thresholds": {
+      "green": 65,
+      "red": 35
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 1,
+      "avg_team_size": 0
+    },
+    "criteria_generated_by": "template",
+    "criteria_locked": false
+  },
+  {
+    "job_id": "job_003",
+    "role_title": "Hotel Front Desk Officer",
+    "industry": "Hospitality",
+    "location": "Kuala Lumpur",
+    "requirements": {
+      "experience_years_min": 1,
+      "experience_years_preferred": 2,
+      "education_level_min": "Diploma",
+      "required_skills": [
+        "customer service",
+        "communication",
+        "check-in check-out",
+        "complaint handling",
+        "multilingual"
+      ],
+      "preferred_skills": [
+        "hotel PMS system",
+        "upselling",
+        "concierge knowledge"
+      ],
+      "key_responsibilities": [
+        "Handle guest check-in and check-out",
+        "Manage room assignments",
+        "Resolve guest complaints",
+        "Coordinate with housekeeping and other departments"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 20,
+      "ideal_max": 38,
+      "max": 50
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Hospitality / hotel experience",
+        "weight": 0.18,
+        "source": "cv",
+        "description": "Years of relevant hotel or hospitality experience"
+      },
+      {
+        "id": "c2",
+        "name": "Multilingual communication",
+        "weight": 0.13,
+        "source": "cv",
+        "description": "Ability to communicate across multiple languages"
+      },
+      {
+        "id": "c3",
+        "name": "PMS system experience (Opera etc.)",
+        "weight": 0.1,
+        "source": "cv",
+        "description": "Experience with hotel property management systems"
+      },
+      {
+        "id": "c4",
+        "name": "Age fit",
+        "weight": 0.1,
+        "source": "cv",
+        "description": "Candidate age relative to the preferred age band for the role"
+      },
+      {
+        "id": "c5",
+        "name": "Upselling & revenue mindset",
+        "weight": 0.04,
+        "source": "cv",
+        "description": "Experience upselling rooms or packages"
+      },
+      {
+        "id": "c6",
+        "name": "Warmth & openness (Agreeableness)",
+        "weight": 0.13,
+        "source": "ocean",
+        "description": "High Agreeableness — warm, guest-focused disposition"
+      },
+      {
+        "id": "c7",
+        "name": "Composure under pressure",
+        "weight": 0.1,
+        "source": "ocean",
+        "description": "Low Neuroticism — stays composed during busy check-in periods"
+      },
+      {
+        "id": "c8",
+        "name": "Complaint de-escalation",
+        "weight": 0.14,
+        "source": "interview",
+        "description": "Situational judgment: de-escalating upset guests"
+      },
+      {
+        "id": "c9",
+        "name": "VIP & loyalty guest handling",
+        "weight": 0.08,
+        "source": "interview",
+        "description": "Handling VIP and loyalty-program guests with care"
+      }
+    ],
+    "thresholds": {
+      "green": 70,
+      "red": 40
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 2,
+      "avg_team_size": 0
+    },
+    "criteria_generated_by": "template",
+    "criteria_locked": false
+  }
+]

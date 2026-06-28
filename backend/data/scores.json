@@ -1,0 +1,335 @@
+[
+  {
+    "score_id": "7c42056e-dc16-4737-b777-7a3c6441c091",
+    "candidate_id": "7edd75ab-9575-41f4-8d62-056f1260973c",
+    "job_id": "job_001",
+    "scored_date": "2026-06-28",
+    "cv_partial_score": 91,
+    "cv_coverage": 0.62,
+    "scored_coverage": 0.62,
+    "pending_sources": [
+      "interview",
+      "ocean"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 36,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.18,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Team supervision",
+        "source": "cv",
+        "weight": 0.16,
+        "score": 70,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.1,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c4",
+        "criterion_name": "Outlet operations knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 90,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c5",
+        "criterion_name": "Age fit",
+        "source": "cv",
+        "weight": 0.1,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c6",
+        "criterion_name": "Stress tolerance & composure",
+        "source": "ocean",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c7",
+        "criterion_name": "Initiative & problem solving",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c8",
+        "criterion_name": "Guest complaint resolution",
+        "source": "interview",
+        "weight": 0.1,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c9",
+        "criterion_name": "Leadership style",
+        "source": "interview",
+        "weight": 0.05,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 91,
+    "lane": "green",
+    "strengths": [
+      "The candidate has substantial experience in the hospitality industry, totaling over four years, which aligns well with the outlet supervisor role.",
+      "She possesses strong skills in guest relations and complaint handling, which are crucial for managing customer escalations.",
+      "Her familiarity with the Opera PMS system and Microsoft Office indicates a solid foundation in using technology for operational tasks."
+    ],
+    "gaps": [
+      "Probe in interview for specific experience in team supervision, as her previous roles did not explicitly involve managing a team.",
+      "Probe in interview for her experience with cash handling and reconciliation, ensuring she can manage daily cash operations effectively."
+    ],
+    "summary": "The candidate is a strong fit for the Outlet Supervisor role with over four years of relevant experience in the hospitality industry and a solid educational background in hotel management. Her skills in guest relations and complaint handling are well-suited for managing customer interactions and escalations. However, further clarification is needed regarding her experience in team supervision and cash handling to ensure she meets all the role's requirements."
+  },
+  {
+    "score_id": "e3d208bb-895a-4ce0-beb7-912704305aae",
+    "candidate_id": "534540cf-a9af-46b0-bdb1-4b27ad2e0c4d",
+    "job_id": "job_001",
+    "scored_date": "2026-06-28",
+    "cv_partial_score": 91,
+    "cv_coverage": 0.62,
+    "scored_coverage": 0.62,
+    "pending_sources": [
+      "interview",
+      "ocean"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 36,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.18,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Team supervision",
+        "source": "cv",
+        "weight": 0.16,
+        "score": 70,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.1,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c4",
+        "criterion_name": "Outlet operations knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 90,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c5",
+        "criterion_name": "Age fit",
+        "source": "cv",
+        "weight": 0.1,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c6",
+        "criterion_name": "Stress tolerance & composure",
+        "source": "ocean",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c7",
+        "criterion_name": "Initiative & problem solving",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c8",
+        "criterion_name": "Guest complaint resolution",
+        "source": "interview",
+        "weight": 0.1,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c9",
+        "criterion_name": "Leadership style",
+        "source": "interview",
+        "weight": 0.05,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 91,
+    "lane": "green",
+    "strengths": [
+      "The candidate has over four years of experience in the hospitality industry, which aligns well with the customer service focus of the Outlet Supervisor role.",
+      "Her proficiency in guest relations and complaint handling indicates strong interpersonal skills essential for handling customer escalations.",
+      "The candidate's age of 29 falls well within the preferred age range, suggesting a good fit for the role's demands and responsibilities."
+    ],
+    "gaps": [
+      "Probe in interview for specific examples of team supervision experience, as her previous roles did not explicitly involve managing a team.",
+      "Probe in interview for experience with cash handling and reconciliation, as this is a key responsibility of the role."
+    ],
+    "summary": "The candidate brings a solid background in hospitality with relevant skills in guest relations and complaint handling, which are critical for an Outlet Supervisor. Her age and educational background are well-suited for the role's requirements. However, further exploration during the interview is needed to assess her experience in team supervision and cash handling, as these are essential components of the position."
+  },
+  {
+    "score_id": "45317715-b606-4a16-a13e-88b1349bcb5a",
+    "candidate_id": "a6d7dead-35eb-4f89-96fa-e7beaa6ab77f",
+    "job_id": "job_001",
+    "scored_date": "2026-06-28",
+    "cv_partial_score": 66,
+    "cv_coverage": 0.62,
+    "scored_coverage": 0.62,
+    "pending_sources": [
+      "interview",
+      "ocean"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 39,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.18,
+        "score": 60,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Team supervision",
+        "source": "cv",
+        "weight": 0.16,
+        "score": 70,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.1,
+        "score": 60,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c4",
+        "criterion_name": "Outlet operations knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 90,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c5",
+        "criterion_name": "Age fit",
+        "source": "cv",
+        "weight": 0.1,
+        "score": 60,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c6",
+        "criterion_name": "Stress tolerance & composure",
+        "source": "ocean",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c7",
+        "criterion_name": "Initiative & problem solving",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c8",
+        "criterion_name": "Guest complaint resolution",
+        "source": "interview",
+        "weight": 0.1,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c9",
+        "criterion_name": "Leadership style",
+        "source": "interview",
+        "weight": 0.05,
+        "score": null,
+        "scored": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 66,
+    "lane": "amber",
+    "strengths": [
+      "The candidate has a solid foundation in customer service and cash handling, essential for managing daily operations.",
+      "Experience across multiple roles in the food and beverage industry demonstrates adaptability and a broad understanding of the sector.",
+      "Proficiency in using POS systems aligns well with the preferred skills for the role."
+    ],
+    "gaps": [
+      "Probe in interview for examples of team supervision experience, as this is a key responsibility for the role.",
+      "Probe in interview for knowledge and experience with inventory management and staff scheduling."
+    ],
+    "summary": "The candidate has 22 months of experience in the food and beverage industry, which is slightly below the preferred experience level for the Outlet Supervisor role. Their skills in customer service, cash handling, and POS systems are strong, indicating a good fit for the operational aspects of the position. However, further exploration during the interview is needed to assess their experience in team supervision and inventory management, which are critical for the role's leadership responsibilities."
+  }
+]

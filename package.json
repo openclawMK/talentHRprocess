@@ -1,0 +1,15 @@
+{
+  "name": "peoplequest-talent-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PeopleQuest Talent AI — AI talent scouting prototype",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,magenta \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

@@ -1,0 +1,333 @@
+import { Router } from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import multer from "multer";
+import { v4 as uuidv4 } from "uuid";
+
+import { extractText } from "../services/fileExtractor.js";
+import { parseCVWithAI } from "../services/cvParser.js";
+import { scoreCandidate } from "../services/scorer.js";
+import { generateCandidateInsights } from "../services/languageGenerator.js";
+import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { chatJSON, chatText } from "../services/aiClient.js";
+
+const router = Router();
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = path.join(__dirname, "..", "data");
+const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
+const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
+const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
+const SCORES_PATH = path.join(DATA_DIR, "scores.json");
+const DEMO_PATH = path.join(DATA_DIR, "demo-candidates.json");
+
+// --- tiny JSON helpers ---
+const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
+const writeJSON = (p, data) => fs.writeFileSync(p, JSON.stringify(data, null, 2));
+const today = () => new Date().toISOString().slice(0, 10);
+const findJob = (jobId) => readJSON(JOBS_PATH).find((j) => j.job_id === jobId);
+
+// Read-only lookup across live candidates + demo fallback data.
+function findCandidate(candidateId) {
+  const live = readJSON(CANDIDATES_PATH);
+  const hit = live.find((c) => c.candidate_id === candidateId);
+  if (hit) return hit;
+  try {
+    return readJSON(DEMO_PATH).find((c) => c.candidate_id === candidateId);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Score a candidate, generate insights, build + persist the score object,
+ * embed it on the candidate, and return the score object.
+ */
+async function runScoring(candidate, job) {
+  const scores = scoreCandidate(candidate, job);
+  const insights = await generateCandidateInsights(candidate, job, scores);
+
+  const scoreObj = {
+    score_id: uuidv4(),
+    candidate_id: candidate.candidate_id,
+    job_id: job.job_id,
+    scored_date: today(),
+    cv_partial_score: scores.cv_partial_score,
+    cv_coverage: scores.cv_coverage,
+    scored_coverage: scores.cv_coverage,
+    pending_sources: scores.pending_sources,
+    full_score_available: scores.full_score_available,
+    benchmark_score: scores.benchmark_score,
+    benchmark_maturity: scores.benchmark_maturity,
+    criteria_scores: scores.criteria_scores,
+    combined_score: scores.combined_score,
+    lane: scores.lane,
+    strengths: insights.strengths,
+    gaps: insights.gaps,
+    summary: insights.summary,
+  };
+
+  const allScores = readJSON(SCORES_PATH);
+  allScores.push(scoreObj);
+  writeJSON(SCORES_PATH, allScores);
+
+  candidate.score = scoreObj;
+  return scoreObj;
+}
+
+// --- multer: temp storage, keep original extension ---
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  filename: (req, file, cb) =>
+    cb(null, `${uuidv4()}${path.extname(file.originalname)}`),
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+/**
+ * POST /api/upload-cv  (multipart: file, jobId)
+ * Upload -> extract -> parse -> score -> persist fully scored candidate.
+ */
+router.post("/upload-cv", upload.single("file"), async (req, res) => {
+  const tempPath = req.file?.path;
+  try {
+    const { jobId } = req.body;
+    if (!req.file) return res.status(400).json({ error: "No file uploaded." });
+    if (!jobId) return res.status(400).json({ error: "Missing jobId." });
+
+    const job = findJob(jobId);
+    if (!job) return res.status(400).json({ error: `Unknown jobId: ${jobId}` });
+
+    const extracted = await extractText(tempPath);
+    if (extracted.unsupported) {
+      return res.status(400).json({ error: extracted.message });
+    }
+    if (extracted.confidence < 50) {
+      return res.status(422).json({
+        error:
+          "CV could not be read clearly. Please upload a cleaner PDF or DOCX.",
+      });
+    }
+
+    const profile = await parseCVWithAI(extracted.text, jobId);
+    const parseOverall = profile.overall_parse_confidence ?? 50;
+
+    const candidate = {
+      candidate_id: uuidv4(),
+      job_id: jobId,
+      source: "upload",
+      submitted_date: today(),
+      parse_confidence_overall: parseOverall,
+      low_confidence_warning: parseOverall < 70,
+      profile,
+      score: null,
+      hr_notes: [],
+      override: null,
+    };
+
+    // Score automatically — HR never triggers scoring manually.
+    await runScoring(candidate, job);
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    candidates.push(candidate);
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    return res.status(201).json(candidate);
+  } catch (err) {
+    console.error("upload-cv error:", err);
+    return res
+      .status(500)
+      .json({ error: "Failed to process CV.", detail: err.message });
+  } finally {
+    if (tempPath && fs.existsSync(tempPath)) fs.unlink(tempPath, () => {});
+  }
+});
+
+/**
+ * POST /api/score-candidate  { candidate_id, job_id }
+ * Re-run scoring for an existing candidate.
+ */
+router.post("/score-candidate", async (req, res) => {
+  try {
+    const { candidate_id, job_id } = req.body;
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === candidate_id);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+
+    const job = findJob(job_id || candidates[idx].job_id);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    await runScoring(candidates[idx], job);
+    writeJSON(CANDIDATES_PATH, candidates);
+    return res.json(candidates[idx]);
+  } catch (err) {
+    console.error("score-candidate error:", err);
+    return res.status(500).json({ error: "Failed to score candidate." });
+  }
+});
+
+/**
+ * POST /api/interview-questions  { candidate_id, job_id }
+ * Generate 7 tailored questions (2 per gap + 3 general).
+ */
+router.post("/interview-questions", async (req, res) => {
+  try {
+    const { candidate_id, job_id } = req.body;
+    const candidate = findCandidate(candidate_id);
+    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(job_id || candidate.job_id);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const gaps = candidate.score?.gaps || [];
+    const system =
+      "You are an expert interviewer and HR consultant. Generate targeted interview questions based on the candidate's profile and identified gaps. " +
+      "Questions must be specific to this candidate, not generic. " +
+      "Never ask about family, health, religion, race, gender, or marital status. Return valid JSON only.";
+
+    const user = `Generate interview questions for ${candidate.profile.name} applying for ${job.role_title}.
+
+Their top 2 gaps are: ${JSON.stringify(gaps)}
+
+Their experience summary: ${JSON.stringify(
+      (candidate.profile.work_history || []).map(
+        (w) => `${w.title} at ${w.employer} (${w.duration_months} months)`
+      )
+    )}
+
+Key role requirements: ${JSON.stringify(job.requirements.key_responsibilities)}
+
+Return this JSON:
+{
+  "questions": [
+    { "question": "one clear sentence", "type": "behavioural|situational|competency", "targets_gap": "which gap this addresses, or null if general" }
+  ]
+}
+
+Generate exactly 7 questions:
+- 2 targeting gap 1
+- 2 targeting gap 2
+- 3 general role-fit questions
+Mix behavioural, situational, and competency types.`;
+
+    const result = await chatJSON({ system, user, temperature: 0.5 });
+    return res.json({ questions: result.questions || [] });
+  } catch (err) {
+    console.error("interview-questions error:", err);
+    return res.status(500).json({ error: "Failed to generate questions." });
+  }
+});
+
+/**
+ * POST /api/compare-candidates  { candidate_id_1, candidate_id_2, job_id }
+ */
+router.post("/compare-candidates", async (req, res) => {
+  try {
+    const { candidate_id_1, candidate_id_2, job_id } = req.body;
+    const a = findCandidate(candidate_id_1);
+    const b = findCandidate(candidate_id_2);
+    if (!a || !b) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(job_id || a.job_id);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const summarize = (c) => ({
+      name: c.profile.name,
+      age: c.profile.age,
+      total_experience_months: c.profile.total_experience_months,
+      lane: c.score?.lane,
+      strengths: c.score?.strengths,
+      gaps: c.score?.gaps,
+      work_history: (c.profile.work_history || []).map(
+        (w) => `${w.title} at ${w.employer}`
+      ),
+    });
+
+    const system =
+      "You are an expert HR advisor comparing two candidates. Be direct and specific. " +
+      "Do not reference gender, race, religion, or marital status. Return plain text only.";
+    const user = `Compare these two candidates for ${job.role_title}.
+Candidate A: ${JSON.stringify(summarize(a))}
+Candidate B: ${JSON.stringify(summarize(b))}
+
+Write 3-4 sentences for an HR manager explaining who is stronger for what reason, what each is better at, and which specific factor should drive the final decision.`;
+
+    const comparison_text = await chatText({ system, user, temperature: 0.4 });
+    return res.json({ comparison_text });
+  } catch (err) {
+    console.error("compare-candidates error:", err);
+    return res.status(500).json({ error: "Failed to compare candidates." });
+  }
+});
+
+/**
+ * GET /api/ocean-questions — the BFI-10 questionnaire items.
+ */
+router.get("/ocean-questions", (req, res) => {
+  res.json({ items: OCEAN_ITEMS });
+});
+
+/**
+ * POST /api/ocean-assessment { candidate_id, responses }
+ * Scores the ocean criteria and recomputes the combined score.
+ */
+router.post("/ocean-assessment", (req, res) => {
+  try {
+    const { candidate_id, responses } = req.body;
+    if (!responses) return res.status(400).json({ error: "Missing responses." });
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === candidate_id);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(candidates[idx].job_id);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const traits = computeTraits(responses);
+    applyOceanScores(candidates[idx], job, traits);
+    writeJSON(CANDIDATES_PATH, candidates);
+    return res.json(candidates[idx]);
+  } catch (err) {
+    console.error("ocean-assessment error:", err);
+    return res.status(500).json({ error: "Failed to score assessment." });
+  }
+});
+
+/**
+ * GET /api/demo-candidates — pre-scored fallback candidates for the demo.
+ */
+router.get("/demo-candidates", (req, res) => {
+  try {
+    res.json(readJSON(DEMO_PATH));
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load demo candidates." });
+  }
+});
+
+/**
+ * GET /api/candidates/:jobId — all candidates for a role, sorted by combined score.
+ */
+router.get("/candidates/:jobId", (req, res) => {
+  try {
+    const list = readJSON(CANDIDATES_PATH)
+      .filter((c) => c.job_id === req.params.jobId)
+      .sort(
+        (x, y) =>
+          (y.score?.combined_score ?? -1) - (x.score?.combined_score ?? -1)
+      );
+    res.json(list);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load candidates." });
+  }
+});
+
+/**
+ * GET /api/candidates/:jobId/:candidateId — single candidate with score.
+ */
+router.get("/candidates/:jobId/:candidateId", (req, res) => {
+  try {
+    const candidate = findCandidate(req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    res.json(candidate);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load candidate." });
+  }
+});
+
+export default router;

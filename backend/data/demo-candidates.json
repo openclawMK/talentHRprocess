@@ -1,0 +1,194 @@
+[
+  {
+    "candidate_id": "demo_001",
+    "job_id": "job_001",
+    "source": "portal",
+    "submitted_date": "2026-06-20",
+    "parse_confidence_overall": 92,
+    "low_confidence_warning": false,
+    "profile": {
+      "name": "Amirah Binti Zainudin",
+      "date_of_birth": null,
+      "age": 25,
+      "contact": { "email": "amirah.demo@email.com", "phone": "012-300 1100", "location": "Cheras, Kuala Lumpur" },
+      "languages": ["Bahasa Malaysia", "English"],
+      "work_history": [
+        { "title": "Outlet Supervisor", "employer": "Chatime", "industry": "F&B", "start_date": "2023-06", "end_date": null, "duration_months": 24, "duties": ["Supervised a team of 4 crew", "Daily cash reconciliation", "Opening and closing procedures"], "team_size_managed": 4, "confidence": 92 },
+        { "title": "Crew Member", "employer": "McDonald's Malaysia", "industry": "F&B", "start_date": "2022-06", "end_date": "2023-05", "duration_months": 12, "duties": ["Front counter service", "Cash handling"], "team_size_managed": null, "confidence": 90 }
+      ],
+      "education": [ { "level": "SPM", "institution": "SMK Cheras", "field": null, "year": 2018, "confidence": 95 } ],
+      "skills": ["customer service", "cash handling", "team supervision", "POS system", "opening closing procedures"],
+      "certifications": ["Food Handling Certificate"],
+      "employment_gaps": [],
+      "total_experience_months": 36,
+      "avg_tenure_months": 18,
+      "career_direction": "upward",
+      "overall_parse_confidence": 92
+    },
+    "score": {
+      "score_id": "demo_score_001",
+      "candidate_id": "demo_001",
+      "job_id": "job_001",
+      "scored_date": "2026-06-20",
+      "cv_partial_score": 88,
+      "cv_coverage": 0.62,
+      "pending_sources": ["interview", "ocean"],
+      "full_score_available": false,
+      "benchmark_score": 72,
+      "benchmark_maturity": "starter",
+      "criteria_scores": [
+        { "criterion_id": "c1", "criterion_name": "F&B experience (years)", "source": "cv", "weight": 0.18, "score": 85, "scored": true, "estimated": false },
+        { "criterion_id": "c2", "criterion_name": "Team supervision", "source": "cv", "weight": 0.16, "score": 90, "scored": true, "estimated": false },
+        { "criterion_id": "c3", "criterion_name": "Cash handling & reconciliation", "source": "cv", "weight": 0.10, "score": 85, "scored": true, "estimated": false },
+        { "criterion_id": "c4", "criterion_name": "Outlet operations knowledge", "source": "cv", "weight": 0.08, "score": 80, "scored": true, "estimated": false },
+        { "criterion_id": "c5", "criterion_name": "Age fit", "source": "cv", "weight": 0.10, "score": 100, "scored": true, "estimated": false },
+        { "criterion_id": "c6", "criterion_name": "Stress tolerance & composure", "source": "ocean", "weight": 0.15, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c7", "criterion_name": "Initiative & problem solving", "source": "ocean", "weight": 0.08, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c8", "criterion_name": "Guest complaint resolution", "source": "interview", "weight": 0.10, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c9", "criterion_name": "Leadership style", "source": "interview", "weight": 0.05, "score": null, "scored": false, "estimated": false }
+      ],
+      "combined_score": 88,
+      "lane": "green",
+      "strengths": [
+        "Amirah has direct outlet supervisory experience in the F&B sector, having led shift operations at Chatime.",
+        "She demonstrates a clear upward progression from crew member to supervisor within two years.",
+        "Her skill set covers the core requirements: cash handling, team supervision, and opening/closing procedures."
+      ],
+      "gaps": [
+        "Probe in interview how she would scale from supervising 4 staff to an outlet team of 8-12.",
+        "Probe in interview her exposure to inventory management and staff scheduling beyond daily operations."
+      ],
+      "summary": "Amirah Binti Zainudin is a strong fit for the Outlet Supervisor role on the CV criteria, with hands-on F&B supervisory experience and a clear progression into team leadership. Her core skills align well with the position's requirements. The main area to explore is her readiness to manage a larger team than she has previously handled."
+    },
+    "hr_notes": [],
+    "override": null
+  },
+  {
+    "candidate_id": "demo_002",
+    "job_id": "job_001",
+    "source": "agency",
+    "submitted_date": "2026-06-21",
+    "parse_confidence_overall": 88,
+    "low_confidence_warning": false,
+    "profile": {
+      "name": "Jason Tan Wei Ming",
+      "date_of_birth": null,
+      "age": 27,
+      "contact": { "email": "jason.demo@email.com", "phone": "016-700 2200", "location": "Pandan Indah, Kuala Lumpur" },
+      "languages": ["English", "Mandarin", "Bahasa Malaysia"],
+      "work_history": [
+        { "title": "Assistant Outlet Supervisor", "employer": "Tealive", "industry": "F&B", "start_date": "2025-10", "end_date": null, "duration_months": 8, "duties": ["Assisted outlet operations", "Staff scheduling", "Inventory checks"], "team_size_managed": 6, "confidence": 88 },
+        { "title": "Shift Leader", "employer": "Secret Recipe", "industry": "F&B", "start_date": "2024-02", "end_date": "2025-09", "duration_months": 16, "duties": ["Led shift team", "POS operations"], "team_size_managed": 5, "confidence": 88 },
+        { "title": "Retail Sales Associate", "employer": "Padini", "industry": "Retail", "start_date": "2023-02", "end_date": "2024-01", "duration_months": 12, "duties": ["Customer service", "Cash handling"], "team_size_managed": null, "confidence": 85 }
+      ],
+      "education": [ { "level": "Diploma", "institution": "Politeknik", "field": "Business Studies", "year": 2022, "confidence": 90 } ],
+      "skills": ["customer service", "cash handling", "POS system", "inventory management", "staff scheduling"],
+      "certifications": [],
+      "employment_gaps": [],
+      "total_experience_months": 36,
+      "avg_tenure_months": 12,
+      "career_direction": "upward",
+      "overall_parse_confidence": 88
+    },
+    "score": {
+      "score_id": "demo_score_002",
+      "candidate_id": "demo_002",
+      "job_id": "job_001",
+      "scored_date": "2026-06-21",
+      "cv_partial_score": 92,
+      "cv_coverage": 0.62,
+      "pending_sources": ["interview", "ocean"],
+      "full_score_available": false,
+      "benchmark_score": 83,
+      "benchmark_maturity": "starter",
+      "criteria_scores": [
+        { "criterion_id": "c1", "criterion_name": "F&B experience (years)", "source": "cv", "weight": 0.18, "score": 100, "scored": true, "estimated": false },
+        { "criterion_id": "c2", "criterion_name": "Team supervision", "source": "cv", "weight": 0.16, "score": 90, "scored": true, "estimated": false },
+        { "criterion_id": "c3", "criterion_name": "Cash handling & reconciliation", "source": "cv", "weight": 0.10, "score": 82, "scored": true, "estimated": false },
+        { "criterion_id": "c4", "criterion_name": "Outlet operations knowledge", "source": "cv", "weight": 0.08, "score": 82, "scored": true, "estimated": false },
+        { "criterion_id": "c5", "criterion_name": "Age fit", "source": "cv", "weight": 0.10, "score": 100, "scored": true, "estimated": false },
+        { "criterion_id": "c6", "criterion_name": "Stress tolerance & composure", "source": "ocean", "weight": 0.15, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c7", "criterion_name": "Initiative & problem solving", "source": "ocean", "weight": 0.08, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c8", "criterion_name": "Guest complaint resolution", "source": "interview", "weight": 0.10, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c9", "criterion_name": "Leadership style", "source": "interview", "weight": 0.05, "score": null, "scored": false, "estimated": false }
+      ],
+      "combined_score": 92,
+      "lane": "green",
+      "strengths": [
+        "Jason brings a blend of F&B supervisory and retail customer-facing experience.",
+        "He holds a Diploma in Business Studies, exceeding the role's minimum education requirement.",
+        "His skills include inventory management and staff scheduling, both valued for this role."
+      ],
+      "gaps": [
+        "Probe in interview the reason for the short eight-month tenure in his current role.",
+        "Probe in interview his hands-on experience handling customer escalations independently."
+      ],
+      "summary": "Jason Tan Wei Ming scores strongly on the CV criteria, with supervisory exposure across F&B and retail and a relevant business diploma. His preferred-skill coverage is strong. The key item to clarify is the short tenure in his most recent position and how he manages escalations on his own."
+    },
+    "hr_notes": [],
+    "override": null
+  },
+  {
+    "candidate_id": "demo_003",
+    "job_id": "job_001",
+    "source": "upload",
+    "submitted_date": "2026-06-22",
+    "parse_confidence_overall": 62,
+    "low_confidence_warning": true,
+    "profile": {
+      "name": "Nurul Ain Binti Hassan",
+      "date_of_birth": null,
+      "age": null,
+      "contact": { "email": "nurulain.demo@email.com", "phone": "011-2200 3300", "location": "Ampang, Selangor" },
+      "languages": ["Bahasa Malaysia", "English"],
+      "work_history": [
+        { "title": "Barista / Crew Member", "employer": "Starbucks Malaysia", "industry": "F&B", "start_date": "2025-06", "end_date": null, "duration_months": 12, "duties": ["Beverage preparation", "Customer service", "Cash handling"], "team_size_managed": null, "confidence": 60 }
+      ],
+      "education": [ { "level": "SPM", "institution": "SMK Ampang", "field": null, "year": 2022, "confidence": 70 } ],
+      "skills": ["customer service", "cash handling"],
+      "certifications": [],
+      "employment_gaps": [],
+      "total_experience_months": 12,
+      "avg_tenure_months": 12,
+      "career_direction": "unclear",
+      "overall_parse_confidence": 62
+    },
+    "score": {
+      "score_id": "demo_score_003",
+      "candidate_id": "demo_003",
+      "job_id": "job_001",
+      "scored_date": "2026-06-22",
+      "cv_partial_score": 47,
+      "cv_coverage": 0.62,
+      "pending_sources": ["interview", "ocean"],
+      "full_score_available": false,
+      "benchmark_score": 30,
+      "benchmark_maturity": "starter",
+      "criteria_scores": [
+        { "criterion_id": "c1", "criterion_name": "F&B experience (years)", "source": "cv", "weight": 0.18, "score": 35, "scored": true, "estimated": false },
+        { "criterion_id": "c2", "criterion_name": "Team supervision", "source": "cv", "weight": 0.16, "score": 30, "scored": true, "estimated": false },
+        { "criterion_id": "c3", "criterion_name": "Cash handling & reconciliation", "source": "cv", "weight": 0.10, "score": 82, "scored": true, "estimated": false },
+        { "criterion_id": "c4", "criterion_name": "Outlet operations knowledge", "source": "cv", "weight": 0.08, "score": 48, "scored": true, "estimated": false },
+        { "criterion_id": "c5", "criterion_name": "Age fit", "source": "cv", "weight": 0.10, "score": 60, "scored": true, "estimated": false },
+        { "criterion_id": "c6", "criterion_name": "Stress tolerance & composure", "source": "ocean", "weight": 0.15, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c7", "criterion_name": "Initiative & problem solving", "source": "ocean", "weight": 0.08, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c8", "criterion_name": "Guest complaint resolution", "source": "interview", "weight": 0.10, "score": null, "scored": false, "estimated": false },
+        { "criterion_id": "c9", "criterion_name": "Leadership style", "source": "interview", "weight": 0.05, "score": null, "scored": false, "estimated": false }
+      ],
+      "combined_score": 47,
+      "lane": "amber",
+      "strengths": [
+        "Nurul has front-line F&B customer service experience as a barista at Starbucks.",
+        "She has practical cash-handling experience in a fast-paced outlet environment.",
+        "She meets the minimum SPM education requirement for the role."
+      ],
+      "gaps": [
+        "Probe in interview any supervisory or team-leadership responsibilities, as none are evident in her history.",
+        "Probe in interview her familiarity with opening/closing procedures and POS systems."
+      ],
+      "summary": "Nurul Ain Binti Hassan has a solid customer-service foundation but limited supervisory exposure for this role. Her single year of experience sits below the role's preferred level. The original CV parsed with low confidence, so the work history and skills should be verified against the source document."
+    },
+    "hr_notes": [],
+    "override": null
+  }
+]

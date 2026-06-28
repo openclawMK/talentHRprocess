@@ -1,0 +1,73 @@
+{
+  "F&B": {
+    "typical_criteria": [
+      { "name": "F&B industry experience", "suggested_weight": 0.20, "source": "cv" },
+      { "name": "Team supervision", "suggested_weight": 0.18, "source": "cv" },
+      { "name": "Cash & POS handling", "suggested_weight": 0.12, "source": "cv" },
+      { "name": "Food safety awareness", "suggested_weight": 0.05, "source": "cv" },
+      { "name": "Stress tolerance (peak hours)", "suggested_weight": 0.15, "source": "ocean" },
+      { "name": "Conscientiousness", "suggested_weight": 0.10, "source": "ocean" },
+      { "name": "Complaint resolution (SJT)", "suggested_weight": 0.12, "source": "interview" },
+      { "name": "Shift flexibility", "suggested_weight": 0.08, "source": "interview" }
+    ]
+  },
+  "Hospitality": {
+    "typical_criteria": [
+      { "name": "Hotel / hospitality experience", "suggested_weight": 0.20, "source": "cv" },
+      { "name": "Multilingual ability", "suggested_weight": 0.15, "source": "cv" },
+      { "name": "PMS system proficiency", "suggested_weight": 0.12, "source": "cv" },
+      { "name": "Agreeableness & warmth", "suggested_weight": 0.15, "source": "ocean" },
+      { "name": "Emotional stability", "suggested_weight": 0.10, "source": "ocean" },
+      { "name": "Guest complaint handling (SJT)", "suggested_weight": 0.15, "source": "interview" },
+      { "name": "Upselling mindset", "suggested_weight": 0.08, "source": "interview" },
+      { "name": "Grooming & presentation", "suggested_weight": 0.05, "source": "interview" }
+    ]
+  },
+  "Retail": {
+    "typical_criteria": [
+      { "name": "Retail sales experience", "suggested_weight": 0.20, "source": "cv" },
+      { "name": "Product knowledge adaptability", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Customer service track record", "suggested_weight": 0.15, "source": "cv" },
+      { "name": "Target & KPI orientation", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Extraversion & persuasiveness", "suggested_weight": 0.15, "source": "ocean" },
+      { "name": "Conscientiousness", "suggested_weight": 0.10, "source": "ocean" },
+      { "name": "Upsell scenario (SJT)", "suggested_weight": 0.12, "source": "interview" },
+      { "name": "Availability & flexibility", "suggested_weight": 0.08, "source": "interview" }
+    ]
+  },
+  "Manufacturing & Production": {
+    "typical_criteria": [
+      { "name": "Production / factory experience", "suggested_weight": 0.25, "source": "cv" },
+      { "name": "Safety compliance record", "suggested_weight": 0.15, "source": "cv" },
+      { "name": "Tenure & attendance stability", "suggested_weight": 0.15, "source": "cv" },
+      { "name": "Technical / machinery skills", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Conscientiousness & diligence", "suggested_weight": 0.15, "source": "ocean" },
+      { "name": "Stress tolerance (repetitive work)", "suggested_weight": 0.10, "source": "ocean" },
+      { "name": "Shift pattern willingness", "suggested_weight": 0.10, "source": "interview" }
+    ]
+  },
+  "Logistics & Warehouse": {
+    "typical_criteria": [
+      { "name": "Warehouse / logistics experience", "suggested_weight": 0.25, "source": "cv" },
+      { "name": "Physical fitness & stamina", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Forklift / equipment certifications", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Accuracy & attention to detail", "suggested_weight": 0.15, "source": "cv" },
+      { "name": "Conscientiousness", "suggested_weight": 0.15, "source": "ocean" },
+      { "name": "Reliability record", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Team coordination", "suggested_weight": 0.10, "source": "interview" },
+      { "name": "Availability for OT / weekend", "suggested_weight": 0.05, "source": "interview" }
+    ]
+  },
+  "Early Childhood Education": {
+    "typical_criteria": [
+      { "name": "ECE qualification (DPKE / Degree)", "suggested_weight": 0.20, "source": "cv" },
+      { "name": "Classroom / childcare experience", "suggested_weight": 0.20, "source": "cv" },
+      { "name": "Curriculum knowledge", "suggested_weight": 0.10, "source": "cv" },
+      { "name": "Agreeableness & warmth", "suggested_weight": 0.15, "source": "ocean" },
+      { "name": "Emotional stability", "suggested_weight": 0.10, "source": "ocean" },
+      { "name": "Conscientiousness", "suggested_weight": 0.10, "source": "ocean" },
+      { "name": "Child safety scenario (SJT)", "suggested_weight": 0.10, "source": "interview" },
+      { "name": "Parent communication style", "suggested_weight": 0.05, "source": "interview" }
+    ]
+  }
+}
