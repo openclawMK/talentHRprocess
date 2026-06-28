@@ -12,6 +12,7 @@ import { generateCandidateInsights } from "../services/languageGenerator.js";
 import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
+import { generateFinalAnalysis } from "../services/finalAnalyser.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
 
 const router = Router();
@@ -66,6 +67,7 @@ async function runScoring(candidate, job) {
     combined_score: scores.combined_score,
     lane: scores.lane,
     strengths: insights.strengths,
+    weaknesses: insights.weaknesses,
     gaps: insights.gaps,
     summary: insights.summary,
   };
@@ -428,6 +430,36 @@ router.post("/candidates/:jobId/:candidateId/interview-scores", (req, res) => {
   } catch (err) {
     console.error("interview-scores error:", err);
     res.status(500).json({ error: "Failed to save interview scores." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/final-analysis
+ * Requires all 3 stages scored. AI synthesises CV + OCEAN + Interview + HR notes
+ * into a holistic verdict with Hire / Hold / Reject recommendation.
+ */
+router.post("/candidates/:jobId/:candidateId/final-analysis", async (req, res) => {
+  try {
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const candidate = candidates[idx];
+    const pending = candidate.score?.pending_sources || [];
+    if (pending.length > 0)
+      return res.status(400).json({
+        error: `Cannot generate final analysis — pending stages: ${pending.join(", ")}`,
+      });
+
+    const analysis = await generateFinalAnalysis(candidate, job);
+    candidate.final_analysis = analysis;
+    writeJSON(CANDIDATES_PATH, candidates);
+    res.json({ candidate, final_analysis: analysis });
+  } catch (err) {
+    console.error("final-analysis error:", err);
+    res.status(500).json({ error: "Failed to generate final analysis." });
   }
 });
 

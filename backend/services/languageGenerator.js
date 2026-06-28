@@ -50,14 +50,16 @@ Top gap identified: ${topGap ? topGap.criterion_name : "n/a"} (the lowest-scorin
 
 Return this JSON:
 {
-  "strengths": [exactly 3 strings, each one sentence, specific to this candidate],
-  "gaps": [exactly 2 strings, each framed as 'probe in interview', not as disqualifiers],
+  "strengths": [exactly 3 strings — what the candidate genuinely does well, specific to their profile],
+  "weaknesses": [exactly 3 strings — honest factual shortfalls: missing experience, education gaps, job-hopping, skills deficits; direct and specific, not softened],
+  "gaps": [exactly 2 strings — unknowns still to probe in interview, framed as behavioral or situational questions],
   "summary": "one paragraph, 3-4 sentences, plain language for an HR manager"
 }`;
 
   const result = await chatJSON({ system, user, temperature: 0.4 });
   return {
     strengths: Array.isArray(result.strengths) ? result.strengths.slice(0, 3) : [],
+    weaknesses: Array.isArray(result.weaknesses) ? result.weaknesses.slice(0, 3) : [],
     gaps: Array.isArray(result.gaps) ? result.gaps.slice(0, 2) : [],
     summary: result.summary || "",
   };

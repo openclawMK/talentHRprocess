@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Info, Check, X, AlertTriangle, ClipboardList, MessageSquare } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
 import { monthsToDuration, round } from "../lib/format.js";
@@ -14,11 +14,16 @@ export default function CandidateDetail() {
   const [note, setNote] = useState("");
   const [noteSaving, setNoteSaving] = useState(false);
   const [noteResult, setNoteResult] = useState(null);
+  const [finalAnalysis, setFinalAnalysis] = useState(null);
+  const [generatingFinal, setGeneratingFinal] = useState(false);
 
   useEffect(() => {
     axios
       .get(`/api/candidates/${jobId}/${candidateId}`)
-      .then((res) => setCandidate(res.data))
+      .then((res) => {
+        setCandidate(res.data);
+        if (res.data.final_analysis) setFinalAnalysis(res.data.final_analysis);
+      })
       .catch(() => setCandidate(false));
     axios
       .get("/api/jobs")
@@ -188,31 +193,138 @@ export default function CandidateDetail() {
         </div>
       )}
 
-      {/* strengths */}
-      <section className="mt-6">
-        <h2 className="font-medium text-gray-900">Strengths</h2>
-        <ol className="mt-2 space-y-1.5">
-          {(s.strengths || []).map((str, i) => (
-            <li key={i} className="flex gap-2 text-sm text-gray-700">
-              <span className="font-semibold text-gray-400">{i + 1}.</span>
-              {str}
-            </li>
-          ))}
-        </ol>
-      </section>
+      {/* strengths + weaknesses side by side */}
+      <div className="mt-6 grid grid-cols-2 gap-4">
+        <section>
+          <div className="flex items-center gap-1.5">
+            <TrendingUp size={15} className="text-green-600" />
+            <h2 className="font-medium text-gray-900">Strengths</h2>
+          </div>
+          <ul className="mt-2 space-y-2">
+            {(s.strengths || []).map((str, i) => (
+              <li key={i} className="flex gap-2 text-sm text-gray-700">
+                <Check size={14} className="mt-0.5 shrink-0 text-green-500" />
+                {str}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section>
+          <div className="flex items-center gap-1.5">
+            <TrendingDown size={15} className="text-red-500" />
+            <h2 className="font-medium text-gray-900">Weaknesses</h2>
+          </div>
+          <ul className="mt-2 space-y-2">
+            {(s.weaknesses || []).map((w, i) => (
+              <li key={i} className="flex gap-2 text-sm text-gray-700">
+                <X size={14} className="mt-0.5 shrink-0 text-red-400" />
+                {w}
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
 
       {/* gaps */}
       <section className="mt-5">
-        <h2 className="font-medium text-gray-900">Areas to probe</h2>
+        <h2 className="font-medium text-gray-900">Areas to probe in interview</h2>
         <ul className="mt-2 space-y-1.5">
           {(s.gaps || []).map((g, i) => (
             <li key={i} className="text-sm text-gray-700">
-              <span className="text-gray-400">→ Probe in interview: </span>
+              <span className="text-gray-400">→ </span>
               {g}
             </li>
           ))}
         </ul>
       </section>
+
+      {/* Final Analysis panel */}
+      {finalAnalysis ? (
+        <section className="mt-6 rounded-lg border-2 border-gray-800 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-gray-700" />
+              <h2 className="font-semibold text-gray-900">Final Assessment</h2>
+              <span className="text-xs text-gray-400">{finalAnalysis.generated_date}</span>
+            </div>
+            <span
+              className="rounded-full px-3 py-1 text-sm font-bold"
+              style={{
+                backgroundColor:
+                  finalAnalysis.recommendation === "Hire" ? "#D1FAE5" :
+                  finalAnalysis.recommendation === "Reject" ? "#FEE2E2" : "#FEF3C7",
+                color:
+                  finalAnalysis.recommendation === "Hire" ? "#065F46" :
+                  finalAnalysis.recommendation === "Reject" ? "#991B1B" : "#92400E",
+              }}
+            >
+              {finalAnalysis.recommendation}
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-gray-500">{finalAnalysis.recommendation_reason}</p>
+
+          <p className="mt-3 text-sm leading-relaxed text-gray-700">{finalAnalysis.summary}</p>
+
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-green-700">
+                <TrendingUp size={12} /> Strengths
+              </div>
+              <ul className="mt-1.5 space-y-1.5">
+                {finalAnalysis.strengths.map((s, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-700">
+                    <Check size={13} className="mt-0.5 shrink-0 text-green-500" />
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-600">
+                <TrendingDown size={12} /> Weaknesses
+              </div>
+              <ul className="mt-1.5 space-y-1.5">
+                {finalAnalysis.weaknesses.map((w, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-700">
+                    <X size={13} className="mt-0.5 shrink-0 text-red-400" />
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      ) : !partial && (
+        <div className="mt-6 rounded-lg border border-dashed border-gray-300 p-5 text-center">
+          <Sparkles size={18} className="mx-auto text-gray-400" />
+          <p className="mt-2 text-sm font-medium text-gray-700">All stages complete — generate a final analysis</p>
+          <p className="mt-0.5 text-xs text-gray-400">AI will synthesise CV, OCEAN, interview scores, and HR notes into a Hire / Hold / Reject recommendation.</p>
+          <button
+            onClick={async () => {
+              setGeneratingFinal(true);
+              try {
+                const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/final-analysis`);
+                setFinalAnalysis(res.data.final_analysis);
+                setCandidate(res.data.candidate);
+              } catch (e) {
+                alert(e.response?.data?.error || "Failed to generate analysis.");
+              } finally {
+                setGeneratingFinal(false);
+              }
+            }}
+            disabled={generatingFinal}
+            className="mt-3 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            style={{ backgroundColor: "#111827" }}
+          >
+            {generatingFinal ? (
+              <><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40" style={{ borderTopColor: "#fff" }} /> Analysing all data…</>
+            ) : (
+              <><Sparkles size={14} /> Generate final analysis →</>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* work history */}
       <section className="mt-6">
@@ -266,7 +378,7 @@ export default function CandidateDetail() {
           <h2 className="font-medium text-gray-900">HR notes</h2>
         </div>
         <p className="mt-0.5 text-xs text-gray-400">
-          Notes are saved and AI-analyzed to produce an HR Assessment score that folds into the overall score.
+          Notes are saved and used in the final AI analysis after all three scoring stages are complete.
         </p>
 
         {/* Past notes */}
@@ -320,7 +432,7 @@ export default function CandidateDetail() {
           disabled={noteSaving || !note.trim()}
           className="mt-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
-          {noteSaving ? "Analyzing…" : "Save & score notes"}
+          {noteSaving ? "Saving…" : "Save note"}
         </button>
       </section>
 
