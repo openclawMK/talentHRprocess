@@ -7,6 +7,7 @@ import CVUpload from "./screens/CVUpload.jsx";
 import Dashboard from "./screens/Dashboard.jsx";
 import CandidateDetail from "./screens/CandidateDetail.jsx";
 import InterviewQuestions from "./screens/InterviewQuestions.jsx";
+import InterviewScoring from "./screens/InterviewScoring.jsx";
 import OceanQuestionnaire from "./screens/OceanQuestionnaire.jsx";
 import CompareView from "./screens/CompareView.jsx";
 
@@ -26,6 +27,10 @@ export default function App() {
         <Route
           path="/jobs/:jobId/candidate/:candidateId/questions"
           element={<InterviewQuestions />}
+        />
+        <Route
+          path="/jobs/:jobId/candidate/:candidateId/interview"
+          element={<InterviewScoring />}
         />
         <Route
           path="/jobs/:jobId/candidate/:candidateId/ocean"

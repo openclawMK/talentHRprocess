@@ -10,6 +10,8 @@ import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
 import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { applyInterviewScores } from "../services/interviewScorer.js";
+import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
 
 const router = Router();
@@ -327,6 +329,112 @@ router.get("/candidates/:jobId/:candidateId", (req, res) => {
     res.json(candidate);
   } catch (err) {
     res.status(500).json({ error: "Failed to load candidate." });
+  }
+});
+
+/**
+ * GET /api/candidates/:jobId/:candidateId/interview-prep
+ * Returns interview-source criteria with 2 AI-generated probe questions each.
+ */
+router.get("/candidates/:jobId/:candidateId/interview-prep", async (req, res) => {
+  try {
+    const candidate = findCandidate(req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const interviewCriteria = (job.criteria || []).filter((c) => c.source === "interview");
+    if (interviewCriteria.length === 0) return res.json({ criteria: [] });
+
+    const system =
+      "You are an expert interviewer. Generate targeted, specific interview questions for each criterion. " +
+      "Never ask about family, health, religion, race, gender, or marital status. Return valid JSON only.";
+
+    const user = `Candidate: ${candidate.profile?.name || "Unknown"}
+Role: ${job.role_title}
+Candidate experience: ${JSON.stringify(
+      (candidate.profile?.work_history || []).map((w) => `${w.title} at ${w.employer}`)
+    )}
+
+Generate exactly 2 targeted interview questions for EACH of these criteria. Make them specific to this candidate.
+
+Criteria:
+${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}"${c.description ? " — " + c.description : ""}`).join("\n")}
+
+Return:
+{
+  "criteria_questions": [
+    { "criterion_id": "<id from above>", "questions": ["question 1", "question 2"] }
+  ]
+}`;
+
+    const result = await chatJSON({ system, user, temperature: 0.5 });
+    const qMap = Object.fromEntries(
+      (result.criteria_questions || []).map((cq) => [cq.criterion_id, cq.questions])
+    );
+
+    const criteria = interviewCriteria.map((c) => ({
+      ...c,
+      questions: qMap[c.id] || [
+        `Tell me about a time you demonstrated ${c.name.toLowerCase()}.`,
+        `How would you handle a situation that requires strong ${c.name.toLowerCase()}?`,
+      ],
+    }));
+
+    res.json({ criteria });
+  } catch (err) {
+    console.error("interview-prep error:", err);
+    res.status(500).json({ error: "Failed to generate interview questions." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/interview-scores
+ * Body: { ratings: [{ criterion_id, score: 0-100, notes }] }
+ */
+router.post("/candidates/:jobId/:candidateId/interview-scores", (req, res) => {
+  try {
+    const { ratings } = req.body;
+    if (!Array.isArray(ratings) || ratings.length === 0)
+      return res.status(400).json({ error: "Missing ratings array." });
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    applyInterviewScores(candidates[idx], job, ratings);
+    writeJSON(CANDIDATES_PATH, candidates);
+    res.json(candidates[idx]);
+  } catch (err) {
+    console.error("interview-scores error:", err);
+    res.status(500).json({ error: "Failed to save interview scores." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/hr-notes
+ * Body: { notes: "free text" }
+ * Saves notes + runs AI analysis → HR Assessment criterion in combined score.
+ */
+router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
+  try {
+    const { notes } = req.body;
+    if (!notes?.trim()) return res.status(400).json({ error: "Missing notes." });
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const assessment = await applyHrNotes(candidates[idx], job, notes.trim());
+    writeJSON(CANDIDATES_PATH, candidates);
+    res.json({ candidate: candidates[idx], assessment });
+  } catch (err) {
+    console.error("hr-notes error:", err);
+    res.status(500).json({ error: "Failed to save HR notes." });
   }
 });
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Info, Check, X, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Info, Check, X, AlertTriangle, ClipboardList, MessageSquare } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
 import { monthsToDuration, round } from "../lib/format.js";
@@ -12,7 +12,8 @@ export default function CandidateDetail() {
   const [candidate, setCandidate] = useState(null);
   const [job, setJob] = useState(null);
   const [note, setNote] = useState("");
-  const [savedNotes, setSavedNotes] = useState([]);
+  const [noteSaving, setNoteSaving] = useState(false);
+  const [noteResult, setNoteResult] = useState(null);
 
   useEffect(() => {
     axios
@@ -41,6 +42,10 @@ export default function CandidateDetail() {
     .reduce((a, c) => a + (c.weight || 0), 0);
   const coveragePct = Math.round(scoredWeight * 100);
   const traits = candidate.ocean_traits;
+
+  const interviewPending = pending.includes("interview");
+  const hrAssessment = criteria.find((c) => c.criterion_id === "hr_notes_assessment");
+  const savedNotesList = candidate.hr_notes_list || [];
 
   const haveSkills = (p.skills || []).map((x) => x.toLowerCase());
   const skillMatched = (req) =>
@@ -232,43 +237,105 @@ export default function CandidateDetail() {
 
       {/* HR notes */}
       <section className="mt-6">
-        <h2 className="font-medium text-gray-900">HR notes</h2>
+        <div className="flex items-center gap-2">
+          <MessageSquare size={15} className="text-orange-500" />
+          <h2 className="font-medium text-gray-900">HR notes</h2>
+        </div>
+        <p className="mt-0.5 text-xs text-gray-400">
+          Notes are saved and AI-analyzed to produce an HR Assessment score that folds into the overall score.
+        </p>
+
+        {/* Past notes */}
+        {savedNotesList.length > 0 && (
+          <div className="mt-2 space-y-2">
+            {savedNotesList.map((n, i) => (
+              <div
+                key={i}
+                className="rounded-md border border-orange-100 bg-orange-50 px-3 py-2 text-sm text-gray-700"
+              >
+                <span className="text-xs text-gray-400">{n.date} · </span>
+                {n.text}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* HR assessment result (shown after notes submitted) */}
+        {hrAssessment && (
+          <div className="mt-2 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-800">
+            <span className="font-medium">HR Assessment: {hrAssessment.score}% </span>
+            {hrAssessment.hr_reasoning && `— ${hrAssessment.hr_reasoning}`}
+            {(hrAssessment.hr_flags || []).length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {hrAssessment.hr_flags.map((f, i) => (
+                  <span key={i} className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700">
+                    {f}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Note result feedback */}
+        {noteResult && (
+          <div className="mt-2 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+            Notes saved. HR Assessment score: <strong>{noteResult.score}%</strong> — {noteResult.reasoning}
+          </div>
+        )}
+
         <textarea
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Add context — what did the AI miss?"
+          placeholder="Add context — interview impressions, attitude, red flags, anything the AI missed…"
           className="mt-2 w-full rounded-lg border border-gray-300 p-3 text-sm focus:border-gray-400 focus:outline-none"
           rows={3}
         />
         <button
-          onClick={() => {
-            if (note.trim()) {
-              setSavedNotes((n) => [...n, note.trim()]);
+          onClick={async () => {
+            if (!note.trim()) return;
+            setNoteSaving(true);
+            setNoteResult(null);
+            try {
+              const res = await axios.post(
+                `/api/candidates/${jobId}/${candidateId}/hr-notes`,
+                { notes: note.trim() }
+              );
+              setCandidate(res.data.candidate);
+              setNoteResult(res.data.assessment);
               setNote("");
+            } catch {
+              // keep note in textarea on error
+            } finally {
+              setNoteSaving(false);
             }
           }}
-          className="mt-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          disabled={noteSaving || !note.trim()}
+          className="mt-2 rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
         >
-          Save note
+          {noteSaving ? "Analyzing…" : "Save & score notes"}
         </button>
-        {savedNotes.map((n, i) => (
-          <div
-            key={i}
-            className="mt-2 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-600"
-          >
-            {n}
-          </div>
-        ))}
       </section>
 
       {/* actions */}
-      <div className="mt-8 flex items-center gap-3">
+      <div className="mt-8 flex flex-wrap items-center gap-3 pb-12">
+        {interviewPending && (
+          <button
+            onClick={() =>
+              navigate(`/jobs/${jobId}/candidate/${candidateId}/interview`)
+            }
+            className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white"
+            style={{ backgroundColor: "#6D28D9" }}
+          >
+            <ClipboardList size={15} />
+            Conduct interview scoring →
+          </button>
+        )}
         <button
           onClick={() =>
             navigate(`/jobs/${jobId}/candidate/${candidateId}/questions`)
           }
-          className="rounded-md px-4 py-2 text-sm font-medium text-white"
-          style={{ backgroundColor: "#6D28D9" }}
+          className="rounded-md border border-purple-300 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50"
         >
           Generate interview questions →
         </button>

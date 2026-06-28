@@ -10,6 +10,7 @@ export const SOURCE_META = {
   cv: { label: "CV", bg: "#DBEAFE", text: "#1D4ED8" },
   interview: { label: "Interview", bg: "#EDE9FE", text: "#6D28D9" },
   ocean: { label: "OCEAN", bg: "#D1FAE5", text: "#065F46" },
+  hr_notes: { label: "HR", bg: "#FFF7ED", text: "#C2410C" },
 };
 
 export const DIMENSION_LABELS = {
