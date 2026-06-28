@@ -44,7 +44,6 @@ export default function CandidateDetail() {
   const traits = candidate.ocean_traits;
 
   const interviewPending = pending.includes("interview");
-  const hrAssessment = criteria.find((c) => c.criterion_id === "hr_notes_assessment");
   const savedNotesList = candidate.hr_notes_list || [];
 
   const haveSkills = (p.skills || []).map((x) => x.toLowerCase());
@@ -88,17 +87,42 @@ export default function CandidateDetail() {
         </div>
       )}
 
-      {/* score coverage indicator */}
-      <div className="mt-5 flex flex-wrap items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
-        <Info size={15} />
-        <span className="font-medium">Criteria scored: {coveragePct}% of total</span>
-        {pending.length > 0 ? (
-          <span className="text-blue-600">
-            | Awaiting: {pending.map((p) => (p === "ocean" ? "OCEAN" : "Interview")).join(" + ")}
-          </span>
-        ) : (
-          <span className="text-green-700">| Full score available</span>
-        )}
+      {/* Score stage buckets */}
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        {[
+          { source: "cv",        label: "CV Assessment",  pct: job.role_level === "supervisory" ? 45 : 35, color: "#1D4ED8", border: "#BFDBFE", bg: "#EFF6FF" },
+          { source: "ocean",     label: "OCEAN Profile",  pct: job.role_level === "supervisory" ? 10 : 15, color: "#065F46", border: "#A7F3D0", bg: "#F0FDF4" },
+          { source: "interview", label: "Interview",       pct: job.role_level === "supervisory" ? 45 : 50, color: "#6D28D9", border: "#DDD6FE", bg: "#F5F3FF" },
+        ].map(({ source, label, pct, color, border, bg }) => {
+          const src = criteria.filter((c) => c.source === source);
+          const scored = src.filter((c) => c.scored && c.score != null);
+          const sw = scored.reduce((a, c) => a + c.weight, 0);
+          const bucketScore = sw
+            ? Math.round(scored.reduce((a, c) => a + c.score * c.weight, 0) / sw)
+            : null;
+          const isPending = src.length > 0 && scored.length === 0;
+          return (
+            <div
+              key={source}
+              className="rounded-lg border p-3"
+              style={{ borderColor: border, backgroundColor: bg }}
+            >
+              <div className="text-xs font-semibold" style={{ color }}>{label}</div>
+              <div className="mt-1 text-2xl font-bold text-gray-900">
+                {isPending ? "—" : bucketScore != null ? `${bucketScore}%` : "—"}
+              </div>
+              <div className="text-xs text-gray-400">{pct}% of final score</div>
+              {isPending && (
+                <div className="mt-0.5 text-xs font-medium" style={{ color }}>Pending</div>
+              )}
+              {!isPending && bucketScore != null && (
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/60">
+                  <div className="h-full rounded-full" style={{ width: `${bucketScore}%`, backgroundColor: color }} />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* criteria breakdown */}
@@ -260,27 +284,10 @@ export default function CandidateDetail() {
           </div>
         )}
 
-        {/* HR assessment result (shown after notes submitted) */}
-        {hrAssessment && (
-          <div className="mt-2 rounded-md bg-orange-50 px-3 py-2 text-sm text-orange-800">
-            <span className="font-medium">HR Assessment: {hrAssessment.score}% </span>
-            {hrAssessment.hr_reasoning && `— ${hrAssessment.hr_reasoning}`}
-            {(hrAssessment.hr_flags || []).length > 0 && (
-              <div className="mt-1 flex flex-wrap gap-1">
-                {hrAssessment.hr_flags.map((f, i) => (
-                  <span key={i} className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700">
-                    {f}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Note result feedback */}
-        {noteResult && (
+        {/* Save confirmation */}
+        {noteResult?.saved && (
           <div className="mt-2 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
-            Notes saved. HR Assessment score: <strong>{noteResult.score}%</strong> — {noteResult.reasoning}
+            Notes saved {noteResult.date}. They will inform your interview scoring judgment.
           </div>
         )}
 
@@ -302,7 +309,7 @@ export default function CandidateDetail() {
                 { notes: note.trim() }
               );
               setCandidate(res.data.candidate);
-              setNoteResult(res.data.assessment);
+              setNoteResult({ saved: true, date: res.data.date });
               setNote("");
             } catch {
               // keep note in textarea on error

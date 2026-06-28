@@ -347,16 +347,18 @@ router.get("/candidates/:jobId/:candidateId/interview-prep", async (req, res) =>
     if (interviewCriteria.length === 0) return res.json({ criteria: [] });
 
     const system =
-      "You are an expert interviewer. Generate targeted, specific interview questions for each criterion. " +
+      "You are an expert interviewer and HR consultant. Generate targeted interview questions and scoring rubrics for each criterion. " +
       "Never ask about family, health, religion, race, gender, or marital status. Return valid JSON only.";
 
     const user = `Candidate: ${candidate.profile?.name || "Unknown"}
-Role: ${job.role_title}
+Role: ${job.role_title} (${job.industry})
 Candidate experience: ${JSON.stringify(
       (candidate.profile?.work_history || []).map((w) => `${w.title} at ${w.employer}`)
     )}
 
-Generate exactly 2 targeted interview questions for EACH of these criteria. Make them specific to this candidate.
+For EACH criterion below, generate:
+- 2 targeted interview questions specific to this candidate
+- A scoring rubric with what a LOW (0-40), MID (41-70), and HIGH (71-100) score looks like for this criterion
 
 Criteria:
 ${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}"${c.description ? " — " + c.description : ""}`).join("\n")}
@@ -364,22 +366,38 @@ ${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}"${c.de
 Return:
 {
   "criteria_questions": [
-    { "criterion_id": "<id from above>", "questions": ["question 1", "question 2"] }
+    {
+      "criterion_id": "<id from above>",
+      "questions": ["question 1", "question 2"],
+      "rubric": {
+        "low": "<what a 0-40 answer looks like — 1 sentence>",
+        "mid": "<what a 41-70 answer looks like — 1 sentence>",
+        "high": "<what a 71-100 answer looks like — 1 sentence>"
+      }
+    }
   ]
 }`;
 
     const result = await chatJSON({ system, user, temperature: 0.5 });
     const qMap = Object.fromEntries(
-      (result.criteria_questions || []).map((cq) => [cq.criterion_id, cq.questions])
+      (result.criteria_questions || []).map((cq) => [cq.criterion_id, cq])
     );
 
-    const criteria = interviewCriteria.map((c) => ({
-      ...c,
-      questions: qMap[c.id] || [
-        `Tell me about a time you demonstrated ${c.name.toLowerCase()}.`,
-        `How would you handle a situation that requires strong ${c.name.toLowerCase()}?`,
-      ],
-    }));
+    const criteria = interviewCriteria.map((c) => {
+      const q = qMap[c.id] || {};
+      return {
+        ...c,
+        questions: q.questions || [
+          `Tell me about a time you demonstrated ${c.name.toLowerCase()}.`,
+          `How would you handle a situation that requires strong ${c.name.toLowerCase()}?`,
+        ],
+        rubric: q.rubric || {
+          low: "No clear example given; vague or irrelevant answer.",
+          mid: "Basic competency shown; some relevant experience mentioned.",
+          high: "Strong, specific example; clear evidence of skill.",
+        },
+      };
+    });
 
     res.json({ criteria });
   } catch (err) {
@@ -429,9 +447,9 @@ router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
     const job = findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
-    const assessment = await applyHrNotes(candidates[idx], job, notes.trim());
+    const result = await applyHrNotes(candidates[idx], notes.trim());
     writeJSON(CANDIDATES_PATH, candidates);
-    res.json({ candidate: candidates[idx], assessment });
+    res.json({ candidate: candidates[idx], saved: result.saved, date: result.date });
   } catch (err) {
     console.error("hr-notes error:", err);
     res.status(500).json({ error: "Failed to save HR notes." });

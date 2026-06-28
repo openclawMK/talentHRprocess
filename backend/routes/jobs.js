@@ -50,11 +50,11 @@ router.get("/industry-templates", (req, res) => {
 // POST /api/generate-criteria — AI-generated criteria for a role
 router.post("/generate-criteria", async (req, res) => {
   try {
-    const { industry, role_title, key_responsibilities = [] } = req.body;
+    const { industry, role_title, key_responsibilities = [], role_level = "entry" } = req.body;
     if (!industry || !role_title)
       return res.status(400).json({ error: "industry and role_title are required." });
-    const criteria = await generateCriteria({ industry, role_title, key_responsibilities });
-    res.json({ criteria, generated_at: new Date().toISOString() });
+    const criteria = await generateCriteria({ industry, role_title, key_responsibilities, role_level });
+    res.json({ criteria, role_level, generated_at: new Date().toISOString() });
   } catch (err) {
     console.error("generate-criteria error:", err);
     res.status(500).json({ error: "Failed to generate criteria." });
@@ -103,6 +103,7 @@ router.post("/jobs", async (req, res) => {
       role_title,
       industry,
       location = "Kuala Lumpur",
+      role_level = "entry",
       requirements = {},
       key_responsibilities = [],
       criteria: suppliedCriteria,
@@ -113,7 +114,7 @@ router.post("/jobs", async (req, res) => {
 
     let criteria = suppliedCriteria;
     if (!Array.isArray(criteria) || criteria.length === 0) {
-      criteria = await generateCriteria({ industry, role_title, key_responsibilities });
+      criteria = await generateCriteria({ industry, role_title, key_responsibilities, role_level });
     } else if (!weightsValid(criteria)) {
       return res.status(400).json({ error: "Criteria weights must sum to 100%" });
     }
@@ -139,6 +140,7 @@ router.post("/jobs", async (req, res) => {
       criteria,
       thresholds: { green: 70, red: 40 },
       benchmark: { maturity: "starter", avg_experience_years: expMin || 1, avg_team_size: 0 },
+      role_level,
       criteria_generated_by: suppliedCriteria ? "edited" : "ai",
       criteria_locked: false,
     };

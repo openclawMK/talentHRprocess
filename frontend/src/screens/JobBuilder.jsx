@@ -16,6 +16,11 @@ const INDUSTRIES = [
 const EDUCATION = ["SPM", "Diploma", "Degree", "Any"];
 const SOURCES = ["cv", "interview", "ocean"];
 
+const ROLE_LEVELS = [
+  { value: "entry",       label: "Entry-level",             hint: "CV 35% · OCEAN 15% · Interview 50%" },
+  { value: "supervisory", label: "Supervisory / Management", hint: "CV 45% · OCEAN 10% · Interview 45%" },
+];
+
 export default function JobBuilder() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -23,6 +28,7 @@ export default function JobBuilder() {
     role_title: "",
     industry: "F&B",
     location: "Kuala Lumpur",
+    role_level: "entry",
     experience_years_min: 1,
     education_level_min: "SPM",
     key_responsibilities: "",
@@ -57,6 +63,7 @@ export default function JobBuilder() {
       const res = await axios.post("/api/generate-criteria", {
         industry: form.industry,
         role_title: form.role_title,
+        role_level: form.role_level,
         key_responsibilities: responsibilitiesList(),
       });
       const c = res.data.criteria || [];
@@ -106,6 +113,7 @@ export default function JobBuilder() {
         role_title: form.role_title,
         industry: form.industry,
         location: form.location,
+        role_level: form.role_level,
         requirements: {
           experience_years_min: Number(form.experience_years_min) || 0,
           education_level_min: form.education_level_min,
@@ -169,6 +177,27 @@ export default function JobBuilder() {
               />
             </Field>
           </div>
+          <Field label="Role level">
+            <div className="mt-1 grid grid-cols-2 gap-3">
+              {ROLE_LEVELS.map((rl) => (
+                <button
+                  key={rl.value}
+                  type="button"
+                  onClick={() => set("role_level", rl.value)}
+                  className={`rounded-lg border p-3 text-left transition-colors ${
+                    form.role_level === rl.value
+                      ? "border-purple-500 bg-purple-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                >
+                  <div className={`text-sm font-medium ${form.role_level === rl.value ? "text-purple-700" : "text-gray-800"}`}>
+                    {rl.label}
+                  </div>
+                  <div className="mt-0.5 text-xs text-gray-400">{rl.hint}</div>
+                </button>
+              ))}
+            </div>
+          </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Min experience (years)">
               <input

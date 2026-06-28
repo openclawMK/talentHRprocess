@@ -120,13 +120,31 @@ export default function InterviewScoring() {
               {/* AI-generated questions */}
               {(c.questions || []).length > 0 && (
                 <div className="mt-3 space-y-1.5 rounded-md bg-gray-50 p-3">
-                  <p className="text-xs font-medium text-gray-500">Suggested questions:</p>
+                  <p className="text-xs font-medium text-gray-500">Ask the candidate:</p>
                   {c.questions.map((q, qi) => (
                     <div key={qi} className="flex gap-2 text-sm text-gray-700">
                       <span className="mt-0.5 shrink-0 font-semibold text-purple-400">›</span>
                       <span>{q}</span>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {/* Scoring rubric */}
+              {c.rubric && (
+                <div className="mt-2 grid grid-cols-3 gap-1.5 text-xs">
+                  <div className="rounded-md bg-red-50 p-2 text-red-700">
+                    <div className="mb-0.5 font-bold">0 – 40</div>
+                    {c.rubric.low}
+                  </div>
+                  <div className="rounded-md bg-amber-50 p-2 text-amber-700">
+                    <div className="mb-0.5 font-bold">41 – 70</div>
+                    {c.rubric.mid}
+                  </div>
+                  <div className="rounded-md bg-green-50 p-2 text-green-700">
+                    <div className="mb-0.5 font-bold">71 – 100</div>
+                    {c.rubric.high}
+                  </div>
                 </div>
               )}
 
