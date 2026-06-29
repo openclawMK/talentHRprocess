@@ -65,21 +65,26 @@ router.post("/whatsapp", async (req, res) => {
     });
     writeJSON(REPLIES_PATH, replies);
 
-    // Update candidate invite state + auto-reply.
-    if (candidate) {
+    // Update the matched candidate's invite state, if any.
+    if (candidate && action !== "manual_review") {
       if (action === "confirmed") {
         candidate.whatsapp_invite = { ...(candidate.whatsapp_invite || {}), confirmed: true };
-        writeJSON(CANDIDATES_PATH, candidates);
-        await sendMessage(from, "✅ Thank you — your interview is confirmed. See you then!");
       } else if (action === "reschedule") {
         candidate.whatsapp_invite = {
           ...(candidate.whatsapp_invite || {}),
           confirmed: false,
           needs_reschedule: true,
         };
-        writeJSON(CANDIDATES_PATH, candidates);
-        await sendMessage(from, "No problem — our team will reach out to find a better time. 🙏");
       }
+      writeJSON(CANDIDATES_PATH, candidates);
+    }
+
+    // Acknowledge YES / NO regardless of whether we matched a candidate
+    // (so testing works and every candidate gets a courtesy reply).
+    if (action === "confirmed") {
+      await sendMessage(from, "✅ Thank you — your interview is confirmed. See you then!");
+    } else if (action === "reschedule") {
+      await sendMessage(from, "No problem — our team will reach out to find a better time. 🙏");
     }
 
     // Twilio expects TwiML or an empty 200.
