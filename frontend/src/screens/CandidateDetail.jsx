@@ -4,7 +4,7 @@ import axios from "axios";
 import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
-import { monthsToDuration, round } from "../lib/format.js";
+import { monthsToDuration, round, barColor } from "../lib/format.js";
 
 export default function CandidateDetail() {
   const { jobId, candidateId } = useParams();
@@ -47,6 +47,12 @@ export default function CandidateDetail() {
     .reduce((a, c) => a + (c.weight || 0), 0);
   const coveragePct = Math.round(scoredWeight * 100);
   const traits = candidate.ocean_traits;
+
+  // Interview record: scored interview criteria that captured questions/notes
+  const interviewRecord = criteria.filter(
+    (c) => c.source === "interview" && c.scored &&
+      ((c.questions_asked && c.questions_asked.length) || c.hr_notes)
+  );
 
   const interviewPending = pending.includes("interview");
   const savedNotesList = candidate.hr_notes_list || [];
@@ -183,6 +189,53 @@ export default function CandidateDetail() {
           <p className="mt-2 text-xs text-gray-500">
             Emotional stability (inverse of Neuroticism): {traits.emotional_stability}
           </p>
+        </section>
+      )}
+
+      {/* Interview record — questions asked + scores */}
+      {interviewRecord.length > 0 && (
+        <section className="mt-4 rounded-lg border border-purple-200 bg-purple-50/30 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardList size={16} className="text-purple-600" />
+              <h2 className="font-medium text-gray-900">Interview record</h2>
+            </div>
+            {candidate.interview_mode && (
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                {candidate.interview_mode === "manual" ? "Manual questions" : "AI-generated questions"}
+              </span>
+            )}
+          </div>
+          <div className="mt-3 space-y-4">
+            {interviewRecord.map((c) => (
+              <div key={c.criterion_id} className="rounded-md border border-purple-100 bg-white p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-gray-800">{c.criterion_name}</span>
+                  <span
+                    className="rounded px-2 py-0.5 text-xs font-bold text-white"
+                    style={{ backgroundColor: barColor(c.score) }}
+                  >
+                    {round(c.score)}%
+                  </span>
+                </div>
+                {(c.questions_asked || []).length > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {c.questions_asked.map((q, i) => (
+                      <li key={i} className="flex gap-2 text-sm text-gray-600">
+                        <span className="mt-0.5 shrink-0 font-semibold text-purple-400">›</span>
+                        {q}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {c.hr_notes && (
+                  <p className="mt-2 border-t border-gray-100 pt-2 text-sm text-gray-500">
+                    <span className="text-gray-400">Notes: </span>{c.hr_notes}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
         </section>
       )}
 
