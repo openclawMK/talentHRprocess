@@ -57,11 +57,13 @@ export function candidateStages(candidate, job) {
   return { stages, currentKey, rejected };
 }
 
-/** Short label for the candidate's current stage, e.g. "OCEAN" or "Ready for offer". */
+/** Short label for the candidate's current stage, e.g. "Awaiting OCEAN" or "Assessment complete". */
 export function currentStageLabel(candidate, job) {
   const { currentKey, rejected } = candidateStages(candidate, job);
   if (rejected) return "Rejected";
   if (!currentKey) return "In progress";
-  if (currentKey === "offer") return "Ready for offer";
+  // All assessment stages done — next step is the human offer/decision.
+  // This is a pipeline position, NOT a hire recommendation (see the verdict badge).
+  if (currentKey === "offer") return "Assessment complete";
   return `Awaiting ${STAGE_META[currentKey].label}`;
 }

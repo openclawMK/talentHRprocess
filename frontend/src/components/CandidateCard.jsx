@@ -75,8 +75,8 @@ export default function CandidateCard({
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
               stageLabel === "Rejected"
                 ? "bg-red-50 text-red-600"
-                : stageLabel === "Ready for offer"
-                ? "bg-green-50 text-green-700"
+                : stageLabel === "Assessment complete"
+                ? "bg-gray-100 text-gray-600"
                 : "bg-purple-50 text-purple-700"
             }`}
           >
