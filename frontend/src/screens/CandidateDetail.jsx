@@ -4,7 +4,7 @@ import axios from "axios";
 import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
-import { monthsToDuration, round, barColor, displayLane } from "../lib/format.js";
+import { monthsToDuration, round, barColor, LANE_META, candidateStatus, screeningScore, screeningVerdict } from "../lib/format.js";
 import { candidateStages } from "../lib/pipeline.js";
 
 export default function CandidateDetail() {
@@ -58,6 +58,10 @@ export default function CandidateDetail() {
   const interviewPending = pending.includes("interview");
   const savedNotesList = candidate.hr_notes_list || [];
 
+  const status = candidateStatus(s);
+  const screenScore = screeningScore(s);
+  const screenV = status === "screening" ? screeningVerdict(screenScore) : null;
+
   const haveSkills = (p.skills || []).map((x) => x.toLowerCase());
   const skillMatched = (req) =>
     haveSkills.some((h) => h.includes(req.toLowerCase()) || req.toLowerCase().includes(h));
@@ -75,12 +79,27 @@ export default function CandidateDetail() {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[22px] font-semibold text-gray-900">{p.name}</h1>
         <div className="flex items-center gap-2">
-          <LaneBadge lane={displayLane(s)} />
-          <span className="text-lg font-semibold">{round(s.combined_score)}%</span>
-          {partial && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-              so far
-            </span>
+          {status === "complete" ? (
+            <>
+              <LaneBadge lane={s.lane} />
+              <span className="text-lg font-semibold">{round(s.combined_score)}%</span>
+            </>
+          ) : status === "screening" ? (
+            <>
+              <LaneBadge lane={screenV.lane} label={screenV.short} />
+              <span className="text-lg font-semibold">{round(screenScore)}%</span>
+              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                screening
+              </span>
+            </>
+          ) : (
+            <>
+              <LaneBadge lane="in_progress" />
+              <span className="text-lg font-semibold">{round(s.combined_score)}%</span>
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                so far
+              </span>
+            </>
           )}
         </div>
       </div>
@@ -96,6 +115,35 @@ export default function CandidateDetail() {
       {candidate.low_confidence_warning && (
         <div className="mt-3 flex items-center gap-1.5 rounded-md bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700">
           <AlertTriangle size={15} /> Low parse confidence — review the original CV
+        </div>
+      )}
+
+      {/* Screening gate result (CV + OCEAN done, interview pending) */}
+      {status === "screening" && screenV && (
+        <div
+          className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4"
+          style={{ borderColor: LANE_META[screenV.lane].text + "33", backgroundColor: LANE_META[screenV.lane].bg + "66" }}
+        >
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold" style={{ color: LANE_META[screenV.lane].text }}>
+                Screening result: {screenV.label}
+              </span>
+            </div>
+            <p className="mt-0.5 text-sm text-gray-600">
+              CV + OCEAN score <strong>{round(screenScore)}%</strong> of the pre-interview assessment.
+              {screenV.key === "proceed" && " Clears the screening bar — proceed to interview to finalise."}
+              {screenV.key === "borderline" && " Borderline — review the profile before deciding to interview."}
+              {screenV.key === "screen_out" && " Below the screening bar — consider screening out without an interview."}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate(`/jobs/${jobId}/candidate/${candidateId}/interview`)}
+            className="shrink-0 rounded-md px-4 py-2 text-sm font-medium text-white"
+            style={{ backgroundColor: "#6D28D9" }}
+          >
+            Conduct interview →
+          </button>
         </div>
       )}
 

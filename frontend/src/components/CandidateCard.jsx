@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import LaneBadge from "./LaneBadge.jsx";
-import { experienceSummary, truncate, round, displayLane } from "../lib/format.js";
+import { experienceSummary, truncate, round, candidateStatus, screeningScore, screeningVerdict } from "../lib/format.js";
 import { currentStageLabel } from "../lib/pipeline.js";
 
 export default function CandidateCard({
@@ -17,6 +17,10 @@ export default function CandidateCard({
   const base = `/jobs/${candidate.job_id}`;
   const stageLabel = job ? currentStageLabel(candidate, job) : null;
 
+  const status = candidateStatus(score);
+  const scrV = status === "screening" ? screeningVerdict(screeningScore(score)) : null;
+  const shownScore = status === "screening" ? screeningScore(score) : score.combined_score;
+
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
       {/* top row */}
@@ -25,20 +29,29 @@ export default function CandidateCard({
           {candidate.profile?.name || "Unnamed candidate"}
         </div>
         <div className="flex items-center gap-2">
-          <LaneBadge lane={displayLane(score)} />
+          {status === "complete" ? (
+            <LaneBadge lane={score.lane} />
+          ) : status === "screening" ? (
+            <LaneBadge lane={scrV.lane} label={scrV.short} />
+          ) : (
+            <LaneBadge lane="in_progress" />
+          )}
           <span
             className="text-base font-semibold text-gray-900"
             title={
-              score.full_score_available === false
+              status === "screening"
+                ? "Screening score (CV + OCEAN). Interview still pending."
+                : status === "awaiting"
                 ? "Partial score — remaining stages still pending. Not a final verdict."
                 : undefined
             }
           >
-            {round(score.combined_score)}%
-            {score.full_score_available === false && (
-              <span className="ml-1 text-xs font-normal text-gray-400">
-                so far
-              </span>
+            {round(shownScore)}%
+            {status === "screening" && (
+              <span className="ml-1 text-xs font-normal text-purple-500">screening</span>
+            )}
+            {status === "awaiting" && (
+              <span className="ml-1 text-xs font-normal text-gray-400">so far</span>
             )}
           </span>
         </div>
