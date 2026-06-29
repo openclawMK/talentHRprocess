@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import jobsRouter from "./routes/jobs.js";
 import candidatesRouter from "./routes/candidates.js";
+import portalRouter from "./routes/portal.js";
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.get("/api/health", (req, res) => {
 // Mounted route modules
 app.use("/api", jobsRouter);
 app.use("/api", candidatesRouter);
+app.use("/api", portalRouter);
 
 app.listen(PORT, () => {
   console.log(`PeopleQuest Talent AI backend running on http://localhost:${PORT}`);

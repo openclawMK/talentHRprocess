@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Plus, Database } from "lucide-react";
+import { Database, Link2, Check } from "lucide-react";
 import CandidateCard from "../components/CandidateCard.jsx";
 
 const TABS = ["all", "green", "amber", "red"];
@@ -15,6 +15,19 @@ export default function Dashboard() {
   const [selected, setSelected] = useState([]);
   const [demo, setDemo] = useState([]);
   const [demoLoaded, setDemoLoaded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function copyLink() {
+    if (!job?.portal_token) return;
+    const url = `${window.location.origin}/apply/${job.portal_token}`;
+    navigator.clipboard?.writeText(url).then(
+      () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+      () => window.prompt("Copy this application link:", url)
+    );
+  }
 
   function loadDemo() {
     axios
@@ -95,13 +108,17 @@ export default function Dashboard() {
               <Database size={16} /> Load demo data
             </button>
           )}
-          <Link
-            to={`/jobs/${jobId}/upload`}
+          <button
+            onClick={copyLink}
             className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"
             style={{ backgroundColor: "#6D28D9" }}
           >
-            <Plus size={16} /> Upload another CV
-          </Link>
+            {copied ? (
+              <><Check size={16} /> Link copied</>
+            ) : (
+              <><Link2 size={16} /> Copy application link</>
+            )}
+          </button>
         </div>
       </div>
 
@@ -142,12 +159,12 @@ export default function Dashboard() {
             {merged.length === 0 ? (
               <>
                 No candidates yet.{" "}
-                <Link
-                  to={`/jobs/${jobId}/upload`}
+                <button
+                  onClick={copyLink}
                   className="font-medium text-gray-900 underline"
                 >
-                  Upload a CV to get started →
-                </Link>
+                  Copy the application link to share with candidates →
+                </button>
               </>
             ) : (
               "No candidates in this lane."

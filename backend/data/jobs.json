@@ -5,6 +5,7 @@
     "industry": "F&B",
     "location": "Kuala Lumpur",
     "role_level": "supervisory",
+    "portal_token": "pq-outlet-sup-7f3a9c",
     "requirements": {
       "experience_years_min": 2,
       "experience_years_preferred": 3,
@@ -123,6 +124,7 @@
     "industry": "F&B / Retail",
     "location": "Kuala Lumpur",
     "role_level": "entry",
+    "portal_token": "pq-cashier-2b8e1d",
     "requirements": {
       "experience_years_min": 0,
       "experience_years_preferred": 1,
@@ -233,6 +235,7 @@
     "industry": "Hospitality",
     "location": "Kuala Lumpur",
     "role_level": "entry",
+    "portal_token": "pq-frontdesk-9d4c5a",
     "requirements": {
       "experience_years_min": 1,
       "experience_years_preferred": 2,

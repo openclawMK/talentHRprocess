@@ -2,6 +2,7 @@ import { Router } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from "uuid";
 import { generateCriteria } from "../services/criteriaGenerator.js";
 
 const router = Router();
@@ -137,6 +138,7 @@ router.post("/jobs", async (req, res) => {
         key_responsibilities: key_responsibilities,
       },
       age_band: requirements.age_band || { min: 18, ideal_min: 18, ideal_max: 45, max: 60 },
+      portal_token: `pq-${uuidv4().slice(0, 8)}`,
       criteria,
       thresholds: { green: 70, red: 40 },
       benchmark: { maturity: "starter", avg_experience_years: expMin || 1, avg_team_size: 0 },
