@@ -36,8 +36,15 @@ function experienceScore(candidate, job) {
   if (months == null) return 40;
   const pref = (job.requirements.experience_years_preferred || 1) * 12;
   const min = (job.requirements.experience_years_min || 0) * 12;
-  if (months >= pref) return 100;
-  if (months >= min) return pref === min ? 100 : clamp(70 + (30 * (months - min)) / (pref - min));
+  // Meeting "preferred" lands at 85 (strong, not perfect); 100 needs ~1.5x preferred.
+  if (months >= pref) {
+    const stretch = pref * 1.5;
+    if (months >= stretch) return 100;
+    return clamp(85 + (15 * (months - pref)) / (stretch - pref));
+  }
+  // Between minimum and preferred: 70 -> 85.
+  if (months >= min) return pref === min ? 85 : clamp(70 + (15 * (months - min)) / (pref - min));
+  // Below minimum: scale up to 70.
   return min === 0 ? 70 : clamp((70 * months) / min);
 }
 
@@ -45,10 +52,11 @@ function educationScore(candidate, job) {
   const edu = candidate.profile.education || [];
   const highest = edu.reduce((m, e) => Math.max(m, eduRank(e.level)), 0);
   const required = eduRank(job.requirements.education_level_min);
-  if (highest >= required) return 100;
+  // Meeting the requirement = 80; each ~10-pt level above adds 10 (cap 100).
+  if (highest >= required) return clamp(80 + (highest - required));
   const gap = required - highest;
   if (gap <= 10) return 60;
-  if (gap <= 20) return 30;
+  if (gap <= 20) return 35;
   return 20;
 }
 
@@ -91,15 +99,18 @@ function keywordScore(candidate, kws, hit = 82, miss = 48) {
 
 function multilingualScore(candidate) {
   const n = (candidate.profile.languages || []).length;
-  return n >= 3 ? 100 : n === 2 ? 75 : n === 1 ? 50 : 30;
+  // Malaysian baseline is ~2 languages; reserve 100 for 4+.
+  return n >= 4 ? 100 : n === 3 ? 88 : n === 2 ? 70 : n === 1 ? 40 : 25;
 }
 
 // ---- route a single criterion to a sub-score ----
 function scoreCriterion(criterion, candidate, job) {
   const t = lc(criterion.name + " " + (criterion.description || ""));
   const has = (...words) => words.some((w) => t.includes(w));
+  // Whole-word match — avoids "age" matching "beverage"/"management" etc.
+  const hasWord = (...words) => words.some((w) => new RegExp(`\\b${w}\\b`).test(t));
 
-  if (has("age")) return { score: ageScore(candidate, job), estimated: false };
+  if (hasWord("age")) return { score: ageScore(candidate, job), estimated: false };
   if (has("multilingual", "language")) return { score: multilingualScore(candidate), estimated: false };
   if (has("supervis", "leadership", "team ")) return { score: supervisionScore(candidate), estimated: false };
   if (has("cash", "pos", "reconcil", "till", "payment"))
