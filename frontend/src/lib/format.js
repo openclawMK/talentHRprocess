@@ -4,7 +4,18 @@ export const LANE_META = {
   green: { label: "Strong match", bg: "#D1FAE5", text: "#065F46" },
   amber: { label: "Needs review", bg: "#FEF3C7", text: "#92400E" },
   red: { label: "Significant gaps", bg: "#FEE2E2", text: "#991B1B" },
+  in_progress: { label: "In progress", bg: "#F3F4F6", text: "#4B5563" },
 };
+
+/**
+ * The lane to DISPLAY. While a candidate is only partially scored (interview
+ * and/or OCEAN still pending) we don't show a final match verdict — the
+ * remaining stages could swing the result significantly.
+ */
+export function displayLane(score) {
+  if (!score) return "in_progress";
+  return score.full_score_available === false ? "in_progress" : score.lane;
+}
 
 export const SOURCE_META = {
   cv: { label: "CV", bg: "#DBEAFE", text: "#1D4ED8" },

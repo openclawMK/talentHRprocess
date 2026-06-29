@@ -4,7 +4,7 @@ import axios from "axios";
 import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
-import { monthsToDuration, round, barColor } from "../lib/format.js";
+import { monthsToDuration, round, barColor, displayLane } from "../lib/format.js";
 import { candidateStages } from "../lib/pipeline.js";
 
 export default function CandidateDetail() {
@@ -75,11 +75,11 @@ export default function CandidateDetail() {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-[22px] font-semibold text-gray-900">{p.name}</h1>
         <div className="flex items-center gap-2">
-          <LaneBadge lane={s.lane} />
+          <LaneBadge lane={displayLane(s)} />
           <span className="text-lg font-semibold">{round(s.combined_score)}%</span>
           {partial && (
             <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-              partial
+              so far
             </span>
           )}
         </div>

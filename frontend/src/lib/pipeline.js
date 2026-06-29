@@ -28,7 +28,10 @@ export function candidateStages(candidate, job) {
     offer: false,
   };
 
-  const rejected = candidate.score?.lane === "red";
+  // Only call it "rejected" once the full score is in — a low partial score
+  // (interview/OCEAN still pending) is not a final verdict.
+  const rejected =
+    candidate.score?.lane === "red" && candidate.score?.full_score_available !== false;
 
   // First enabled, non-done stage is "current"; everything after is "upcoming".
   let currentKey = null;

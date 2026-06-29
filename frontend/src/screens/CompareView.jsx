@@ -4,7 +4,7 @@ import axios from "axios";
 import { ArrowLeft } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
-import { round } from "../lib/format.js";
+import { round, displayLane } from "../lib/format.js";
 
 function Column({ candidate }) {
   const p = candidate.profile;
@@ -15,11 +15,11 @@ function Column({ candidate }) {
       <div className="flex items-center justify-between">
         <div className="font-medium text-gray-900">{p.name}</div>
         <div className="flex items-center gap-2">
-          <LaneBadge lane={s.lane} />
+          <LaneBadge lane={displayLane(s)} />
           <span className="font-semibold">
             {round(s.combined_score)}%
             {s.full_score_available === false && (
-              <span className="ml-1 text-xs font-normal text-gray-400">(partial)</span>
+              <span className="ml-1 text-xs font-normal text-gray-400">so far</span>
             )}
           </span>
         </div>

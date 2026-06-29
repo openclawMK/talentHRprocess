@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { AlertTriangle, Trash2 } from "lucide-react";
 import LaneBadge from "./LaneBadge.jsx";
-import { experienceSummary, truncate, round } from "../lib/format.js";
+import { experienceSummary, truncate, round, displayLane } from "../lib/format.js";
 import { currentStageLabel } from "../lib/pipeline.js";
 
 export default function CandidateCard({
@@ -25,19 +25,19 @@ export default function CandidateCard({
           {candidate.profile?.name || "Unnamed candidate"}
         </div>
         <div className="flex items-center gap-2">
-          <LaneBadge lane={score.lane} />
+          <LaneBadge lane={displayLane(score)} />
           <span
             className="text-base font-semibold text-gray-900"
             title={
               score.full_score_available === false
-                ? "This score is based on CV only. Complete OCEAN + interview for full score."
+                ? "Partial score — remaining stages still pending. Not a final verdict."
                 : undefined
             }
           >
             {round(score.combined_score)}%
             {score.full_score_available === false && (
               <span className="ml-1 text-xs font-normal text-gray-400">
-                (partial)
+                so far
               </span>
             )}
           </span>

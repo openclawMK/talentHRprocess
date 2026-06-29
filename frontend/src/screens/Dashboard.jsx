@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Database, Link2, Check, SlidersHorizontal } from "lucide-react";
 import CandidateCard from "../components/CandidateCard.jsx";
+import { displayLane } from "../lib/format.js";
 
 const TABS = ["all", "green", "amber", "red"];
 
@@ -120,7 +121,7 @@ export default function Dashboard() {
   );
 
   const visible = merged.filter(
-    (c) => filter === "all" || c.score?.lane === filter
+    (c) => filter === "all" || displayLane(c.score) === filter
   );
 
   return (
