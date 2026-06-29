@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
 import { monthsToDuration, round, barColor } from "../lib/format.js";
@@ -566,6 +566,20 @@ export default function CandidateDetail() {
         >
           Back to dashboard
         </Link>
+        <button
+          onClick={async () => {
+            if (!window.confirm("Delete this candidate and their scores? This can't be undone.")) return;
+            try {
+              await axios.delete(`/api/candidates/${jobId}/${candidateId}`);
+            } catch {
+              /* demo candidates aren't stored server-side */
+            }
+            navigate(`/jobs/${jobId}/dashboard`);
+          }}
+          className="ml-auto flex items-center gap-2 rounded-md border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+        >
+          <Trash2 size={15} /> Delete candidate
+        </button>
       </div>
     </div>
   );

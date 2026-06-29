@@ -88,6 +88,19 @@ export default function Dashboard() {
     return () => clearInterval(t);
   }, [load]);
 
+  async function deleteCandidate(id) {
+    if (!window.confirm("Delete this candidate and their scores? This can't be undone.")) return;
+    // Remove from view immediately (covers both live and demo data).
+    setCandidates((prev) => (prev || []).filter((c) => c.candidate_id !== id));
+    setDemo((prev) => prev.filter((c) => c.candidate_id !== id));
+    setSelected((prev) => prev.filter((x) => x !== id));
+    try {
+      await axios.delete(`/api/candidates/${jobId}/${id}`);
+    } catch {
+      /* demo candidates 404 on the server — already removed from view */
+    }
+  }
+
   function toggleCompare(id) {
     setSelected((prev) =>
       prev.includes(id)
@@ -258,6 +271,7 @@ export default function Dashboard() {
               job={job}
               selected={selected.includes(c.candidate_id)}
               onToggleCompare={toggleCompare}
+              onDelete={deleteCandidate}
             />
           ))
         )}

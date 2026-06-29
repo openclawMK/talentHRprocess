@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import LaneBadge from "./LaneBadge.jsx";
 import { experienceSummary, truncate, round } from "../lib/format.js";
 import { currentStageLabel } from "../lib/pipeline.js";
@@ -9,6 +9,7 @@ export default function CandidateCard({
   job,
   selected,
   onToggleCompare,
+  onDelete,
 }) {
   const score = candidate.score || {};
   const strength = (score.strengths || [])[0];
@@ -108,6 +109,15 @@ export default function CandidateCard({
           />
           Compare
         </label>
+        {onDelete && (
+          <button
+            onClick={() => onDelete(candidate.candidate_id)}
+            title="Delete candidate"
+            className="rounded-md p-1.5 text-gray-300 hover:bg-red-50 hover:text-red-600"
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

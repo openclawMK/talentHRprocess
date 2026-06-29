@@ -322,6 +322,37 @@ router.get("/candidates/:jobId", (req, res) => {
 });
 
 /**
+ * DELETE /api/candidates/:jobId/:candidateId — remove a candidate + their scores.
+ * Only affects live candidates (demo fallback data is read-only).
+ */
+router.delete("/candidates/:jobId/:candidateId", (req, res) => {
+  try {
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1)
+      return res.status(404).json({ error: "Candidate not found (demo data can't be deleted)." });
+
+    candidates.splice(idx, 1);
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    // Clean up the candidate's score records too.
+    try {
+      const scores = readJSON(SCORES_PATH).filter(
+        (s) => s.candidate_id !== req.params.candidateId
+      );
+      writeJSON(SCORES_PATH, scores);
+    } catch {
+      /* scores file optional */
+    }
+
+    res.json({ ok: true, candidate_id: req.params.candidateId });
+  } catch (err) {
+    console.error("delete candidate error:", err);
+    res.status(500).json({ error: "Failed to delete candidate." });
+  }
+});
+
+/**
  * GET /api/candidates/:jobId/:candidateId — single candidate with score.
  */
 router.get("/candidates/:jobId/:candidateId", (req, res) => {
