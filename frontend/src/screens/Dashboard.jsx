@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Database, Link2, Check, SlidersHorizontal } from "lucide-react";
+import { Link2, Check, SlidersHorizontal } from "lucide-react";
 import CandidateCard from "../components/CandidateCard.jsx";
 import { displayLane } from "../lib/format.js";
 
@@ -14,8 +14,6 @@ export default function Dashboard() {
   const [job, setJob] = useState(null);
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState([]);
-  const [demo, setDemo] = useState([]);
-  const [demoLoaded, setDemoLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [pipeline, setPipeline] = useState(null);
   const [showPipeline, setShowPipeline] = useState(false);
@@ -31,21 +29,6 @@ export default function Dashboard() {
       },
       () => window.prompt("Copy this application link:", url)
     );
-  }
-
-  function loadDemo() {
-    axios
-      .get("/api/demo-candidates")
-      .then((res) => {
-        // Demo candidates are sample data — show them regardless of the
-        // current role so the button always populates the dashboard.
-        setDemo(res.data || []);
-        setDemoLoaded(true);
-      })
-      .catch(() => {
-        setDemo([]);
-        setDemoLoaded(true);
-      });
   }
 
   const load = useCallback(() => {
@@ -85,20 +68,18 @@ export default function Dashboard() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 30000); // poll for new uploads during demo
+    const t = setInterval(load, 30000); // poll for new applications
     return () => clearInterval(t);
   }, [load]);
 
   async function deleteCandidate(id) {
     if (!window.confirm("Delete this candidate and their scores? This can't be undone.")) return;
-    // Remove from view immediately (covers both live and demo data).
     setCandidates((prev) => (prev || []).filter((c) => c.candidate_id !== id));
-    setDemo((prev) => prev.filter((c) => c.candidate_id !== id));
     setSelected((prev) => prev.filter((x) => x !== id));
     try {
       await axios.delete(`/api/candidates/${jobId}/${id}`);
     } catch {
-      /* demo candidates 404 on the server — already removed from view */
+      /* ignore */
     }
   }
 
@@ -112,11 +93,8 @@ export default function Dashboard() {
     );
   }
 
-  // merge live candidates with any loaded demo data (dedupe by id), sort by score
-  const merged = [...(candidates || []), ...demo].filter(
-    (c, i, arr) => arr.findIndex((x) => x.candidate_id === c.candidate_id) === i
-  );
-  merged.sort(
+  // sort candidates by score, highest first
+  const merged = [...(candidates || [])].sort(
     (x, y) => (y.score?.combined_score ?? -1) - (x.score?.combined_score ?? -1)
   );
 
@@ -138,34 +116,18 @@ export default function Dashboard() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {!demoLoaded && (
-            <button
-              onClick={loadDemo}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              <Database size={16} /> Load demo data
-            </button>
+        <button
+          onClick={copyLink}
+          className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"
+          style={{ backgroundColor: "#6D28D9" }}
+        >
+          {copied ? (
+            <><Check size={16} /> Link copied</>
+          ) : (
+            <><Link2 size={16} /> Copy application link</>
           )}
-          <button
-            onClick={copyLink}
-            className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"
-            style={{ backgroundColor: "#6D28D9" }}
-          >
-            {copied ? (
-              <><Check size={16} /> Link copied</>
-            ) : (
-              <><Link2 size={16} /> Copy application link</>
-            )}
-          </button>
-        </div>
+        </button>
       </div>
-
-      {demoLoaded && (
-        <div className="mt-3 rounded-md border border-purple-200 bg-purple-50 px-3 py-2 text-sm text-purple-700">
-          Demo data loaded — showing sample candidates
-        </div>
-      )}
 
       {/* Pipeline configurator */}
       {pipeline && (
