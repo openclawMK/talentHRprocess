@@ -12,7 +12,7 @@ import { Router } from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { phoneDigits, sendMessage, logMessage } from "../services/whatsappService.js";
+import { phoneDigits, logMessage } from "../services/whatsappService.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -79,16 +79,18 @@ router.post("/whatsapp", async (req, res) => {
       writeJSON(CANDIDATES_PATH, candidates);
     }
 
-    // Acknowledge YES / NO regardless of whether we matched a candidate
-    // (so testing works and every candidate gets a courtesy reply).
-    if (action === "confirmed") {
-      await sendMessage(from, "✅ Thank you — your interview is confirmed. See you then!");
-    } else if (action === "reschedule") {
-      await sendMessage(from, "No problem — our team will reach out to find a better time. 🙏");
-    }
+    // Reply inline via TwiML — the reliable way to respond in the sandbox.
+    let reply = null;
+    if (action === "confirmed") reply = "✅ Thank you — your interview is confirmed. See you then!";
+    else if (action === "reschedule") reply = "No problem — our team will reach out to find a better time. 🙏";
 
-    // Twilio expects TwiML or an empty 200.
-    res.set("Content-Type", "text/xml").status(200).send("<Response></Response>");
+    if (reply) logMessage("outbound", from, reply, "twiml-reply");
+
+    const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const twiml = reply
+      ? `<Response><Message>${esc(reply)}</Message></Response>`
+      : "<Response></Response>";
+    res.set("Content-Type", "text/xml").status(200).send(twiml);
   } catch (err) {
     console.error("whatsapp webhook error:", err);
     res.status(200).send("<Response></Response>"); // never make Twilio retry
