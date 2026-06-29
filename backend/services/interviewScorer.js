@@ -24,6 +24,10 @@ export function applyInterviewScores(candidate, job, ratings) {
       ...cs,
       score: Math.max(0, Math.min(100, Math.round(Number(rating.score)))),
       hr_notes: rating.notes || null,
+      questions_asked: Array.isArray(rating.questions)
+        ? rating.questions.filter((q) => q && q.trim())
+        : [],
+      question_source: rating.source === "manual" ? "manual" : "ai",
       scored: true,
       estimated: false,
     };
@@ -31,4 +35,5 @@ export function applyInterviewScores(candidate, job, ratings) {
 
   recomputeCombined(score, job);
   candidate.interview_completed = true;
+  candidate.interview_mode = ratings[0]?.source === "manual" ? "manual" : "ai";
 }

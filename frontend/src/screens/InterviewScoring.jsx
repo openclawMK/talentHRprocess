@@ -1,36 +1,77 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, ClipboardList } from "lucide-react";
+import { ArrowLeft, ClipboardList, Sparkles, PenLine, Loader2 } from "lucide-react";
 import { barColor } from "../lib/format.js";
 
 export default function InterviewScoring() {
   const { jobId, candidateId } = useParams();
   const navigate = useNavigate();
 
-  const [criteria, setCriteria] = useState(null);
   const [candidate, setCandidate] = useState(null);
+  const [job, setJob] = useState(null);
+  const [mode, setMode] = useState(null); // null | "ai" | "manual"
+  const [criteria, setCriteria] = useState(null); // working list once a mode is picked
+  const [loadingAi, setLoadingAi] = useState(false);
+
   const [ratings, setRatings] = useState({});
   const [notes, setNotes] = useState({});
+  const [manualQ, setManualQ] = useState({}); // criterion_id -> typed questions (textarea)
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  // Load candidate + job (job gives us the bare interview criteria for manual mode)
   useEffect(() => {
     axios
       .get(`/api/candidates/${jobId}/${candidateId}`)
       .then((r) => setCandidate(r.data))
       .catch(() => setCandidate(false));
-
     axios
-      .get(`/api/candidates/${jobId}/${candidateId}/interview-prep`)
-      .then((r) => {
-        setCriteria(r.data.criteria);
-        const init = {};
-        r.data.criteria.forEach((c) => { init[c.id] = 70; });
-        setRatings(init);
-      })
-      .catch(() => setCriteria([]));
+      .get("/api/jobs")
+      .then((r) => setJob(r.data.find((j) => j.job_id === jobId) || null))
+      .catch(() => setJob(null));
   }, [jobId, candidateId]);
+
+  const interviewDefs = (job?.criteria || []).filter((c) => c.source === "interview");
+
+  function seedRatings(list) {
+    const init = {};
+    list.forEach((c) => { init[c.id] = 70; });
+    setRatings(init);
+  }
+
+  async function chooseAi() {
+    setMode("ai");
+    setLoadingAi(true);
+    setError(null);
+    try {
+      const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep`);
+      setCriteria(r.data.criteria);
+      seedRatings(r.data.criteria);
+    } catch {
+      setError("Couldn't generate AI questions. You can switch to Manual mode instead.");
+      setCriteria([]);
+    } finally {
+      setLoadingAi(false);
+    }
+  }
+
+  function chooseManual() {
+    setMode("manual");
+    setError(null);
+    const list = interviewDefs.map((c) => ({ id: c.id, name: c.name, description: c.description }));
+    setCriteria(list);
+    seedRatings(list);
+  }
+
+  function resetMode() {
+    setMode(null);
+    setCriteria(null);
+    setRatings({});
+    setNotes({});
+    setManualQ({});
+    setError(null);
+  }
 
   async function submit() {
     setSaving(true);
@@ -40,6 +81,11 @@ export default function InterviewScoring() {
         criterion_id: c.id,
         score: ratings[c.id] ?? 70,
         notes: notes[c.id] || null,
+        source: mode,
+        questions:
+          mode === "manual"
+            ? (manualQ[c.id] || "").split("\n").map((q) => q.trim()).filter(Boolean)
+            : c.questions || [],
       }));
       await axios.post(
         `/api/candidates/${jobId}/${candidateId}/interview-scores`,
@@ -54,18 +100,14 @@ export default function InterviewScoring() {
 
   if (candidate === false)
     return <div className="text-gray-500">Candidate not found.</div>;
-  if (!criteria || !candidate)
+  if (!candidate || !job)
     return <div className="h-64 animate-pulse rounded-lg border border-gray-200 bg-gray-50" />;
 
-  if (criteria.length === 0) {
+  // No interview criteria on this role
+  if (interviewDefs.length === 0) {
     return (
       <div className="mx-auto max-w-2xl">
-        <Link
-          to={`/jobs/${jobId}/candidate/${candidateId}`}
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeft size={16} /> Back
-        </Link>
+        <BackLink jobId={jobId} candidateId={candidateId} />
         <div className="mt-12 text-center text-gray-500">
           No interview criteria defined for this role.
         </div>
@@ -73,15 +115,10 @@ export default function InterviewScoring() {
     );
   }
 
-  return (
-    <div className="mx-auto max-w-2xl">
-      <Link
-        to={`/jobs/${jobId}/candidate/${candidateId}`}
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-      >
-        <ArrowLeft size={16} /> Back to candidate
-      </Link>
-
+  // --- Header (shared) ---
+  const Header = (
+    <>
+      <BackLink jobId={jobId} candidateId={candidateId} />
       <div className="mt-4 flex items-center gap-3">
         <ClipboardList size={22} className="text-purple-600" />
         <div>
@@ -89,10 +126,70 @@ export default function InterviewScoring() {
           <p className="text-sm text-gray-500">{candidate.profile?.name}</p>
         </div>
       </div>
+    </>
+  );
 
-      <p className="mt-3 rounded-md bg-purple-50 px-4 py-2.5 text-sm text-purple-800">
-        Use the questions below during or after the interview, then rate each criterion 0–100 and submit.
-      </p>
+  // --- Mode selection screen ---
+  if (mode === null) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        {Header}
+        <p className="mt-3 text-sm text-gray-500">
+          Choose how you want to run this interview. Either way, you give the final score for each criterion.
+        </p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <button
+            onClick={chooseAi}
+            className="rounded-xl border border-gray-200 p-5 text-left transition-colors hover:border-purple-400 hover:bg-purple-50/40"
+          >
+            <Sparkles size={22} className="text-purple-600" />
+            <h3 className="mt-3 font-medium text-gray-900">AI-generated questions</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              AI writes tailored questions and a scoring rubric for each criterion, based on this role and the candidate's CV. You rate each one.
+            </p>
+          </button>
+          <button
+            onClick={chooseManual}
+            className="rounded-xl border border-gray-200 p-5 text-left transition-colors hover:border-purple-400 hover:bg-purple-50/40"
+          >
+            <PenLine size={22} className="text-purple-600" />
+            <h3 className="mt-3 font-medium text-gray-900">Write my own questions</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Type your own questions for each criterion and score the candidate on them. Best if you already have a question set.
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === "ai" && loadingAi) {
+    return (
+      <div className="mx-auto max-w-2xl">
+        {Header}
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 text-gray-500">
+          <Loader2 className="animate-spin text-purple-500" />
+          <p className="text-sm">Generating tailored questions for {job.role_title}…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Scoring screen (both modes) ---
+  return (
+    <div className="mx-auto max-w-2xl">
+      {Header}
+
+      <div className="mt-3 flex items-center justify-between rounded-md bg-purple-50 px-4 py-2.5 text-sm text-purple-800">
+        <span>
+          {mode === "ai"
+            ? "Ask the AI questions during the interview, then rate each criterion 0–100."
+            : "Type your own questions for each criterion, then rate the candidate 0–100."}
+        </span>
+        <button onClick={resetMode} className="shrink-0 font-medium text-purple-700 underline hover:text-purple-900">
+          Change mode
+        </button>
+      </div>
 
       <div className="mt-5 space-y-6">
         {criteria.map((c, i) => {
@@ -117,8 +214,8 @@ export default function InterviewScoring() {
                 </span>
               </div>
 
-              {/* AI-generated questions */}
-              {(c.questions || []).length > 0 && (
+              {/* AI questions */}
+              {mode === "ai" && (c.questions || []).length > 0 && (
                 <div className="mt-3 space-y-1.5 rounded-md bg-gray-50 p-3">
                   <p className="text-xs font-medium text-gray-500">Ask the candidate:</p>
                   {c.questions.map((q, qi) => (
@@ -130,8 +227,8 @@ export default function InterviewScoring() {
                 </div>
               )}
 
-              {/* Scoring rubric */}
-              {c.rubric && (
+              {/* AI rubric */}
+              {mode === "ai" && c.rubric && (
                 <div className="mt-2 grid grid-cols-3 gap-1.5 text-xs">
                   <div className="rounded-md bg-red-50 p-2 text-red-700">
                     <div className="mb-0.5 font-bold">0 – 40</div>
@@ -148,6 +245,20 @@ export default function InterviewScoring() {
                 </div>
               )}
 
+              {/* Manual question entry */}
+              {mode === "manual" && (
+                <div className="mt-3">
+                  <p className="mb-1 text-xs font-medium text-gray-500">Your questions (one per line):</p>
+                  <textarea
+                    value={manualQ[c.id] || ""}
+                    onChange={(e) => setManualQ((q) => ({ ...q, [c.id]: e.target.value }))}
+                    placeholder={"e.g. Tell me about a time you handled an angry customer.\nWhat would you do if two staff called in sick during a rush?"}
+                    rows={3}
+                    className="w-full rounded border border-gray-200 p-2 text-sm text-gray-700 placeholder-gray-300 focus:border-gray-400 focus:outline-none"
+                  />
+                </div>
+              )}
+
               {/* Rating slider */}
               <div className="mt-4">
                 <div className="flex items-center justify-between text-xs text-gray-500">
@@ -159,9 +270,7 @@ export default function InterviewScoring() {
                   min="0"
                   max="100"
                   value={rating}
-                  onChange={(e) =>
-                    setRatings((r) => ({ ...r, [c.id]: Number(e.target.value) }))
-                  }
+                  onChange={(e) => setRatings((r) => ({ ...r, [c.id]: Number(e.target.value) }))}
                   className="mt-1 w-full accent-purple-600"
                 />
                 <div className="flex justify-between text-[10px] text-gray-400">
@@ -174,9 +283,7 @@ export default function InterviewScoring() {
               {/* Per-criterion notes */}
               <textarea
                 value={notes[c.id] || ""}
-                onChange={(e) =>
-                  setNotes((n) => ({ ...n, [c.id]: e.target.value }))
-                }
+                onChange={(e) => setNotes((n) => ({ ...n, [c.id]: e.target.value }))}
                 placeholder="Notes on candidate's answer (optional)…"
                 rows={2}
                 className="mt-3 w-full rounded border border-gray-200 p-2 text-sm text-gray-700 placeholder-gray-300 focus:border-gray-400 focus:outline-none"
@@ -187,9 +294,7 @@ export default function InterviewScoring() {
       </div>
 
       {error && (
-        <div className="mt-4 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700">
-          {error}
-        </div>
+        <div className="mt-4 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>
       )}
 
       <div className="mt-6 flex items-center gap-3 pb-12">
@@ -209,5 +314,16 @@ export default function InterviewScoring() {
         </Link>
       </div>
     </div>
+  );
+}
+
+function BackLink({ jobId, candidateId }) {
+  return (
+    <Link
+      to={`/jobs/${jobId}/candidate/${candidateId}`}
+      className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
+    >
+      <ArrowLeft size={16} /> Back to candidate
+    </Link>
   );
 }
