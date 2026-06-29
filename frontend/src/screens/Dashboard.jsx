@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Link2, Check, SlidersHorizontal } from "lucide-react";
+import { Link2, Check, SlidersHorizontal, MessageCircle, Send } from "lucide-react";
 import CandidateCard from "../components/CandidateCard.jsx";
+import Modal from "../components/Modal.jsx";
 import { displayLane } from "../lib/format.js";
 
 const TABS = ["all", "green", "amber", "red"];
@@ -18,6 +19,40 @@ export default function Dashboard() {
   const [pipeline, setPipeline] = useState(null);
   const [showPipeline, setShowPipeline] = useState(false);
   const [savingStage, setSavingStage] = useState(null);
+  const [waModal, setWaModal] = useState(false);
+  const [waForm, setWaForm] = useState({ candidate_name: "", phone: "" });
+  const [waSending, setWaSending] = useState(false);
+  const [waResult, setWaResult] = useState(null);
+  const [hrAlerts, setHrAlerts] = useState(false);
+  const [hrPhone, setHrPhone] = useState("");
+  const [hrSaved, setHrSaved] = useState(false);
+
+  async function saveHrAlerts(alerts = hrAlerts, phone = hrPhone) {
+    try {
+      await axios.patch(`/api/jobs/${jobId}/whatsapp-settings`, {
+        hr_whatsapp_alerts: alerts,
+        hr_contact_phone: phone,
+      });
+      setHrSaved(true);
+      setTimeout(() => setHrSaved(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function sendPortalLink() {
+    if (!waForm.phone.trim()) return;
+    setWaSending(true);
+    setWaResult(null);
+    try {
+      const res = await axios.post(`/api/jobs/${jobId}/send-portal-link`, waForm);
+      setWaResult(res.data);
+    } catch (e) {
+      setWaResult({ error: e.response?.data?.error || "Failed to send." });
+    } finally {
+      setWaSending(false);
+    }
+  }
 
   function copyLink() {
     if (!job?.portal_token) return;
@@ -40,7 +75,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     axios.get("/api/jobs").then((res) => {
-      setJob(res.data.find((j) => j.job_id === jobId) || null);
+      const j = res.data.find((x) => x.job_id === jobId) || null;
+      setJob(j);
+      if (j) {
+        setHrAlerts(!!j.hr_whatsapp_alerts);
+        setHrPhone(j.hr_contact_phone || "");
+      }
     });
     axios
       .get(`/api/jobs/${jobId}/pipeline`)
@@ -116,18 +156,79 @@ export default function Dashboard() {
             </span>
           )}
         </div>
-        <button
-          onClick={copyLink}
-          className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"
-          style={{ backgroundColor: "#6D28D9" }}
-        >
-          {copied ? (
-            <><Check size={16} /> Link copied</>
-          ) : (
-            <><Link2 size={16} /> Copy application link</>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setWaResult(null); setWaModal(true); }}
+            className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"
+            style={{ backgroundColor: "#25D366" }}
+          >
+            <MessageCircle size={16} /> Send via WhatsApp
+          </button>
+          <button
+            onClick={copyLink}
+            className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"
+            style={{ backgroundColor: "#6D28D9" }}
+          >
+            {copied ? (
+              <><Check size={16} /> Link copied</>
+            ) : (
+              <><Link2 size={16} /> Copy application link</>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Send portal link via WhatsApp */}
+      {waModal && (
+        <Modal title="Send application link via WhatsApp" onClose={() => setWaModal(false)}>
+          {waResult?.ok ? (
+            <div className="text-sm">
+              <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">
+                {waResult.skipped
+                  ? "WhatsApp isn't configured yet — message logged but not sent."
+                  : "Message sent! ✅"}
+              </div>
+              <p className="mt-3 break-all text-xs text-gray-500">Link: {waResult.portal_url}</p>
+              <button
+                onClick={() => setWaModal(false)}
+                className="mt-4 w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-gray-700">Candidate name</span>
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  value={waForm.candidate_name}
+                  onChange={(e) => setWaForm({ ...waForm, candidate_name: e.target.value })}
+                  placeholder="Optional"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-gray-700">Phone (Malaysian)</span>
+                <input
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  value={waForm.phone}
+                  onChange={(e) => setWaForm({ ...waForm, phone: e.target.value })}
+                  placeholder="012-345 6789"
+                />
+              </label>
+              {waResult?.error && <p className="text-sm text-red-600">{waResult.error}</p>}
+              <button
+                onClick={sendPortalLink}
+                disabled={waSending || !waForm.phone.trim()}
+                className="flex w-full items-center justify-center gap-2 rounded-md py-2 text-sm font-medium text-white disabled:opacity-50"
+                style={{ backgroundColor: "#25D366" }}
+              >
+                <Send size={15} /> {waSending ? "Sending…" : "Send link"}
+              </button>
+            </div>
+          )}
+        </Modal>
+      )}
 
       {/* Pipeline configurator */}
       {pipeline && (
@@ -178,6 +279,40 @@ export default function Dashboard() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* WhatsApp HR alerts */}
+              <div className="mt-4 border-t border-gray-100 pt-3">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <MessageCircle size={14} className="text-green-600" /> WhatsApp HR alerts
+                  </span>
+                  <button
+                    onClick={() => { const v = !hrAlerts; setHrAlerts(v); saveHrAlerts(v, hrPhone); }}
+                    className={`relative h-5 w-9 rounded-full transition-colors ${hrAlerts ? "bg-green-500" : "bg-gray-300"}`}
+                  >
+                    <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${hrAlerts ? "left-[18px]" : "left-0.5"}`} />
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  Get a WhatsApp ping when a strong candidate (score ≥ green threshold) applies.
+                </p>
+                {hrAlerts && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      value={hrPhone}
+                      onChange={(e) => setHrPhone(e.target.value)}
+                      placeholder="Your phone e.g. 012-345 6789"
+                      className="flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:border-gray-400 focus:outline-none"
+                    />
+                    <button
+                      onClick={() => saveHrAlerts()}
+                      className="rounded-md bg-gray-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-gray-700"
+                    >
+                      {hrSaved ? "Saved ✓" : "Save"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

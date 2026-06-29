@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown, Trash2, MessageCircle, Send, CalendarClock } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
+import Modal from "../components/Modal.jsx";
 import { monthsToDuration, round, barColor, LANE_META, candidateStatus, screeningScore, screeningVerdict } from "../lib/format.js";
 import { candidateStages } from "../lib/pipeline.js";
 
@@ -17,6 +18,52 @@ export default function CandidateDetail() {
   const [noteResult, setNoteResult] = useState(null);
   const [finalAnalysis, setFinalAnalysis] = useState(null);
   const [generatingFinal, setGeneratingFinal] = useState(false);
+  const [inviteModal, setInviteModal] = useState(false);
+  const [invite, setInvite] = useState({ interview_type: "In-person interview", date: "", time: "" });
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteResult, setInviteResult] = useState(null);
+  const [showChat, setShowChat] = useState(false);
+  const [chat, setChat] = useState(null);
+  const [outcomeSaving, setOutcomeSaving] = useState(false);
+
+  async function loadChat() {
+    setShowChat((v) => !v);
+    if (chat === null) {
+      try {
+        const res = await axios.get(`/api/candidates/${jobId}/${candidateId}/whatsapp-history`);
+        setChat(res.data);
+      } catch {
+        setChat({ configured: false, thread: [] });
+      }
+    }
+  }
+
+  async function sendInvite() {
+    setInviteSending(true);
+    setInviteResult(null);
+    try {
+      const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/send-interview-invite`, invite);
+      setInviteResult(res.data);
+    } catch (e) {
+      setInviteResult({ error: e.response?.data?.error || "Failed to send invite." });
+    } finally {
+      setInviteSending(false);
+    }
+  }
+
+  async function setOutcome(outcome) {
+    const verb = outcome === "offer" ? "send an OFFER message to" : "send a REJECTION message to";
+    if (!window.confirm(`This will ${verb} the candidate via WhatsApp and mark them as ${outcome}. Continue?`)) return;
+    setOutcomeSaving(true);
+    try {
+      const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/outcome`, { outcome });
+      setCandidate(res.data.candidate);
+    } catch {
+      /* ignore */
+    } finally {
+      setOutcomeSaving(false);
+    }
+  }
 
   useEffect(() => {
     axios
@@ -594,6 +641,61 @@ export default function CandidateDetail() {
         </button>
       </section>
 
+      {/* WhatsApp conversation */}
+      <section className="mt-6">
+        <button
+          onClick={loadChat}
+          className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+        >
+          <MessageCircle size={15} className="text-green-600" />
+          WhatsApp conversation
+          <span className="text-xs text-gray-400">{showChat ? "▲" : "▼"}</span>
+        </button>
+        {showChat && (
+          <div className="mt-2 rounded-lg border border-gray-200 p-4">
+            {chat === null ? (
+              <div className="text-sm text-gray-400">Loading…</div>
+            ) : chat.thread.length === 0 ? (
+              <div className="text-sm text-gray-400">
+                No messages yet.
+                {!chat.configured && " (WhatsApp isn't configured — messages will log here once Twilio is set up.)"}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {chat.thread.map((m, i) => (
+                  <div key={i} className={`flex ${m.direction === "outbound" ? "justify-end" : "justify-start"}`}>
+                    <div
+                      className={`max-w-[80%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm ${
+                        m.direction === "outbound"
+                          ? "bg-green-100 text-gray-800"
+                          : "border border-gray-200 bg-white text-gray-700"
+                      }`}
+                    >
+                      {m.body}
+                      <div className="mt-1 text-[10px] text-gray-400">
+                        {new Date(m.at).toLocaleString()} · {m.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* outcome banner */}
+      {candidate.outcome && (
+        <div
+          className={`mt-6 rounded-md px-4 py-2.5 text-sm font-medium ${
+            candidate.outcome === "offer" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+          }`}
+        >
+          Marked as {candidate.outcome === "offer" ? "OFFER" : "REJECTED"}
+          {candidate.outcome_date ? ` on ${candidate.outcome_date}` : ""} — candidate notified via WhatsApp.
+        </div>
+      )}
+
       {/* actions */}
       <div className="mt-8 flex flex-wrap items-center gap-3 pb-12">
         {interviewPending && (
@@ -607,6 +709,33 @@ export default function CandidateDetail() {
             <ClipboardList size={15} />
             Conduct interview scoring →
           </button>
+        )}
+        {(status === "screening" || interviewPending) && (
+          <button
+            onClick={() => { setInviteResult(null); setInviteModal(true); }}
+            className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white"
+            style={{ backgroundColor: "#25D366" }}
+          >
+            <MessageCircle size={15} /> Send interview invite
+          </button>
+        )}
+        {status === "complete" && !candidate.outcome && (
+          <>
+            <button
+              onClick={() => setOutcome("offer")}
+              disabled={outcomeSaving}
+              className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              Mark offer
+            </button>
+            <button
+              onClick={() => setOutcome("rejected")}
+              disabled={outcomeSaving}
+              className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+            >
+              Mark rejected
+            </button>
+          </>
         )}
         <Link
           to={`/jobs/${jobId}/dashboard`}
@@ -629,6 +758,76 @@ export default function CandidateDetail() {
           <Trash2 size={15} /> Delete candidate
         </button>
       </div>
+
+      {/* Interview invite modal */}
+      {inviteModal && (
+        <Modal title="Send interview invite via WhatsApp" onClose={() => setInviteModal(false)}>
+          {inviteResult?.ok ? (
+            <div className="text-sm">
+              <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">
+                {inviteResult.skipped
+                  ? "WhatsApp isn't configured yet — invite logged but not sent."
+                  : "Invite sent! ✅ The candidate can reply YES to confirm."}
+              </div>
+              <button
+                onClick={() => { setInviteModal(false); setChat(null); }}
+                className="mt-4 w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white"
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <label className="block">
+                <span className="mb-1 block text-sm font-medium text-gray-700">Interview type</span>
+                <select
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                  value={invite.interview_type}
+                  onChange={(e) => setInvite({ ...invite, interview_type: e.target.value })}
+                >
+                  <option>In-person interview</option>
+                  <option>Phone interview</option>
+                  <option>Video interview</option>
+                  <option>Walk-in interview</option>
+                </select>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="mb-1 block text-sm font-medium text-gray-700">Date</span>
+                  <input
+                    type="date"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                    value={invite.date}
+                    onChange={(e) => setInvite({ ...invite, date: e.target.value })}
+                  />
+                </label>
+                <label className="block">
+                  <span className="mb-1 block text-sm font-medium text-gray-700">Time</span>
+                  <input
+                    type="time"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
+                    value={invite.time}
+                    onChange={(e) => setInvite({ ...invite, time: e.target.value })}
+                  />
+                </label>
+              </div>
+              <div className="rounded-md bg-gray-50 p-3 text-xs text-gray-500">
+                <CalendarClock size={13} className="mb-1 inline text-gray-400" /> Preview: “You're invited to a{" "}
+                {invite.interview_type.toLowerCase()} for {job.role_title} on {invite.date || "—"} at {invite.time || "—"}. Reply YES to confirm.”
+              </div>
+              {inviteResult?.error && <p className="text-sm text-red-600">{inviteResult.error}</p>}
+              <button
+                onClick={sendInvite}
+                disabled={inviteSending || !invite.date || !invite.time}
+                className="flex w-full items-center justify-center gap-2 rounded-md py-2 text-sm font-medium text-white disabled:opacity-50"
+                style={{ backgroundColor: "#25D366" }}
+              >
+                <Send size={15} /> {inviteSending ? "Sending…" : "Send invite"}
+              </button>
+            </div>
+          )}
+        </Modal>
+      )}
     </div>
   );
 }

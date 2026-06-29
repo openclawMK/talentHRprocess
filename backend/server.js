@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import jobsRouter from "./routes/jobs.js";
 import candidatesRouter from "./routes/candidates.js";
 import portalRouter from "./routes/portal.js";
+import webhookRouter from "./routes/webhook.js";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: false })); // Twilio webhook posts form-encoded
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -23,6 +25,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api", jobsRouter);
 app.use("/api", candidatesRouter);
 app.use("/api", portalRouter);
+app.use("/webhook", webhookRouter);
 
 app.listen(PORT, () => {
   console.log(`PeopleQuest Talent AI backend running on http://localhost:${PORT}`);

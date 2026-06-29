@@ -21,6 +21,7 @@ import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
 import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { notify } from "../services/whatsappService.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -175,6 +176,26 @@ router.post("/portal/:token/ocean", (req, res) => {
     applyOceanScores(candidates[idx], job, traits);
     candidates[idx].portal_status = "submitted";
     writeJSON(CANDIDATES_PATH, candidates);
+
+    // Fire-and-forget WhatsApp notifications — never block the response.
+    const cand = candidates[idx];
+    notify(cand.profile?.contact?.phone, "application_received", {
+      name: cand.profile?.name,
+      role: job.role_title,
+    }).catch(() => {});
+
+    const greenMark = job.thresholds?.green ?? 70;
+    if (
+      job.hr_whatsapp_alerts &&
+      job.hr_contact_phone &&
+      (cand.score?.combined_score ?? 0) >= greenMark
+    ) {
+      notify(job.hr_contact_phone, "hr_alert", {
+        candidate: cand.profile?.name,
+        score: cand.score.combined_score,
+        role: job.role_title,
+      }).catch(() => {});
+    }
 
     res.json({ ok: true, role_title: job.role_title });
   } catch (err) {

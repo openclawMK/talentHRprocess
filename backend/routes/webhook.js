@@ -1,0 +1,93 @@
+/**
+ * Twilio WhatsApp inbound webhook (Session 10).
+ *
+ * Twilio POSTs form-encoded data to /webhook/whatsapp when a candidate replies.
+ * We log the reply, match it to a candidate by phone, and auto-process simple
+ * confirmations (YES / NO). Always returns 200 so Twilio doesn't retry.
+ *
+ * Configure in Twilio Console → Messaging → Sandbox settings → "When a message
+ * comes in": https://<your-render-backend>.onrender.com/webhook/whatsapp
+ */
+import { Router } from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { phoneDigits, sendMessage, logMessage } from "../services/whatsappService.js";
+
+const router = Router();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DATA_DIR = path.join(__dirname, "..", "data");
+const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
+const REPLIES_PATH = path.join(DATA_DIR, "whatsapp-replies.json");
+
+const readJSON = (p, fb) => {
+  try { return JSON.parse(fs.readFileSync(p, "utf-8")); } catch { return fb; }
+};
+const writeJSON = (p, d) => {
+  try { fs.writeFileSync(p, JSON.stringify(d, null, 2)); } catch { /* ignore */ }
+};
+
+const YES = ["YES", "YA", "OK", "OKAY", "CONFIRM", "SETUJU"];
+const NO = ["NO", "TIDAK", "CANCEL", "RESCHEDULE"];
+
+router.post("/whatsapp", async (req, res) => {
+  try {
+    const from = req.body?.From || ""; // "whatsapp:+60..."
+    const body = (req.body?.Body || "").trim();
+    const profileName = req.body?.ProfileName || "";
+    const messageSid = req.body?.MessageSid || null;
+
+    logMessage("inbound", from, body, "received", messageSid);
+
+    const fromDigits = phoneDigits(from);
+
+    // Match to a candidate by phone.
+    const candidates = readJSON(CANDIDATES_PATH, []);
+    const candidate = candidates.find(
+      (c) => phoneDigits(c.profile?.contact?.phone) === fromDigits
+    );
+
+    const word = body.toUpperCase().replace(/[^A-Z]/g, "");
+    let action = "manual_review";
+    if (YES.includes(word)) action = "confirmed";
+    else if (NO.includes(word)) action = "reschedule";
+
+    // Log the reply.
+    const replies = readJSON(REPLIES_PATH, []);
+    replies.push({
+      phone: from,
+      profile_name: profileName,
+      body,
+      candidate_id: candidate?.candidate_id || null,
+      action,
+      processed: action !== "manual_review",
+      received_at: new Date().toISOString(),
+    });
+    writeJSON(REPLIES_PATH, replies);
+
+    // Update candidate invite state + auto-reply.
+    if (candidate) {
+      if (action === "confirmed") {
+        candidate.whatsapp_invite = { ...(candidate.whatsapp_invite || {}), confirmed: true };
+        writeJSON(CANDIDATES_PATH, candidates);
+        await sendMessage(from, "✅ Thank you — your interview is confirmed. See you then!");
+      } else if (action === "reschedule") {
+        candidate.whatsapp_invite = {
+          ...(candidate.whatsapp_invite || {}),
+          confirmed: false,
+          needs_reschedule: true,
+        };
+        writeJSON(CANDIDATES_PATH, candidates);
+        await sendMessage(from, "No problem — our team will reach out to find a better time. 🙏");
+      }
+    }
+
+    // Twilio expects TwiML or an empty 200.
+    res.set("Content-Type", "text/xml").status(200).send("<Response></Response>");
+  } catch (err) {
+    console.error("whatsapp webhook error:", err);
+    res.status(200).send("<Response></Response>"); // never make Twilio retry
+  }
+});
+
+export default router;

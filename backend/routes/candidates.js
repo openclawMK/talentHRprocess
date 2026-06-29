@@ -13,6 +13,7 @@ import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanS
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
+import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
 
 const router = Router();
@@ -349,6 +350,100 @@ router.delete("/candidates/:jobId/:candidateId", (req, res) => {
   } catch (err) {
     console.error("delete candidate error:", err);
     res.status(500).json({ error: "Failed to delete candidate." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/send-interview-invite
+ * Body: { interview_type, date, time } → sends a WhatsApp invite, stores invite state.
+ */
+router.post("/candidates/:jobId/:candidateId/send-interview-invite", async (req, res) => {
+  try {
+    const { interview_type, date, time } = req.body;
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const cand = candidates[idx];
+    const phone = cand.profile?.contact?.phone;
+    if (!phone) return res.status(400).json({ error: "No phone number on file for this candidate." });
+
+    const result = await notify(phone, "interview_invite", {
+      name: cand.profile?.name,
+      role: job.role_title,
+      interview_type,
+      date,
+      time,
+    });
+
+    cand.whatsapp_invite = { sent_at: today(), interview_type, date, time, confirmed: null };
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    res.json({
+      ok: true,
+      message_id: result.sid || null,
+      skipped: !!result.skipped,
+      reason: result.reason || result.error || null,
+    });
+  } catch (err) {
+    console.error("send-interview-invite error:", err);
+    res.status(500).json({ error: "Failed to send invite." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/outcome  { outcome: "offer" | "rejected" }
+ * Records the outcome and sends the candidate the matching WhatsApp message.
+ */
+router.post("/candidates/:jobId/:candidateId/outcome", async (req, res) => {
+  try {
+    const { outcome } = req.body;
+    if (!["offer", "rejected"].includes(outcome))
+      return res.status(400).json({ error: "outcome must be 'offer' or 'rejected'." });
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const cand = candidates[idx];
+    cand.outcome = outcome;
+    cand.outcome_date = today();
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    const template = outcome === "offer" ? "outcome_successful" : "outcome_unsuccessful";
+    const result = await notify(cand.profile?.contact?.phone, template, {
+      name: cand.profile?.name,
+      role: job.role_title,
+    });
+
+    res.json({ candidate: cand, message_sent: !result.skipped, reason: result.reason || null });
+  } catch (err) {
+    console.error("outcome error:", err);
+    res.status(500).json({ error: "Failed to record outcome." });
+  }
+});
+
+/**
+ * GET /api/candidates/:jobId/:candidateId/whatsapp-history
+ * Returns the merged inbound/outbound message thread for this candidate.
+ */
+router.get("/candidates/:jobId/:candidateId/whatsapp-history", (req, res) => {
+  try {
+    const candidate = findCandidate(req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    const digits = phoneDigits(candidate.profile?.contact?.phone);
+    const thread = readLog()
+      .filter((m) => digits && phoneDigits(m.phone) === digits)
+      .map((m) => ({ direction: m.direction, body: m.content, at: m.timestamp, status: m.status }))
+      .sort((a, b) => new Date(a.at) - new Date(b.at));
+    res.json({ configured: whatsappConfigured, thread });
+  } catch (err) {
+    console.error("whatsapp-history error:", err);
+    res.status(500).json({ error: "Failed to load conversation." });
   }
 });
 

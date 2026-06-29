@@ -11,6 +11,7 @@ import {
   pipelineStageList,
   reconcileCandidate,
 } from "../services/pipeline.js";
+import { notify } from "../services/whatsappService.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -67,6 +68,62 @@ router.post("/generate-criteria", async (req, res) => {
   } catch (err) {
     console.error("generate-criteria error:", err);
     res.status(500).json({ error: "Failed to generate criteria." });
+  }
+});
+
+// POST /api/jobs/:jobId/send-portal-link — share the application link via WhatsApp
+router.post("/jobs/:jobId/send-portal-link", async (req, res) => {
+  try {
+    const { candidate_name, phone } = req.body;
+    if (!phone) return res.status(400).json({ error: "Phone number is required." });
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+
+    const base = process.env.FRONTEND_URL || "";
+    const url = `${base}/apply/${job.portal_token}`;
+    const minutes = job.pipeline_stages?.ocean_assessment?.enabled === false ? 5 : 8;
+    const expiryDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+    const expiry = expiryDate.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
+    const result = await notify(phone, "portal_link", {
+      name: candidate_name,
+      role: job.role_title,
+      url,
+      minutes,
+      expiry,
+    });
+
+    res.json({
+      ok: true,
+      message_id: result.sid || null,
+      skipped: !!result.skipped,
+      reason: result.reason || result.error || null,
+      portal_url: url,
+    });
+  } catch (err) {
+    console.error("send-portal-link error:", err);
+    res.status(500).json({ error: "Failed to send portal link." });
+  }
+});
+
+// PATCH /api/jobs/:jobId/whatsapp-settings — { hr_whatsapp_alerts, hr_contact_phone }
+router.patch("/jobs/:jobId/whatsapp-settings", (req, res) => {
+  try {
+    const { hr_whatsapp_alerts, hr_contact_phone } = req.body;
+    const jobs = readJSON(JOBS_PATH);
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+    if (typeof hr_whatsapp_alerts === "boolean") jobs[idx].hr_whatsapp_alerts = hr_whatsapp_alerts;
+    if (typeof hr_contact_phone === "string") jobs[idx].hr_contact_phone = hr_contact_phone;
+    writeJSON(JOBS_PATH, jobs);
+    res.json({
+      job_id: jobs[idx].job_id,
+      hr_whatsapp_alerts: !!jobs[idx].hr_whatsapp_alerts,
+      hr_contact_phone: jobs[idx].hr_contact_phone || "",
+    });
+  } catch (err) {
+    console.error("whatsapp-settings error:", err);
+    res.status(500).json({ error: "Failed to update settings." });
   }
 });
 
@@ -211,6 +268,8 @@ router.post("/jobs", async (req, res) => {
       age_band: requirements.age_band || { min: 18, ideal_min: 18, ideal_max: 45, max: 60 },
       portal_token: `pq-${uuidv4().slice(0, 8)}`,
       pipeline_stages: { ...DEFAULT_PIPELINE },
+      hr_whatsapp_alerts: false,
+      hr_contact_phone: "",
       criteria,
       thresholds: { green: 70, red: 40 },
       benchmark: { maturity: "starter", avg_experience_years: expMin || 1, avg_team_size: 0 },
