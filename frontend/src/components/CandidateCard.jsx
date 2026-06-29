@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
 import LaneBadge from "./LaneBadge.jsx";
 import { experienceSummary, truncate, round } from "../lib/format.js";
+import { currentStageLabel } from "../lib/pipeline.js";
 
 export default function CandidateCard({
   candidate,
@@ -13,6 +14,7 @@ export default function CandidateCard({
   const strength = (score.strengths || [])[0];
   const gap = (score.gaps || [])[0];
   const base = `/jobs/${candidate.job_id}`;
+  const stageLabel = job ? currentStageLabel(candidate, job) : null;
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
@@ -49,11 +51,24 @@ export default function CandidateCard({
       )}
 
       {/* middle row */}
-      <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
         <span>{experienceSummary(candidate, job)}</span>
         <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs capitalize text-gray-500">
           {candidate.source || "upload"}
         </span>
+        {stageLabel && (
+          <span
+            className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+              stageLabel === "Rejected"
+                ? "bg-red-50 text-red-600"
+                : stageLabel === "Ready for offer"
+                ? "bg-green-50 text-green-700"
+                : "bg-purple-50 text-purple-700"
+            }`}
+          >
+            {stageLabel}
+          </span>
+        )}
       </div>
 
       {/* strengths / gaps */}
@@ -79,10 +94,10 @@ export default function CandidateCard({
           View profile
         </Link>
         <Link
-          to={`${base}/candidate/${candidate.candidate_id}/questions`}
+          to={`${base}/candidate/${candidate.candidate_id}/interview`}
           className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
         >
-          Interview questions
+          Interview scoring
         </Link>
         <label className="ml-auto flex cursor-pointer items-center gap-1.5 text-sm text-gray-600">
           <input

@@ -6,6 +6,8 @@
  * is collected. The age criterion is scored against the job's age_band.
  */
 
+import { sourceEnabled } from "./pipeline.js";
+
 function clamp(n, lo = 0, hi = 100) {
   return Math.max(lo, Math.min(hi, Math.round(n)));
 }
@@ -181,6 +183,7 @@ export function scoreCandidate(candidate, job) {
       weight: c.weight,
       score: null,
       scored: false,
+      not_applicable: !sourceEnabled(job, c.source),
       estimated: false,
     };
   });
@@ -192,8 +195,9 @@ export function scoreCandidate(candidate, job) {
     : 0;
   const cv_coverage = Math.round(cvWeight * 100) / 100;
 
-  const pending_sources = ["interview", "ocean"].filter((src) =>
-    criteria.some((c) => c.source === src)
+  // Only enabled stages with criteria are "pending"; disabled stages are N/A.
+  const pending_sources = ["interview", "ocean"].filter(
+    (src) => sourceEnabled(job, src) && criteria.some((c) => c.source === src)
   );
   const full_score_available = pending_sources.length === 0;
 

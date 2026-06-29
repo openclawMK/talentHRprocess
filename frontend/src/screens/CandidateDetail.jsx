@@ -5,6 +5,7 @@ import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Spark
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
 import { monthsToDuration, round, barColor } from "../lib/format.js";
+import { candidateStages } from "../lib/pipeline.js";
 
 export default function CandidateDetail() {
   const { jobId, candidateId } = useParams();
@@ -98,43 +99,99 @@ export default function CandidateDetail() {
         </div>
       )}
 
-      {/* Score stage buckets */}
-      <div className="mt-5 grid grid-cols-3 gap-3">
-        {[
-          { source: "cv",        label: "CV Assessment",  pct: job.role_level === "supervisory" ? 45 : 35, color: "#1D4ED8", border: "#BFDBFE", bg: "#EFF6FF" },
-          { source: "ocean",     label: "OCEAN Profile",  pct: job.role_level === "supervisory" ? 10 : 15, color: "#065F46", border: "#A7F3D0", bg: "#F0FDF4" },
-          { source: "interview", label: "Interview",       pct: job.role_level === "supervisory" ? 45 : 50, color: "#6D28D9", border: "#DDD6FE", bg: "#F5F3FF" },
-        ].map(({ source, label, pct, color, border, bg }) => {
-          const src = criteria.filter((c) => c.source === source);
-          const scored = src.filter((c) => c.scored && c.score != null);
-          const sw = scored.reduce((a, c) => a + c.weight, 0);
-          const bucketScore = sw
-            ? Math.round(scored.reduce((a, c) => a + c.score * c.weight, 0) / sw)
-            : null;
-          const isPending = src.length > 0 && scored.length === 0;
-          return (
-            <div
-              key={source}
-              className="rounded-lg border p-3"
-              style={{ borderColor: border, backgroundColor: bg }}
-            >
-              <div className="text-xs font-semibold" style={{ color }}>{label}</div>
-              <div className="mt-1 text-2xl font-bold text-gray-900">
-                {isPending ? "—" : bucketScore != null ? `${bucketScore}%` : "—"}
-              </div>
-              <div className="text-xs text-gray-400">{pct}% of final score</div>
-              {isPending && (
-                <div className="mt-0.5 text-xs font-medium" style={{ color }}>Pending</div>
-              )}
-              {!isPending && bucketScore != null && (
-                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/60">
-                  <div className="h-full rounded-full" style={{ width: `${bucketScore}%`, backgroundColor: color }} />
+      {/* Pipeline progress */}
+      {(() => {
+        const { stages } = candidateStages(candidate, job);
+        return (
+          <div className="mt-5 flex items-center gap-1">
+            {stages.map((st, i) => (
+              <div key={st.key} className="flex flex-1 items-center gap-1">
+                <div className="flex flex-1 flex-col items-center gap-1">
+                  <div
+                    className="flex h-7 w-7 items-center justify-center rounded-full text-xs"
+                    style={{
+                      backgroundColor:
+                        st.status === "done" ? "#6D28D9" : st.status === "current" ? "#EDE9FE" : "#F3F4F6",
+                      color: st.status === "done" ? "#fff" : st.status === "current" ? "#6D28D9" : "#9CA3AF",
+                      border: st.status === "current" ? "2px solid #6D28D9" : "none",
+                    }}
+                  >
+                    {st.status === "done" ? "✓" : st.icon}
+                  </div>
+                  <span
+                    className="text-[10px] font-medium"
+                    style={{ color: st.status === "upcoming" ? "#9CA3AF" : "#4B5563" }}
+                  >
+                    {st.label}
+                  </span>
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {i < stages.length - 1 && (
+                  <div
+                    className="mb-4 h-0.5 flex-1"
+                    style={{ backgroundColor: st.status === "done" ? "#6D28D9" : "#E5E7EB" }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
+      {/* Score stage buckets — pct reflects the active (redistributed) pipeline */}
+      {(() => {
+        const activeWeight = criteria
+          .filter((c) => !c.not_applicable)
+          .reduce((a, c) => a + (c.weight || 0), 0);
+        const buckets = [
+          { source: "cv",        label: "CV Assessment", color: "#1D4ED8", border: "#BFDBFE", bg: "#EFF6FF" },
+          { source: "ocean",     label: "OCEAN Profile", color: "#065F46", border: "#A7F3D0", bg: "#F0FDF4" },
+          { source: "interview", label: "Interview",     color: "#6D28D9", border: "#DDD6FE", bg: "#F5F3FF" },
+        ];
+        return (
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {buckets.map(({ source, label, color, border, bg }) => {
+              const src = criteria.filter((c) => c.source === source);
+              const disabled = src.length > 0 && src.every((c) => c.not_applicable);
+              const scored = src.filter((c) => c.scored && c.score != null && !c.not_applicable);
+              const sw = scored.reduce((a, c) => a + c.weight, 0);
+              const bucketScore = sw
+                ? Math.round(scored.reduce((a, c) => a + c.score * c.weight, 0) / sw)
+                : null;
+              const activeSrcWeight = src.filter((c) => !c.not_applicable).reduce((a, c) => a + c.weight, 0);
+              const pct = activeWeight > 0 ? Math.round((activeSrcWeight / activeWeight) * 100) : 0;
+              const isPending = !disabled && src.length > 0 && scored.length === 0;
+              return (
+                <div
+                  key={source}
+                  className="rounded-lg border p-3"
+                  style={{
+                    borderColor: disabled ? "#E5E7EB" : border,
+                    backgroundColor: disabled ? "#F9FAFB" : bg,
+                    opacity: disabled ? 0.6 : 1,
+                  }}
+                >
+                  <div className="text-xs font-semibold" style={{ color: disabled ? "#9CA3AF" : color }}>
+                    {label}
+                  </div>
+                  <div className="mt-1 text-2xl font-bold text-gray-900">
+                    {disabled ? "—" : isPending ? "—" : bucketScore != null ? `${bucketScore}%` : "—"}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {disabled ? "Stage disabled" : `${pct}% of final score`}
+                  </div>
+                  {disabled && <div className="mt-0.5 text-xs font-medium text-gray-400">Not applicable</div>}
+                  {isPending && <div className="mt-0.5 text-xs font-medium" style={{ color }}>Pending</div>}
+                  {!disabled && !isPending && bucketScore != null && (
+                    <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-white/60">
+                      <div className="h-full rounded-full" style={{ width: `${bucketScore}%`, backgroundColor: color }} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* criteria breakdown */}
       <section className="mt-4 rounded-lg border border-gray-200 p-5">

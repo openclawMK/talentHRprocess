@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Database, Link2, Check } from "lucide-react";
+import { Database, Link2, Check, SlidersHorizontal } from "lucide-react";
 import CandidateCard from "../components/CandidateCard.jsx";
 
 const TABS = ["all", "green", "amber", "red"];
@@ -16,6 +16,9 @@ export default function Dashboard() {
   const [demo, setDemo] = useState([]);
   const [demoLoaded, setDemoLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pipeline, setPipeline] = useState(null);
+  const [showPipeline, setShowPipeline] = useState(false);
+  const [savingStage, setSavingStage] = useState(null);
 
   function copyLink() {
     if (!job?.portal_token) return;
@@ -55,7 +58,29 @@ export default function Dashboard() {
     axios.get("/api/jobs").then((res) => {
       setJob(res.data.find((j) => j.job_id === jobId) || null);
     });
+    axios
+      .get(`/api/jobs/${jobId}/pipeline`)
+      .then((res) => setPipeline(res.data))
+      .catch(() => setPipeline(null));
   }, [jobId]);
+
+  async function toggleStage(key) {
+    if (!pipeline) return;
+    const stage = pipeline.stages.find((s) => s.key === key);
+    if (!stage || stage.locked) return;
+    setSavingStage(key);
+    try {
+      const res = await axios.patch(`/api/jobs/${jobId}/pipeline`, {
+        stages: { [key]: !stage.enabled },
+      });
+      setPipeline(res.data);
+      load(); // candidate scores were reconciled server-side
+    } catch {
+      /* ignore */
+    } finally {
+      setSavingStage(null);
+    }
+  }
 
   useEffect(() => {
     load();
@@ -125,6 +150,61 @@ export default function Dashboard() {
       {demoLoaded && (
         <div className="mt-3 rounded-md border border-purple-200 bg-purple-50 px-3 py-2 text-sm text-purple-700">
           Demo data loaded — showing sample candidates
+        </div>
+      )}
+
+      {/* Pipeline configurator */}
+      {pipeline && (
+        <div className="mt-4 rounded-lg border border-gray-200">
+          <button
+            onClick={() => setShowPipeline((v) => !v)}
+            className="flex w-full items-center justify-between px-4 py-2.5 text-left"
+          >
+            <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+              <SlidersHorizontal size={15} className="text-purple-600" /> Pipeline setup
+            </span>
+            <span className="flex items-center gap-2 text-xs text-gray-400">
+              {Object.entries(pipeline.source_shares || {}).map(([k, v]) => (
+                <span key={k} className="uppercase">{k} {Math.round(v * 100)}%</span>
+              ))}
+              <span className="text-gray-300">{showPipeline ? "▲" : "▼"}</span>
+            </span>
+          </button>
+
+          {showPipeline && (
+            <div className="border-t border-gray-100 px-4 py-3">
+              <p className="text-xs text-gray-500">
+                Turn stages on or off for this role. Disabled stages drop out of scoring and their
+                weight is redistributed across the remaining stages.
+              </p>
+              <div className="mt-3 space-y-2">
+                {pipeline.stages.map((s) => {
+                  const meta = { cv_submission: "CV submission", ocean_assessment: "OCEAN assessment", interview: "Interview", offer: "Offer" }[s.key];
+                  return (
+                    <div key={s.key} className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2">
+                      <span className="text-sm text-gray-700">
+                        {meta}
+                        {s.locked && <span className="ml-2 text-xs text-gray-400">(always on)</span>}
+                      </span>
+                      <button
+                        onClick={() => toggleStage(s.key)}
+                        disabled={s.locked || savingStage === s.key}
+                        className={`relative h-5 w-9 rounded-full transition-colors ${
+                          s.enabled ? "bg-purple-600" : "bg-gray-300"
+                        } ${s.locked ? "opacity-50" : ""}`}
+                      >
+                        <span
+                          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
+                            s.enabled ? "left-[18px]" : "left-0.5"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

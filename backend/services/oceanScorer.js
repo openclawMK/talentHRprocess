@@ -78,15 +78,15 @@ export function applyOceanScores(candidate, job, traits) {
 // Recompute combined score over ALL currently-scored criteria (cv + ocean + interview).
 export function recomputeCombined(score, job) {
   const all = score.criteria_scores || [];
-  const scored = all.filter((c) => c.scored && c.score != null);
+  // Not-applicable criteria (disabled pipeline stages) never count.
+  const scored = all.filter((c) => c.scored && c.score != null && !c.not_applicable);
   const scoredWeight = scored.reduce((a, c) => a + c.weight, 0);
   const combined = scoredWeight
     ? Math.round(scored.reduce((a, c) => a + c.score * c.weight, 0) / scoredWeight)
     : 0;
 
-  const present = new Set(all.map((c) => c.source));
-  const pending = ["interview", "ocean"].filter(
-    (s) => present.has(s) && all.some((c) => c.source === s && !c.scored)
+  const pending = ["interview", "ocean"].filter((s) =>
+    all.some((c) => c.source === s && !c.scored && !c.not_applicable)
   );
 
   score.combined_score = combined;

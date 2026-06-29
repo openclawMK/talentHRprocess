@@ -4,11 +4,19 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
 import { generateCriteria } from "../services/criteriaGenerator.js";
+import {
+  DEFAULT_PIPELINE,
+  redistribute,
+  sourceShares,
+  pipelineStageList,
+  reconcileCandidate,
+} from "../services/pipeline.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
 const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
+const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
 const TEMPLATES_PATH = path.join(DATA_DIR, "industry-templates.json");
 
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
@@ -59,6 +67,69 @@ router.post("/generate-criteria", async (req, res) => {
   } catch (err) {
     console.error("generate-criteria error:", err);
     res.status(500).json({ error: "Failed to generate criteria." });
+  }
+});
+
+// GET /api/jobs/:jobId/pipeline — active pipeline + redistributed weights
+router.get("/jobs/:jobId/pipeline", (req, res) => {
+  const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+  if (!job) return res.status(404).json({ error: "Job not found." });
+  res.json({
+    job_id: job.job_id,
+    stages: pipelineStageList(job),
+    criteria: redistribute(job),
+    source_shares: sourceShares(job),
+  });
+});
+
+// PATCH /api/jobs/:jobId/pipeline — toggle optional stages, recompute candidate scores
+router.patch("/jobs/:jobId/pipeline", (req, res) => {
+  try {
+    const { stages } = req.body; // { ocean_assessment: bool, interview: bool }
+    const jobs = readJSON(JOBS_PATH);
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+
+    const job = jobs[idx];
+    const current = job.pipeline_stages || { ...DEFAULT_PIPELINE };
+
+    // Only the unlocked stages can be toggled.
+    for (const key of ["ocean_assessment", "interview"]) {
+      if (typeof stages?.[key] === "boolean") {
+        current[key] = { ...(current[key] || {}), enabled: stages[key], locked: false };
+      }
+    }
+    // Ensure locked stages stay on.
+    current.cv_submission = { enabled: true, locked: true };
+    current.offer = { enabled: true, locked: true };
+    job.pipeline_stages = current;
+    jobs[idx] = job;
+    writeJSON(JOBS_PATH, jobs);
+
+    // Reconcile existing candidates for this role so dashboards stay correct.
+    try {
+      const candidates = readJSON(CANDIDATES_PATH);
+      let changed = false;
+      for (const c of candidates) {
+        if (c.job_id === job.job_id) {
+          reconcileCandidate(c, job);
+          changed = true;
+        }
+      }
+      if (changed) writeJSON(CANDIDATES_PATH, candidates);
+    } catch (e) {
+      console.error("pipeline reconcile error:", e.message);
+    }
+
+    res.json({
+      job_id: job.job_id,
+      stages: pipelineStageList(job),
+      criteria: redistribute(job),
+      source_shares: sourceShares(job),
+    });
+  } catch (err) {
+    console.error("patch pipeline error:", err);
+    res.status(500).json({ error: "Failed to update pipeline." });
   }
 });
 
@@ -139,6 +210,7 @@ router.post("/jobs", async (req, res) => {
       },
       age_band: requirements.age_band || { min: 18, ideal_min: 18, ideal_max: 45, max: 60 },
       portal_token: `pq-${uuidv4().slice(0, 8)}`,
+      pipeline_stages: { ...DEFAULT_PIPELINE },
       criteria,
       thresholds: { green: 70, red: 40 },
       benchmark: { maturity: "starter", avg_experience_years: expMin || 1, avg_team_size: 0 },
