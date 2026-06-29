@@ -503,14 +503,6 @@ export default function CandidateDetail() {
             Conduct interview scoring →
           </button>
         )}
-        <button
-          onClick={() =>
-            navigate(`/jobs/${jobId}/candidate/${candidateId}/questions`)
-          }
-          className="rounded-md border border-purple-300 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50"
-        >
-          Generate interview questions →
-        </button>
         <Link
           to={`/jobs/${jobId}/dashboard`}
           className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"

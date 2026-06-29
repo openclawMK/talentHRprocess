@@ -5,7 +5,6 @@ import JobSelector from "./screens/JobSelector.jsx";
 import JobBuilder from "./screens/JobBuilder.jsx";
 import Dashboard from "./screens/Dashboard.jsx";
 import CandidateDetail from "./screens/CandidateDetail.jsx";
-import InterviewQuestions from "./screens/InterviewQuestions.jsx";
 import InterviewScoring from "./screens/InterviewScoring.jsx";
 import CompareView from "./screens/CompareView.jsx";
 import CandidatePortal from "./screens/CandidatePortal.jsx";
@@ -22,10 +21,6 @@ function HRApp() {
         <Route
           path="/jobs/:jobId/candidate/:candidateId"
           element={<CandidateDetail />}
-        />
-        <Route
-          path="/jobs/:jobId/candidate/:candidateId/questions"
-          element={<InterviewQuestions />}
         />
         <Route
           path="/jobs/:jobId/candidate/:candidateId/interview"
