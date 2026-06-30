@@ -2,22 +2,33 @@ import { createContext, useContext, useState } from "react";
 import axios from "axios";
 
 const AuthContext = createContext(null);
+const KEY = "pq_auth";
 
-/**
- * Holds the HR auth token + user in memory only (lost on refresh — fine for the
- * demo; the user just logs in again). Sets the axios Authorization header so
- * every API call is authenticated.
- */
+// Restore a remembered session on load (only if the user ticked "Remember me").
+function restore() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return { token: null, user: null };
+    const { token, user } = JSON.parse(raw);
+    if (token) axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    return { token, user };
+  } catch {
+    return { token: null, user: null };
+  }
+}
+
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState({ token: null, user: null });
+  const [auth, setAuth] = useState(restore);
 
-  function login(token, user) {
+  function login(token, user, remember = false) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    if (remember) localStorage.setItem(KEY, JSON.stringify({ token, user }));
     setAuth({ token, user });
   }
 
   function logout() {
     delete axios.defaults.headers.common["Authorization"];
+    localStorage.removeItem(KEY);
     setAuth({ token: null, user: null });
   }
 
