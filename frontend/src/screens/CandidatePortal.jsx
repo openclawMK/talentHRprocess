@@ -19,7 +19,7 @@ export default function CandidatePortal() {
   const [job, setJob] = useState(undefined);
   const [step, setStep] = useState("landing");
   const [consent, setConsent] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", expected_salary: "" });
   const [file, setFile] = useState(null);
   const inputRef = useRef(null);
   const [applying, setApplying] = useState(false);
@@ -54,7 +54,7 @@ export default function CandidatePortal() {
     if (!form.name.trim() || !form.email.trim() || !file) { setError("Please fill in your name, email and attach your CV."); return; }
     setApplying(true); setError("");
     try {
-      const fd = new FormData(); fd.append("file", file); fd.append("name", form.name); fd.append("email", form.email); fd.append("phone", form.phone);
+      const fd = new FormData(); fd.append("file", file); fd.append("name", form.name); fd.append("email", form.email); fd.append("phone", form.phone); fd.append("expected_salary", form.expected_salary);
       const res = await axios.post(`/api/portal/${token}/apply`, fd);
       setCandidateId(res.data.candidate_id); setParsed(res.data.parsed); setStep("assessment");
     } catch (e) { setError(e.response?.data?.error || "We couldn't process your CV. Please try again."); }
@@ -117,6 +117,9 @@ export default function CandidatePortal() {
             <input type="email" style={inputStyle} placeholder="you@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
             <label style={lbl}>Phone</label>
             <input style={inputStyle} placeholder="01X-XXXXXXX" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <label style={lbl}>Expected monthly salary (RM)</label>
+            <input inputMode="numeric" style={inputStyle} placeholder="e.g. 2500" value={form.expected_salary} onChange={(e) => setForm({ ...form, expected_salary: e.target.value.replace(/[^\d]/g, "") })} />
+            <div style={{ fontSize: 12.5, color: "#9AA0AE", marginTop: -12, marginBottom: 20 }}>Optional — your expected gross monthly pay. Helps us match you to the right role.</div>
             <label style={lbl}>CV / Resume *</label>
             <div onClick={() => !applying && inputRef.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); if (!applying) pickFile(e.dataTransfer.files?.[0]); }}
               style={{ border: "2px dashed #C7CBDA", borderRadius: 14, padding: 36, textAlign: "center", marginBottom: 26, cursor: "pointer" }}>
@@ -180,7 +183,9 @@ export default function CandidatePortal() {
             <div style={{ display: "flex", flexDirection: "column" }}>
               {[
                 ["Applying for", job.role_title], ["Name", form.name], ["Email", form.email],
-                ...(form.phone ? [["Phone", form.phone]] : []), ["CV", file?.name],
+                ...(form.phone ? [["Phone", form.phone]] : []),
+                ...(form.expected_salary ? [["Expected salary", `RM${Number(form.expected_salary).toLocaleString("en-MY")}/mo`]] : []),
+                ["CV", file?.name],
                 ...(parsed?.latest_role ? [["Most recent role", parsed.latest_role]] : []),
                 ["Questionnaire", `${Object.keys(answers).length} / ${items.length} answered`],
               ].map(([k, v], i, arr) => (

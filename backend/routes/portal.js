@@ -133,7 +133,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     const job = findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
 
-    const { name, email, phone } = req.body;
+    const { name, email, phone, expected_salary } = req.body;
     if (!req.file) return res.status(400).json({ error: "Please attach your CV." });
     if (!name?.trim() || !email?.trim())
       return res.status(400).json({ error: "Name and email are required." });
@@ -149,6 +149,9 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     // Candidate-provided contact details are authoritative.
     profile.name = name.trim();
     profile.contact = { ...(profile.contact || {}), name: name.trim(), email: email.trim(), phone: (phone || "").trim() };
+    // Expected monthly salary (RM) — optional, candidate-stated.
+    const salaryNum = Number(String(expected_salary ?? "").replace(/[^\d.]/g, ""));
+    if (salaryNum > 0) profile.expected_salary = Math.round(salaryNum);
 
     const parseOverall = profile.overall_parse_confidence ?? 50;
     const candidate = {

@@ -19,6 +19,13 @@ const REC = {
   HOLD: { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", icon: "⏸" },
   REJECT: { color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", icon: "✕" },
 };
+const BUDGET = {
+  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0", icon: "✓" },
+  amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A", icon: "≈" },
+  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA", icon: "↑" },
+  blue: { color: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE", icon: "↓" },
+  neutral: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB", icon: "RM" },
+};
 const CONF_PCT = { High: 88, Medium: 64, Low: 42 };
 const LAYER = {
   cv_fit: { label: "CV Fit", accent: "#4F46E5", bg: "#EEF2FF", border: "#C7D2FE", bar: "#6366F1" },
@@ -142,6 +149,7 @@ export default function CandidateDetail() {
   const interviewPending = pending.includes("interview");
   const oceanPending = pending.includes("ocean") && !traits;
   const oceanLink = `${window.location.origin}/assessment/${candidateId}`;
+  const budget = candidate.budget_fit;
   const screenV = status === "screening" ? screeningVerdict(screeningScore(s)) : null;
   const { stages } = candidateStages(candidate, job);
 
@@ -163,6 +171,11 @@ export default function CandidateDetail() {
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: lane.color, background: lane.bg, border: `1px solid ${lane.border}`, padding: "4px 10px", borderRadius: 20 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: lane.dot }} />{lane.label} lane
               </span>
+              {budget && budget.status !== "unknown" && (() => { const b = BUDGET[budget.lane] || BUDGET.neutral; return (
+                <span title={`Expected ${budget.expected_label || "—"}${budget.range_label ? ` · role budget ${budget.range_label}` : ""}`} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: b.color, background: b.bg, border: `1px solid ${b.border}`, padding: "4px 10px", borderRadius: 20 }}>
+                  <span style={{ fontSize: 11 }}>{b.icon}</span>{budget.label}
+                </span>
+              ); })()}
             </div>
             <div style={{ fontSize: 14, color: "#6B7280", marginTop: 5 }}>
               Submitted {candidate.submitted_date} · <span style={{ fontWeight: 600, color: "#4B5563", textTransform: "capitalize" }}>{candidate.source}</span>{p.age != null ? ` · Age ${p.age}` : ""} · {job.role_title} · {years} yrs{p.contact?.location ? ` · ${p.contact.location.split(",")[0]}` : ""}
@@ -363,6 +376,16 @@ export default function CandidateDetail() {
                     </div>
                   )}
                 </div>
+
+                {sfit.budget && (() => { const b = BUDGET[sfit.budget.lane] || BUDGET.neutral; return (
+                  <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #F1F2F6", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }} className="flex-wrap">
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px" }}>Budget fit <span style={{ fontWeight: 600, textTransform: "none", letterSpacing: 0, color: "#B6B9C6" }}>· not counted in fit %</span></div>
+                      <div style={{ fontSize: 13.5, color: "#374151", marginTop: 4 }}>Expected {sfit.budget.expected_label || "—"} · Role budget {sfit.budget.range_label || "not set"}</div>
+                    </div>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: b.color, background: b.bg, border: `1px solid ${b.border}`, padding: "6px 13px", borderRadius: 20, whiteSpace: "nowrap" }}><span style={{ fontSize: 11 }}>{b.icon}</span>{sfit.budget.label}</span>
+                  </div>
+                ); })()}
               </div>
             );
           })()}

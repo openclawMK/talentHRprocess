@@ -13,7 +13,7 @@ import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
-import { computeSuccessFit } from "../services/successFit.js";
+import { computeSuccessFit, computeBudgetFit } from "../services/successFit.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
@@ -524,7 +524,8 @@ router.get("/candidates/:jobId/:candidateId", (req, res) => {
   try {
     const candidate = findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    res.json(candidate);
+    const job = findJob(req.params.jobId);
+    res.json({ ...candidate, budget_fit: job ? computeBudgetFit(candidate, job) : null });
   } catch (err) {
     res.status(500).json({ error: "Failed to load candidate." });
   }

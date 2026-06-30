@@ -6,12 +6,18 @@ import { round, displayLane, candidateStatus } from "../lib/format.js";
 const cardBox = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 24, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
 const SRC = { cv: { bg: "#EEF2FF", color: "#4338CA" }, ocean: { bg: "#ECFDF5", color: "#047857" }, interview: { bg: "#F5F3FF", color: "#6D28D9" }, hr_notes: { bg: "#FFF7ED", color: "#C2410C" } };
 const LANE = { green: "#059669", amber: "#D97706", red: "#DC2626", in_progress: "#9CA3AF" };
+const BUDGET = {
+  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" }, amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A" },
+  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" }, blue: { color: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE" },
+  neutral: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
+};
 
 function Card({ c }) {
   const p = c.profile || {};
   const s = c.score || {};
   const criteria = s.criteria_scores || [];
   const status = candidateStatus(s);
+  const budget = c.budget_fit;
   return (
     <div style={{ ...cardBox, flex: "1 1 400px", minWidth: 0, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
@@ -37,6 +43,13 @@ function Card({ c }) {
           );
         })}
       </div>
+
+      {budget && budget.status !== "unknown" && (() => { const b = BUDGET[budget.lane] || BUDGET.neutral; return (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 18, padding: "10px 12px", background: b.bg, border: `1px solid ${b.border}`, borderRadius: 10 }}>
+          <span style={{ fontSize: 12.5, color: "#6B7280" }}>Budget · expected {budget.expected_label || "—"}</span>
+          <span style={{ fontSize: 12.5, fontWeight: 700, color: b.color, whiteSpace: "nowrap" }}>{budget.label}</span>
+        </div>
+      ); })()}
 
       <div style={{ fontSize: 13, fontWeight: 600, color: "#9AA0AE", margin: "22px 0 10px" }}>Strengths</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>{(s.strengths || []).map((x, i) => <div key={i} style={{ display: "flex", gap: 9, alignItems: "flex-start", fontSize: 13.5, color: "#374151", lineHeight: 1.5 }}><span style={{ color: "#C4C7D2", flexShrink: 0 }}>•</span>{x}</div>)}</div>

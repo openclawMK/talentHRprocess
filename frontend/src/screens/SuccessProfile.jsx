@@ -17,6 +17,7 @@ const EMPTY = {
   summary: "", must_haves: [], nice_to_haves: [], dealbreakers: [],
   ideal_ocean_profile: { O: "medium", C: "high", E: "medium", A: "high", N: "low" },
   benchmark_experience_years: 2, benchmark_team_size: 0, benchmark_education: "",
+  salary_budget_min: 0, salary_budget_max: 0,
 };
 
 export default function SuccessProfile() {
@@ -81,7 +82,11 @@ export default function SuccessProfile() {
             <Bench label="Ideal experience (years)"><input type="number" min="0" value={profile.benchmark_experience_years} onChange={(e) => set("benchmark_experience_years", Number(e.target.value))} style={benchInput} /></Bench>
             <Bench label="Team size led"><input type="number" min="0" value={profile.benchmark_team_size} onChange={(e) => set("benchmark_team_size", Number(e.target.value))} style={benchInput} /></Bench>
             <Bench label="Education"><input value={profile.benchmark_education} onChange={(e) => set("benchmark_education", e.target.value)} placeholder="e.g. Diploma or above" style={{ ...benchInput, width: 200 }} /></Bench>
+            <div style={{ height: 1, background: "#F1F2F6", margin: "2px 0" }} />
+            <Bench label="Salary budget — min (RM/mo)"><input type="number" min="0" value={profile.salary_budget_min} onChange={(e) => set("salary_budget_min", Number(e.target.value))} placeholder="e.g. 1800" style={benchInput} /></Bench>
+            <Bench label="Salary budget — max (RM/mo)"><input type="number" min="0" value={profile.salary_budget_max} onChange={(e) => set("salary_budget_max", Number(e.target.value))} placeholder="e.g. 2800" style={benchInput} /></Bench>
           </div>
+          <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 12 }}>Used to flag each candidate's expected salary as a budget-fit signal — it never affects the fit score.</div>
         </div>
       </div>
 

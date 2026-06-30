@@ -39,6 +39,8 @@ router.put("/jobs/:jobId/success-profile", (req, res) => {
       benchmark_experience_years: Number(p.benchmark_experience_years) || 0,
       benchmark_team_size: Number(p.benchmark_team_size) || 0,
       benchmark_education: p.benchmark_education || "",
+      salary_budget_min: Number(p.salary_budget_min) || 0,
+      salary_budget_max: Number(p.salary_budget_max) || 0,
       created_at: jobs[idx].successProfile?.created_at || now,
       last_updated: now,
     };
@@ -60,7 +62,9 @@ router.post("/jobs/:jobId/success-profile/generate", async (req, res) => {
       "You are a senior HR consultant specializing in Malaysian hiring. Generate a Role Success Profile. " +
       "Return valid JSON only, matching exactly: { summary, must_haves (array of strings), nice_to_haves (array of strings), " +
       "dealbreakers (array of strings), ideal_ocean_profile: { O, C, E, A, N } where each value is one of " +
-      "'low','medium-low','medium','medium-high','high', benchmark_experience_years (number), benchmark_team_size (number) }. " +
+      "'low','medium-low','medium','medium-high','high', benchmark_experience_years (number), benchmark_team_size (number), " +
+      "salary_budget_min (number, monthly RM), salary_budget_max (number, monthly RM) }. " +
+      "For salary, give a realistic monthly gross range in Malaysian Ringgit for this role and industry. " +
       "Be specific and realistic for the Malaysian job market.";
 
     const user = `Job title: ${job.role_title}. Industry: ${job.industry}. Key responsibilities: ${
@@ -76,6 +80,8 @@ router.post("/jobs/:jobId/success-profile/generate", async (req, res) => {
       ideal_ocean_profile: result.ideal_ocean_profile || { O: "medium", C: "high", E: "medium", A: "high", N: "low" },
       benchmark_experience_years: Number(result.benchmark_experience_years) || 2,
       benchmark_team_size: Number(result.benchmark_team_size) || 0,
+      salary_budget_min: Number(result.salary_budget_min) || 0,
+      salary_budget_max: Number(result.salary_budget_max) || 0,
     });
   } catch (err) {
     console.error("generate success-profile error:", err);

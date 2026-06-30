@@ -17,6 +17,35 @@ function traitValue(traits, key) {
 }
 const traitName = { O: "Openness", C: "Conscientiousness", E: "Extraversion", A: "Agreeableness", N: "Neuroticism" };
 
+const fmtRM = (n) => `RM${Number(n).toLocaleString("en-MY")}`;
+
+/**
+ * Budget fit — compares a candidate's expected salary against the role's budget
+ * range. This is a SEPARATE affordability signal; it never feeds the fit score.
+ * Statuses: within / slightly_above / over / below / no_budget / unknown.
+ */
+export function computeBudgetFit(candidate, job) {
+  const sp = job.successProfile || {};
+  const expected = Number(candidate.profile?.expected_salary) || null;
+  const min = Number(sp.salary_budget_min) || 0;
+  const max = Number(sp.salary_budget_max) || 0;
+  const hasBudget = min > 0 || max > 0;
+  const rangeLabel = hasBudget ? `${min ? fmtRM(min) : "—"}–${max ? fmtRM(max) : "—"}` : null;
+
+  if (!expected)
+    return { expected: null, min, max, has_budget: hasBudget, status: "unknown", label: "Salary not provided", lane: "neutral", range_label: rangeLabel };
+  if (!hasBudget)
+    return { expected, expected_label: fmtRM(expected), min, max, has_budget: false, status: "no_budget", label: `Asking ${fmtRM(expected)}`, lane: "neutral", range_label: null };
+
+  let status, label, lane;
+  if (min > 0 && expected < min) { status = "below"; label = "Below range"; lane = "blue"; }
+  else if (expected <= (max || Infinity)) { status = "within"; label = "Within budget"; lane = "green"; }
+  else if (max > 0 && expected <= max * 1.1) { status = "slightly_above"; label = "Slightly above"; lane = "amber"; }
+  else { status = "over"; label = "Over budget"; lane = "red"; }
+
+  return { expected, expected_label: fmtRM(expected), min, max, has_budget: true, status, label, lane, range_label: rangeLabel };
+}
+
 export function computeSuccessFit(candidate, job) {
   const sp = job.successProfile;
   if (!sp || !Object.keys(sp).length) return null;
@@ -67,6 +96,7 @@ export function computeSuccessFit(candidate, job) {
     fit, verdict, lane,
     must_haves: must, nice_to_haves: nice, dealbreakers,
     ocean, benchmarks,
+    budget: computeBudgetFit(candidate, job),
     has_ocean: !!traits,
     summary: sp.summary || "",
   };
