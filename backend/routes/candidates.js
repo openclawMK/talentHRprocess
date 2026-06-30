@@ -13,6 +13,8 @@ import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanS
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
+import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
+import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
 
@@ -78,7 +80,19 @@ async function runScoring(candidate, job) {
   writeJSON(SCORES_PATH, allScores);
 
   candidate.score = scoreObj;
+  // Session 11: attach the hiring-intelligence layer.
+  candidate.score_breakdown = buildScoreBreakdown(candidate, job);
+  candidate.recommendation = await generateRecommendation(candidate, job);
   return scoreObj;
+}
+
+/**
+ * Refresh the score breakdown + recommendation after a score change
+ * (OCEAN / interview / notes). Mutates the candidate in place.
+ */
+async function refreshIntelligence(candidate, job) {
+  candidate.score_breakdown = buildScoreBreakdown(candidate, job);
+  candidate.recommendation = await generateRecommendation(candidate, job);
 }
 
 // --- multer: temp storage, keep original extension ---
@@ -538,7 +552,7 @@ Return:
  * POST /api/candidates/:jobId/:candidateId/interview-scores
  * Body: { ratings: [{ criterion_id, score: 0-100, notes }] }
  */
-router.post("/candidates/:jobId/:candidateId/interview-scores", (req, res) => {
+router.post("/candidates/:jobId/:candidateId/interview-scores", async (req, res) => {
   try {
     const { ratings } = req.body;
     if (!Array.isArray(ratings) || ratings.length === 0)
@@ -551,11 +565,33 @@ router.post("/candidates/:jobId/:candidateId/interview-scores", (req, res) => {
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     applyInterviewScores(candidates[idx], job, ratings);
+    await refreshIntelligence(candidates[idx], job); // Session 11
     writeJSON(CANDIDATES_PATH, candidates);
     res.json(candidates[idx]);
   } catch (err) {
     console.error("interview-scores error:", err);
     res.status(500).json({ error: "Failed to save interview scores." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/regenerate-recommendation
+ * Recompute the score breakdown + Hire/Hold/Reject recommendation with latest data.
+ */
+router.post("/candidates/:jobId/:candidateId/regenerate-recommendation", async (req, res) => {
+  try {
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    await refreshIntelligence(candidates[idx], job);
+    writeJSON(CANDIDATES_PATH, candidates);
+    res.json(candidates[idx]);
+  } catch (err) {
+    console.error("regenerate-recommendation error:", err);
+    res.status(500).json({ error: "Failed to regenerate recommendation." });
   }
 });
 

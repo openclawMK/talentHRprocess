@@ -10,6 +10,7 @@ import {
   sourceShares,
   pipelineStageList,
   reconcileCandidate,
+  candidateStageKey,
 } from "../services/pipeline.js";
 import { notify } from "../services/whatsappService.js";
 
@@ -124,6 +125,77 @@ router.patch("/jobs/:jobId/whatsapp-settings", (req, res) => {
   } catch (err) {
     console.error("whatsapp-settings error:", err);
     res.status(500).json({ error: "Failed to update settings." });
+  }
+});
+
+// GET /api/jobs/:jobId/analytics — pipeline analytics for a role
+router.get("/jobs/:jobId/analytics", (req, res) => {
+  try {
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+
+    let candidates = [];
+    try {
+      candidates = readJSON(CANDIDATES_PATH).filter((c) => c.job_id === job.job_id);
+    } catch {
+      candidates = [];
+    }
+
+    const total = candidates.length;
+    if (total === 0) {
+      return res.json({ job_id: job.job_id, role_title: job.role_title, total_applicants: 0, empty: true });
+    }
+
+    const by_stage = { cv_submission: 0, ocean_assessment: 0, interview: 0, offer: 0, rejected: 0 };
+    const by_lane = { green: 0, amber: 0, red: 0 };
+    const recommendation_summary = { hire: 0, hold: 0, reject: 0 };
+    const scores = [];
+    const daysList = [];
+    let oldest = null;
+    const todayMs = Date.now();
+
+    for (const c of candidates) {
+      const stage = candidateStageKey(c, job);
+      by_stage[stage] = (by_stage[stage] || 0) + 1;
+
+      const lane = c.score?.lane;
+      if (lane && by_lane[lane] != null) by_lane[lane] += 1;
+
+      const rec = (c.recommendation?.recommendation || "").toLowerCase();
+      if (recommendation_summary[rec] != null) recommendation_summary[rec] += 1;
+
+      if (typeof c.score?.combined_score === "number") scores.push(c.score.combined_score);
+
+      const submitted = c.submitted_date ? new Date(c.submitted_date).getTime() : todayMs;
+      const days = Math.max(0, Math.round((todayMs - submitted) / 86400000));
+      daysList.push(days);
+
+      if (stage !== "offer" && stage !== "rejected") {
+        if (!oldest || days > oldest.days_waiting) {
+          oldest = { name: c.profile?.name || "Candidate", days_waiting: days, current_stage: stage };
+        }
+      }
+    }
+
+    const avg = (arr) => (arr.length ? Math.round(arr.reduce((a, x) => a + x, 0) / arr.length) : 0);
+
+    res.json({
+      job_id: job.job_id,
+      role_title: job.role_title,
+      total_applicants: total,
+      by_stage,
+      by_lane,
+      avg_score: avg(scores),
+      highest_score: scores.length ? Math.max(...scores) : 0,
+      lowest_score: scores.length ? Math.min(...scores) : 0,
+      recommendation_summary,
+      avg_days_to_current_stage: Math.round((daysList.reduce((a, x) => a + x, 0) / total) * 10) / 10,
+      oldest_pending_candidate: oldest,
+      generated_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("analytics error:", err);
+    res.status(500).json({ error: "Failed to load analytics." });
   }
 });
 

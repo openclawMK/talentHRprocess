@@ -26,6 +26,7 @@ export default function Dashboard() {
   const [hrAlerts, setHrAlerts] = useState(false);
   const [hrPhone, setHrPhone] = useState("");
   const [hrSaved, setHrSaved] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
 
   async function saveHrAlerts(alerts = hrAlerts, phone = hrPhone) {
     try {
@@ -88,6 +89,15 @@ export default function Dashboard() {
       .catch(() => setPipeline(null));
   }, [jobId]);
 
+  const loadAnalytics = useCallback(() => {
+    axios
+      .get(`/api/jobs/${jobId}/analytics`)
+      .then((res) => setAnalytics(res.data?.empty ? null : res.data))
+      .catch(() => setAnalytics(null));
+  }, [jobId]);
+
+  useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
+
   async function toggleStage(key) {
     if (!pipeline) return;
     const stage = pipeline.stages.find((s) => s.key === key);
@@ -118,6 +128,7 @@ export default function Dashboard() {
     setSelected((prev) => prev.filter((x) => x !== id));
     try {
       await axios.delete(`/api/candidates/${jobId}/${id}`);
+      loadAnalytics();
     } catch {
       /* ignore */
     }
@@ -228,6 +239,66 @@ export default function Dashboard() {
             </div>
           )}
         </Modal>
+      )}
+
+      {/* Analytics panel (Session 11) */}
+      {analytics && (
+        <div className="mt-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {[
+              { label: "Applicants", value: analytics.total_applicants, sub: null, color: "#111827" },
+              { label: "Strong", value: analytics.by_lane?.green ?? 0, sub: "green", color: "#059669" },
+              { label: "Review", value: analytics.by_lane?.amber ?? 0, sub: "amber", color: "#D97706" },
+              { label: "Gaps", value: analytics.by_lane?.red ?? 0, sub: "red", color: "#DC2626" },
+              { label: "Avg score", value: `${analytics.avg_score}%`, sub: null, color: "#6D28D9" },
+            ].map((c) => (
+              <div key={c.label} className="rounded-lg border border-gray-200 bg-white p-3">
+                <div className="text-xs text-gray-400">{c.label}</div>
+                <div className="mt-0.5 text-2xl font-bold" style={{ color: c.color }}>{c.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pipeline funnel */}
+          {(() => {
+            const stages = [
+              { key: "applications", label: "Applications", n: analytics.total_applicants },
+              { key: "cv_submission", label: "CV", n: analytics.by_stage?.cv_submission ?? 0 },
+              { key: "ocean_assessment", label: "OCEAN", n: analytics.by_stage?.ocean_assessment ?? 0 },
+              { key: "interview", label: "Interview", n: analytics.by_stage?.interview ?? 0 },
+              { key: "offer", label: "Offer", n: analytics.by_stage?.offer ?? 0 },
+            ];
+            const maxStage = Math.max(...stages.slice(1).map((s) => s.n));
+            return (
+              <div className="mt-3 flex flex-wrap items-center gap-1 rounded-lg border border-gray-200 bg-white px-4 py-3">
+                {stages.map((st, i) => {
+                  const bottleneck = i > 0 && st.n === maxStage && maxStage > 0;
+                  return (
+                    <div key={st.key} className="flex items-center gap-1">
+                      <div
+                        className="rounded-md px-2.5 py-1 text-center"
+                        style={{ backgroundColor: bottleneck ? "#FEF3C7" : "#F9FAFB" }}
+                      >
+                        <div className="text-sm font-bold text-gray-900">{st.n}</div>
+                        <div className="text-[10px] text-gray-500">{st.label}</div>
+                      </div>
+                      {i < stages.length - 1 && <span className="text-gray-300">→</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+
+          {/* Oldest pending alert */}
+          {analytics.oldest_pending_candidate?.days_waiting > 5 && (
+            <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              ⚠ {analytics.oldest_pending_candidate.name} has been waiting{" "}
+              {analytics.oldest_pending_candidate.days_waiting} days at{" "}
+              {analytics.oldest_pending_candidate.current_stage.replace("_", " ")} — consider following up
+            </div>
+          )}
+        </div>
       )}
 
       {/* Pipeline configurator */}

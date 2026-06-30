@@ -74,6 +74,18 @@ export function reconcileCandidate(candidate, job) {
   recomputeCombined(score, job);
 }
 
+/**
+ * The pipeline stage a candidate currently sits at (for analytics / funnel).
+ * Returns one of: cv_submission | ocean_assessment | interview | offer | rejected.
+ */
+export function candidateStageKey(candidate, job) {
+  if (candidate.outcome === "rejected") return "rejected";
+  if (candidate.outcome === "offer") return "offer";
+  if (sourceEnabled(job, "ocean") && !candidate.ocean_completed) return "ocean_assessment";
+  if (sourceEnabled(job, "interview") && !candidate.interview_completed) return "interview";
+  return "offer"; // all assessment stages done, awaiting the human offer decision
+}
+
 /** Per-source share of the active score, e.g. { cv: 0.41, ocean: 0.18, interview: 0.41 }. */
 export function sourceShares(job) {
   const redist = redistribute(job);

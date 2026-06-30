@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, TrendingUp, TrendingDown, Trash2, MessageCircle, Send, CalendarClock } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, Trash2, MessageCircle, Send, CalendarClock, RefreshCw } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
 import Modal from "../components/Modal.jsx";
@@ -16,8 +16,7 @@ export default function CandidateDetail() {
   const [note, setNote] = useState("");
   const [noteSaving, setNoteSaving] = useState(false);
   const [noteResult, setNoteResult] = useState(null);
-  const [finalAnalysis, setFinalAnalysis] = useState(null);
-  const [generatingFinal, setGeneratingFinal] = useState(false);
+  const [regenLoading, setRegenLoading] = useState(false);
   const [inviteModal, setInviteModal] = useState(false);
   const [invite, setInvite] = useState({ interview_type: "In-person interview", date: "", time: "" });
   const [inviteSending, setInviteSending] = useState(false);
@@ -68,10 +67,7 @@ export default function CandidateDetail() {
   useEffect(() => {
     axios
       .get(`/api/candidates/${jobId}/${candidateId}`)
-      .then((res) => {
-        setCandidate(res.data);
-        if (res.data.final_analysis) setFinalAnalysis(res.data.final_analysis);
-      })
+      .then((res) => setCandidate(res.data))
       .catch(() => setCandidate(false));
     axios
       .get("/api/jobs")
@@ -108,6 +104,34 @@ export default function CandidateDetail() {
   const status = candidateStatus(s);
   const screenScore = screeningScore(s);
   const screenV = status === "screening" ? screeningVerdict(screenScore) : null;
+
+  // Session 11: hiring-intelligence layer
+  const rec = candidate.recommendation || null;
+  const bd = candidate.score_breakdown || null;
+
+  async function regenerateRecommendation() {
+    setRegenLoading(true);
+    try {
+      const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/regenerate-recommendation`);
+      setCandidate(res.data);
+    } catch {
+      /* ignore */
+    } finally {
+      setRegenLoading(false);
+    }
+  }
+
+  const REC_STYLE = {
+    HIRE: { bg: "#D1FAE5", text: "#065F46", border: "#059669" },
+    HOLD: { bg: "#FEF3C7", text: "#92400E", border: "#D97706" },
+    REJECT: { bg: "#FEE2E2", text: "#991B1B", border: "#DC2626" },
+  };
+  const CONF_STYLE = {
+    High: { bg: "#DBEAFE", text: "#1D4ED8" },
+    Medium: { bg: "#EDE9FE", text: "#6D28D9" },
+    Low: { bg: "#F3F4F6", text: "#6B7280" },
+  };
+  const IMPACT_DOT = { positive: "#059669", partial: "#D97706", neutral: "#9CA3AF", negative: "#DC2626" };
 
   const haveSkills = (p.skills || []).map((x) => x.toLowerCase());
   const skillMatched = (req) =>
@@ -163,6 +187,81 @@ export default function CandidateDetail() {
         <div className="mt-3 flex items-center gap-1.5 rounded-md bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700">
           <AlertTriangle size={15} /> Low parse confidence — review the original CV
         </div>
+      )}
+
+      {/* AI Recommendation card (Session 11) */}
+      {rec && (
+        <section
+          className="mt-4 rounded-lg border-2 p-5"
+          style={{ borderColor: (REC_STYLE[rec.recommendation] || REC_STYLE.HOLD).border }}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-gray-600" />
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">AI Recommendation</h2>
+            </div>
+            <button
+              onClick={regenerateRecommendation}
+              disabled={regenLoading}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 disabled:opacity-50"
+            >
+              <RefreshCw size={13} className={regenLoading ? "animate-spin" : ""} />
+              {regenLoading ? "Regenerating…" : "Regenerate"}
+            </button>
+          </div>
+
+          <div className="mt-3 flex items-center gap-2">
+            <span
+              className="rounded-md px-3 py-1 text-sm font-bold"
+              style={{
+                backgroundColor: (REC_STYLE[rec.recommendation] || REC_STYLE.HOLD).bg,
+                color: (REC_STYLE[rec.recommendation] || REC_STYLE.HOLD).text,
+              }}
+            >
+              {rec.recommendation}
+            </span>
+            <span
+              className="rounded-full px-2 py-0.5 text-xs font-medium"
+              style={{
+                backgroundColor: (CONF_STYLE[rec.confidence] || CONF_STYLE.Low).bg,
+                color: (CONF_STYLE[rec.confidence] || CONF_STYLE.Low).text,
+              }}
+            >
+              Confidence: {rec.confidence}
+            </span>
+          </div>
+
+          {(rec.reasons || []).length > 0 && (
+            <div className="mt-3">
+              <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">Key reasons</div>
+              <ul className="mt-1 space-y-1">
+                {rec.reasons.map((r, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-700">
+                    <span className="text-gray-300">•</span> {r}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {(rec.concerns || []).length > 0 && (
+            <div className="mt-3">
+              <div className="text-xs font-semibold uppercase tracking-wide text-amber-600">Concerns</div>
+              <ul className="mt-1 space-y-1">
+                {rec.concerns.map((c, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-700">
+                    <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-500" /> {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="mt-3 rounded-md bg-gray-50 px-3 py-2 text-sm">
+            <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Next action</span>
+            <div className="mt-0.5 font-medium text-gray-800">→ {rec.next_action}</div>
+          </div>
+        </section>
       )}
 
       {/* Screening gate result (CV + OCEAN done, interview pending) */}
@@ -398,38 +497,88 @@ export default function CandidateDetail() {
         </div>
       )}
 
-      {/* strengths + weaknesses side by side */}
-      <div className="mt-6 grid grid-cols-2 gap-4">
-        <section>
-          <div className="flex items-center gap-1.5">
-            <TrendingUp size={15} className="text-green-600" />
-            <h2 className="font-medium text-gray-900">Strengths</h2>
+      {/* Contributing factors — the "why" behind each layer */}
+      {bd && (
+        <section className="mt-6 rounded-lg border border-gray-200 p-5">
+          <h2 className="font-medium text-gray-900">Why this score</h2>
+          <div className="mt-3 space-y-4">
+            {[
+              { key: "cv_fit", label: "CV Fit" },
+              { key: "personality_fit", label: "Personality Fit" },
+              { key: "interview_result", label: "Interview" },
+            ].map(({ key, label }) => {
+              const layer = bd[key] || {};
+              const factors = layer.contributing_factors || [];
+              if (layer.status === "disabled") return null;
+              return (
+                <div key={key}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <span className="text-xs text-gray-400">
+                      {layer.score != null ? `${layer.score}% · ${layer.label}` : layer.label}
+                    </span>
+                  </div>
+                  {factors.length > 0 ? (
+                    <ul className="mt-1.5 space-y-1">
+                      {factors.map((f, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <span
+                            className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+                            style={{ backgroundColor: IMPACT_DOT[f.impact] || "#9CA3AF" }}
+                          />
+                          <span>
+                            <span className="text-gray-500">{f.factor}:</span> {f.result}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-xs italic text-gray-400">Not yet assessed.</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <ul className="mt-2 space-y-2">
-            {(s.strengths || []).map((str, i) => (
-              <li key={i} className="flex gap-2 text-sm text-gray-700">
-                <Check size={14} className="mt-0.5 shrink-0 text-green-500" />
-                {str}
-              </li>
-            ))}
-          </ul>
         </section>
+      )}
 
-        <section>
-          <div className="flex items-center gap-1.5">
-            <TrendingDown size={15} className="text-red-500" />
-            <h2 className="font-medium text-gray-900">Weaknesses</h2>
-          </div>
-          <ul className="mt-2 space-y-2">
-            {(s.weaknesses || []).map((w, i) => (
-              <li key={i} className="flex gap-2 text-sm text-gray-700">
-                <X size={14} className="mt-0.5 shrink-0 text-red-400" />
-                {w}
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
+      {/* Strengths / Risks / Missing Evidence */}
+      {bd && (
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <section className="rounded-lg p-4" style={{ backgroundColor: "#F0FDF4" }}>
+            <h3 className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#065F46" }}>Strengths</h3>
+            <ul className="mt-2 space-y-2">
+              {(bd.strengths || []).map((x, i) => (
+                <li key={i} className="flex gap-1.5 text-sm text-gray-700">
+                  <Check size={13} className="mt-0.5 shrink-0 text-green-600" /> {x}
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section className="rounded-lg p-4" style={{ backgroundColor: "#FFFBEB" }}>
+            <h3 className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#92400E" }}>Risks</h3>
+            <ul className="mt-2 space-y-2">
+              {(bd.risks || []).map((x, i) => (
+                <li key={i} className="flex gap-1.5 text-sm text-gray-700">
+                  <AlertTriangle size={13} className="mt-0.5 shrink-0 text-amber-600" /> {x}
+                </li>
+              ))}
+              {(bd.risks || []).length === 0 && <li className="text-xs italic text-gray-400">No major risks flagged.</li>}
+            </ul>
+          </section>
+          <section className="rounded-lg p-4" style={{ backgroundColor: "#F9FAFB" }}>
+            <h3 className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#374151" }}>Missing evidence</h3>
+            <ul className="mt-2 space-y-2">
+              {(bd.missing_evidence || []).map((x, i) => (
+                <li key={i} className="flex gap-1.5 text-sm text-gray-700">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400" /> {x}
+                </li>
+              ))}
+              {(bd.missing_evidence || []).length === 0 && <li className="text-xs italic text-gray-400">Nothing outstanding.</li>}
+            </ul>
+          </section>
+        </div>
+      )}
 
       {/* gaps */}
       <section className="mt-5">
@@ -443,93 +592,6 @@ export default function CandidateDetail() {
           ))}
         </ul>
       </section>
-
-      {/* Final Analysis panel */}
-      {finalAnalysis ? (
-        <section className="mt-6 rounded-lg border-2 border-gray-800 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Sparkles size={16} className="text-gray-700" />
-              <h2 className="font-semibold text-gray-900">Final Assessment</h2>
-              <span className="text-xs text-gray-400">{finalAnalysis.generated_date}</span>
-            </div>
-            <span
-              className="rounded-full px-3 py-1 text-sm font-bold"
-              style={{
-                backgroundColor:
-                  finalAnalysis.recommendation === "Hire" ? "#D1FAE5" :
-                  finalAnalysis.recommendation === "Reject" ? "#FEE2E2" : "#FEF3C7",
-                color:
-                  finalAnalysis.recommendation === "Hire" ? "#065F46" :
-                  finalAnalysis.recommendation === "Reject" ? "#991B1B" : "#92400E",
-              }}
-            >
-              {finalAnalysis.recommendation}
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-gray-500">{finalAnalysis.recommendation_reason}</p>
-
-          <p className="mt-3 text-sm leading-relaxed text-gray-700">{finalAnalysis.summary}</p>
-
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-green-700">
-                <TrendingUp size={12} /> Strengths
-              </div>
-              <ul className="mt-1.5 space-y-1.5">
-                {finalAnalysis.strengths.map((s, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-gray-700">
-                    <Check size={13} className="mt-0.5 shrink-0 text-green-500" />
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-red-600">
-                <TrendingDown size={12} /> Weaknesses
-              </div>
-              <ul className="mt-1.5 space-y-1.5">
-                {finalAnalysis.weaknesses.map((w, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-gray-700">
-                    <X size={13} className="mt-0.5 shrink-0 text-red-400" />
-                    {w}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-      ) : !partial && (
-        <div className="mt-6 rounded-lg border border-dashed border-gray-300 p-5 text-center">
-          <Sparkles size={18} className="mx-auto text-gray-400" />
-          <p className="mt-2 text-sm font-medium text-gray-700">All stages complete — generate a final analysis</p>
-          <p className="mt-0.5 text-xs text-gray-400">AI will synthesise CV, OCEAN, interview scores, and HR notes into a Hire / Hold / Reject recommendation.</p>
-          <button
-            onClick={async () => {
-              setGeneratingFinal(true);
-              try {
-                const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/final-analysis`);
-                setFinalAnalysis(res.data.final_analysis);
-                setCandidate(res.data.candidate);
-              } catch (e) {
-                alert(e.response?.data?.error || "Failed to generate analysis.");
-              } finally {
-                setGeneratingFinal(false);
-              }
-            }}
-            disabled={generatingFinal}
-            className="mt-3 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-            style={{ backgroundColor: "#111827" }}
-          >
-            {generatingFinal ? (
-              <><span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40" style={{ borderTopColor: "#fff" }} /> Analysing all data…</>
-            ) : (
-              <><Sparkles size={14} /> Generate final analysis →</>
-            )}
-          </button>
-        </div>
-      )}
 
       {/* work history */}
       <section className="mt-6">

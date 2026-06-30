@@ -21,6 +21,8 @@ import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
 import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
+import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
 
 const router = Router();
@@ -158,7 +160,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
  * POST /api/portal/:token/ocean  { candidate_id, responses }
  * Applies OCEAN scoring and marks the application submitted.
  */
-router.post("/portal/:token/ocean", (req, res) => {
+router.post("/portal/:token/ocean", async (req, res) => {
   try {
     const job = findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
@@ -175,6 +177,9 @@ router.post("/portal/:token/ocean", (req, res) => {
     const traits = computeTraits(responses);
     applyOceanScores(candidates[idx], job, traits);
     candidates[idx].portal_status = "submitted";
+    // Session 11: refresh hiring-intelligence layer after OCEAN.
+    candidates[idx].score_breakdown = buildScoreBreakdown(candidates[idx], job);
+    candidates[idx].recommendation = await generateRecommendation(candidates[idx], job);
     writeJSON(CANDIDATES_PATH, candidates);
 
     // Fire-and-forget WhatsApp notifications — never block the response.
