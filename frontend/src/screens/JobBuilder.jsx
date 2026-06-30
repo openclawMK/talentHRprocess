@@ -1,413 +1,143 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Sparkles, Trash2, Plus, RotateCcw, X } from "lucide-react";
-import SourceBadge from "../components/SourceBadge.jsx";
 
-const INDUSTRIES = [
-  "F&B",
-  "Hospitality",
-  "Retail",
-  "Manufacturing & Production",
-  "Logistics & Warehouse",
-  "Early Childhood Education",
-  "Other",
-];
+const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
+const INDUSTRIES = ["F&B", "Hospitality", "Retail", "Manufacturing & Production", "Logistics & Warehouse", "Early Childhood Education", "Other"];
 const EDUCATION = ["SPM", "Diploma", "Degree", "Any"];
-const SOURCES = ["cv", "interview", "ocean"];
-
 const ROLE_LEVELS = [
-  { value: "entry",       label: "Entry-level",             hint: "CV 35% · OCEAN 15% · Interview 50%" },
-  { value: "supervisory", label: "Supervisory / Management", hint: "CV 45% · OCEAN 10% · Interview 45%" },
+  { value: "entry", label: "Entry-level", hint: "CV 35% · OCEAN 15% · Interview 50%" },
+  { value: "supervisory", label: "Supervisory", hint: "CV 45% · OCEAN 10% · Interview 45%" },
 ];
+const SRC = { cv: { bg: "#EEF2FF", color: "#4338CA" }, ocean: { bg: "#ECFDF5", color: "#047857" }, interview: { bg: "#F5F3FF", color: "#6D28D9" } };
+
+const input = { width: "100%", padding: "11px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 15, color: "#111827", outline: "none", background: "#fff" };
+const label = { display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 7 };
 
 export default function JobBuilder() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState({
-    role_title: "",
-    industry: "F&B",
-    location: "Kuala Lumpur",
-    role_level: "entry",
-    experience_years_min: 1,
-    education_level_min: "SPM",
-    key_responsibilities: "",
-  });
+  const [form, setForm] = useState({ role_title: "", industry: "F&B", location: "Kuala Lumpur", role_level: "entry", experience_years_min: 1, education_level_min: "SPM", key_responsibilities: "" });
   const [criteria, setCriteria] = useState([]);
   const [original, setOriginal] = useState([]);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-  const [newC, setNewC] = useState({ name: "", source: "cv", weight: 10 });
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const total = criteria.reduce((a, c) => a + (Number(c.weight) || 0), 0);
   const totalPct = Math.round(total * 100);
   const valid = Math.abs(total - 1) <= 0.01;
-
-  const responsibilitiesList = () =>
-    form.key_responsibilities
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  const respList = () => form.key_responsibilities.split("\n").map((s) => s.trim()).filter(Boolean);
 
   async function generate() {
-    if (!form.role_title.trim()) {
-      setError("Please enter a role title.");
-      return;
-    }
-    setError("");
-    setGenerating(true);
+    if (!form.role_title.trim()) { setError("Please enter a role title."); return; }
+    setError(""); setGenerating(true);
     try {
-      const res = await axios.post("/api/generate-criteria", {
-        industry: form.industry,
-        role_title: form.role_title,
-        role_level: form.role_level,
-        key_responsibilities: responsibilitiesList(),
-      });
+      const res = await axios.post("/api/generate-criteria", { industry: form.industry, role_title: form.role_title, role_level: form.role_level, key_responsibilities: respList() });
       const c = res.data.criteria || [];
-      setCriteria(c);
-      setOriginal(c);
-      setStep(2);
-    } catch {
-      setError("Couldn't generate criteria. Please try again.");
-    } finally {
-      setGenerating(false);
-    }
+      setCriteria(c); setOriginal(c);
+    } catch { setError("Couldn't generate criteria. Please try again."); }
+    finally { setGenerating(false); }
   }
-
-  function updateWeight(id, pct) {
-    setCriteria((cs) =>
-      cs.map((c) => (c.id === id ? { ...c, weight: pct / 100 } : c))
-    );
-  }
-  function remove(id) {
-    setCriteria((cs) => cs.filter((c) => c.id !== id));
-  }
-  function addCriterion() {
-    if (!newC.name.trim()) return;
-    setCriteria((cs) => [
-      ...cs,
-      {
-        id: `c${cs.length + 1}_${Date.now()}`,
-        name: newC.name.trim(),
-        source: newC.source,
-        weight: newC.weight / 100,
-        description: "",
-      },
-    ]);
-    setNewC({ name: "", source: "cv", weight: 10 });
-    setShowAdd(false);
-  }
-  function reset() {
-    setCriteria(original);
-  }
+  function updateWeight(id, pct) { setCriteria((cs) => cs.map((c) => (c.id === id ? { ...c, weight: pct / 100 } : c))); }
+  function remove(id) { setCriteria((cs) => cs.filter((c) => c.id !== id)); }
 
   async function save() {
     if (!valid) return;
-    setSaving(true);
-    setError("");
+    setSaving(true); setError("");
     try {
       const res = await axios.post("/api/jobs", {
-        role_title: form.role_title,
-        industry: form.industry,
-        location: form.location,
-        role_level: form.role_level,
-        requirements: {
-          experience_years_min: Number(form.experience_years_min) || 0,
-          education_level_min: form.education_level_min,
-        },
-        key_responsibilities: responsibilitiesList(),
-        criteria: criteria.map((c, i) => ({
-          id: `c${i + 1}`,
-          name: c.name,
-          weight: c.weight,
-          source: c.source,
-          description: c.description || "",
-        })),
+        role_title: form.role_title, industry: form.industry, location: form.location, role_level: form.role_level,
+        requirements: { experience_years_min: Number(form.experience_years_min) || 0, education_level_min: form.education_level_min },
+        key_responsibilities: respList(),
+        criteria: criteria.map((c, i) => ({ id: `c${i + 1}`, name: c.name, weight: c.weight, source: c.source, description: c.description || "" })),
       });
-      navigate(`/jobs/${res.data.job_id}/upload`);
-    } catch (err) {
-      setError(err?.response?.data?.error || "Couldn't create the role.");
-      setSaving(false);
-    }
+      navigate(`/jobs/${res.data.job_id}/dashboard`);
+    } catch (err) { setError(err?.response?.data?.error || "Couldn't create the role."); setSaving(false); }
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <Link
-        to="/jobs"
-        className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-      >
-        <ArrowLeft size={16} /> Back to roles
-      </Link>
-      <h1 className="mt-4 text-2xl font-semibold text-gray-900">
-        Create a new role
-      </h1>
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
+      <div onClick={() => navigate("/")} style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to dashboard</div>
+      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 6px" }}>Create a new job role</h1>
+      <p style={{ fontSize: 15, color: "#6B7280", margin: "0 0 26px" }}>Fill in the basics — AI will draft the scoring criteria for you.</p>
 
-      {/* STEP 1 — role details */}
-      {step === 1 && (
-        <div className="mt-6 space-y-4">
-          <Field label="Role title">
-            <input
-              className="input"
-              value={form.role_title}
-              onChange={(e) => set("role_title", e.target.value)}
-              placeholder="e.g. Restaurant Manager"
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Industry">
-              <select
-                className="input"
-                value={form.industry}
-                onChange={(e) => set("industry", e.target.value)}
-              >
-                {INDUSTRIES.map((i) => (
-                  <option key={i}>{i}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Location">
-              <input
-                className="input"
-                value={form.location}
-                onChange={(e) => set("location", e.target.value)}
-              />
-            </Field>
+      {/* Form card */}
+      <div style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 26, boxShadow: "0 1px 2px rgba(16,24,40,.04)", marginBottom: 16 }}>
+        <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
+          <div><label style={label}>Job title</label><input style={input} value={form.role_title} onChange={(e) => set("role_title", e.target.value)} placeholder="e.g. Restaurant Manager" /></div>
+          <div><label style={label}>Industry</label>
+            <select style={input} value={form.industry} onChange={(e) => set("industry", e.target.value)}>{INDUSTRIES.map((i) => <option key={i}>{i}</option>)}</select>
           </div>
-          <Field label="Role level">
-            <div className="mt-1 grid grid-cols-2 gap-3">
+        </div>
+        <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
+          <div><label style={label}>Location</label><input style={input} value={form.location} onChange={(e) => set("location", e.target.value)} /></div>
+          <div><label style={label}>Minimum education</label>
+            <select style={input} value={form.education_level_min} onChange={(e) => set("education_level_min", e.target.value)}>{EDUCATION.map((x) => <option key={x}>{x}</option>)}</select>
+          </div>
+        </div>
+        <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
+          <div><label style={label}>Min experience (years)</label><input type="number" min="0" style={input} value={form.experience_years_min} onChange={(e) => set("experience_years_min", e.target.value)} /></div>
+          <div><label style={label}>Role level</label>
+            <div style={{ display: "flex", gap: 8 }}>
               {ROLE_LEVELS.map((rl) => (
-                <button
-                  key={rl.value}
-                  type="button"
-                  onClick={() => set("role_level", rl.value)}
-                  className={`rounded-lg border p-3 text-left transition-colors ${
-                    form.role_level === rl.value
-                      ? "border-purple-500 bg-purple-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className={`text-sm font-medium ${form.role_level === rl.value ? "text-purple-700" : "text-gray-800"}`}>
-                    {rl.label}
-                  </div>
-                  <div className="mt-0.5 text-xs text-gray-400">{rl.hint}</div>
-                </button>
+                <button key={rl.value} type="button" onClick={() => set("role_level", rl.value)} title={rl.hint}
+                  style={{ flex: 1, padding: "11px 8px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${form.role_level === rl.value ? "#7C3AED" : "#E2E4EC"}`, background: form.role_level === rl.value ? "#F5F3FF" : "#fff", color: form.role_level === rl.value ? "#6D28D9" : "#374151" }}>{rl.label}</button>
               ))}
             </div>
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Min experience (years)">
-              <input
-                type="number"
-                min="0"
-                className="input"
-                value={form.experience_years_min}
-                onChange={(e) => set("experience_years_min", e.target.value)}
-              />
-            </Field>
-            <Field label="Minimum education">
-              <select
-                className="input"
-                value={form.education_level_min}
-                onChange={(e) => set("education_level_min", e.target.value)}
-              >
-                {EDUCATION.map((x) => (
-                  <option key={x}>{x}</option>
-                ))}
-              </select>
-            </Field>
           </div>
-          <Field label="Key responsibilities (one per line)">
-            <textarea
-              className="input"
-              rows={4}
-              value={form.key_responsibilities}
-              onChange={(e) => set("key_responsibilities", e.target.value)}
-              placeholder={"Manage daily operations\nLead a team of 15 staff\nOwn P&L and cost control"}
-            />
-          </Field>
-          {error && <div className="text-sm text-red-600">{error}</div>}
-          <button
-            onClick={generate}
-            disabled={generating}
-            className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-            style={{ backgroundColor: "#6D28D9" }}
-          >
-            {generating ? (
-              <>
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40" style={{ borderTopColor: "#fff" }} />
-                Generating criteria for {form.role_title || "role"}...
-              </>
-            ) : (
-              <>
-                <Sparkles size={16} /> Generate criteria →
-              </>
-            )}
+        </div>
+        <div><label style={label}>Key responsibilities (one per line)</label>
+          <textarea style={{ ...input, minHeight: 120, lineHeight: 1.6, resize: "vertical" }} value={form.key_responsibilities} onChange={(e) => set("key_responsibilities", e.target.value)} placeholder={"Manage daily operations\nLead a team of 10 staff\nHandle customer escalations"} />
+        </div>
+      </div>
+
+      {/* AI criteria card */}
+      {criteria.length === 0 ? (
+        <div style={{ background: "linear-gradient(135deg,#F5F3FF,#EEF2FF)", border: "1px solid #E9E5FF", borderRadius: 16, padding: 22, marginBottom: 22, textAlign: "center" }}>
+          <div style={{ fontSize: 14, color: "#6D5D9E", marginBottom: 12 }}>Generate AI scoring criteria tailored to this role.</div>
+          <button onClick={generate} disabled={generating} style={{ padding: "11px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)", opacity: generating ? 0.7 : 1 }}>
+            {generating ? "Generating…" : "✨ Generate criteria"}
           </button>
         </div>
-      )}
-
-      {/* STEP 2 — criteria review */}
-      {step === 2 && (
-        <div className="mt-6">
-          <p className="text-sm text-gray-500">
-            AI-generated criteria for <strong>{form.role_title}</strong>. Adjust
-            weights, add or remove criteria, then save.
-          </p>
-
-          <div className="mt-4 overflow-hidden rounded-lg border border-gray-200">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
-                <tr>
-                  <th className="px-3 py-2">Criterion</th>
-                  <th className="px-3 py-2 w-56">Weight</th>
-                  <th className="px-3 py-2">Source</th>
-                  <th className="px-3 py-2"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {criteria.map((c) => (
-                  <tr key={c.id} className="border-t border-gray-100">
-                    <td className="px-3 py-2 text-gray-800">{c.name}</td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="range"
-                          min="5"
-                          max="50"
-                          value={Math.round(c.weight * 100)}
-                          onChange={(e) => updateWeight(c.id, Number(e.target.value))}
-                          className="flex-1"
-                        />
-                        <span className="w-9 text-right text-xs font-medium text-gray-600">
-                          {Math.round(c.weight * 100)}%
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-3 py-2">
-                      <SourceBadge source={c.source} />
-                    </td>
-                    <td className="px-3 py-2 text-right">
-                      <button
-                        onClick={() => remove(c.id)}
-                        className="text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-3 flex items-center justify-between">
-            <div
-              className={`text-sm font-medium ${valid ? "text-green-700" : "text-red-600"}`}
-            >
-              Total: {totalPct}%{valid ? " ✓" : " — adjust to reach 100%"}
+      ) : (
+        <div style={{ background: "linear-gradient(135deg,#F5F3FF,#EEF2FF)", border: "1px solid #E9E5FF", borderRadius: 16, padding: 22, marginBottom: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }} className="flex-wrap gap-3">
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 11, background: GRAD, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>✨</div>
+              <div><div style={{ fontSize: 15, fontWeight: 700, color: "#312E81" }}>AI-generated scoring criteria</div><div style={{ fontSize: 13, color: "#6D5D9E" }}>Adjust weights to total 100% before publishing.</div></div>
             </div>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowAdd(true)}
-                className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                <Plus size={15} /> Add criterion
-              </button>
-              <button
-                onClick={reset}
-                className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700"
-              >
-                <RotateCcw size={14} /> Reset to AI suggestion
-              </button>
-            </div>
+            <span style={{ fontSize: 13, fontWeight: 700, color: valid ? "#047857" : "#B91C1C" }}>Total {totalPct}%{valid ? " ✓" : ""}</span>
           </div>
-
-          {error && <div className="mt-3 text-sm text-red-600">{error}</div>}
-
-          <div className="mt-6 flex items-center gap-3">
-            <button
-              onClick={save}
-              disabled={!valid || saving}
-              className="rounded-md px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-              style={{ backgroundColor: "#6D28D9" }}
-            >
-              {saving ? "Creating role..." : "Save & create role →"}
-            </button>
-            <button
-              onClick={() => setStep(1)}
-              className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Back to details
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Add criterion modal */}
-      {showAdd && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/30 p-4">
-          <div className="w-full max-w-sm rounded-lg bg-white p-5 shadow-xl">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium text-gray-900">Add criterion</h3>
-              <button onClick={() => setShowAdd(false)}>
-                <X size={18} className="text-gray-400" />
-              </button>
-            </div>
-            <div className="mt-4 space-y-3">
-              <input
-                className="input"
-                placeholder="Criterion name"
-                value={newC.name}
-                onChange={(e) => setNewC({ ...newC, name: e.target.value })}
-              />
-              <div className="grid grid-cols-2 gap-3">
-                <select
-                  className="input"
-                  value={newC.source}
-                  onChange={(e) => setNewC({ ...newC, source: e.target.value })}
-                >
-                  {SOURCES.map((s) => (
-                    <option key={s} value={s}>
-                      {s.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="5"
-                    max="50"
-                    className="input"
-                    value={newC.weight}
-                    onChange={(e) => setNewC({ ...newC, weight: Number(e.target.value) })}
-                  />
-                  <span className="text-sm text-gray-500">%</span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {criteria.map((c) => {
+              const tag = SRC[c.source] || SRC.cv;
+              return (
+                <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", textAlign: "center", width: 56, color: tag.color, background: tag.bg, padding: "4px 0", borderRadius: 6 }}>{c.source}</span>
+                  <div style={{ width: 150, fontSize: 14, fontWeight: 600, color: "#374151", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={c.name}>{c.name}</div>
+                  <input type="range" min="5" max="50" value={Math.round(c.weight * 100)} onChange={(e) => updateWeight(c.id, Number(e.target.value))} className="flex-1 accent-violet-600" />
+                  <span style={{ width: 40, textAlign: "right", fontSize: 14, fontWeight: 700, color: "#4F46E5" }}>{Math.round(c.weight * 100)}%</span>
+                  <button onClick={() => remove(c.id)} style={{ color: "#B6B9C6", background: "none", border: "none", cursor: "pointer" }}>✕</button>
                 </div>
-              </div>
-            </div>
-            <button
-              onClick={addCriterion}
-              className="mt-4 w-full rounded-md px-3 py-2 text-sm font-medium text-white"
-              style={{ backgroundColor: "#6D28D9" }}
-            >
-              Add
-            </button>
+              );
+            })}
+          </div>
+          <div style={{ marginTop: 16, display: "flex", gap: 10 }}>
+            <button onClick={generate} disabled={generating} style={{ padding: "9px 15px", background: "#fff", color: "#6D28D9", border: "1px solid #D6CDF5", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>✨ {generating ? "…" : "Regenerate"}</button>
+            <button onClick={() => setCriteria(original)} style={{ padding: "9px 15px", background: "transparent", color: "#9AA0AE", border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Reset to AI suggestion</button>
           </div>
         </div>
       )}
-    </div>
-  );
-}
 
-function Field({ label, children }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-sm font-medium text-gray-700">{label}</span>
-      {children}
-    </label>
+      {error && <div style={{ color: "#DC2626", fontSize: 14, marginBottom: 14 }}>{error}</div>}
+
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+        <button onClick={() => navigate("/")} style={{ padding: "12px 18px", background: "#fff", color: "#6B7280", border: "1px solid #E2E4EC", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+        <button onClick={save} disabled={!valid || saving || criteria.length === 0} style={{ padding: "12px 22px", background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)", opacity: !valid || saving || criteria.length === 0 ? 0.5 : 1 }}>
+          {saving ? "Publishing…" : "Publish job role"}
+        </button>
+      </div>
+    </div>
   );
 }
