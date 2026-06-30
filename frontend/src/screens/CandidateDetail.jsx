@@ -27,9 +27,17 @@ const LAYER = {
 };
 const SRC_TAG = { cv: { bg: "#EEF2FF", color: "#4338CA" }, ocean: { bg: "#ECFDF5", color: "#047857" }, interview: { bg: "#F5F3FF", color: "#6D28D9" }, hr_notes: { bg: "#FFF7ED", color: "#C2410C" } };
 
+// Per-trait descriptive phrases: [high, moderate, low]
+const OCEAN_DESC = {
+  O: ["Curious, embraces new ideas", "Open to some change", "Prefers familiar routines"],
+  C: ["Organised and dependable", "Generally reliable", "May need structure & reminders"],
+  E: ["Outgoing and energetic", "Balanced and measured", "Reserved, works independently"],
+  A: ["Collaborative team player", "Cooperative yet assertive", "Direct and candid"],
+  ES: ["Calm under pressure", "Generally composed", "Sensitive to stress"],
+};
+
 const initials = (n) => (n || "?").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 function avatarFor(n) { let h = 0; for (const ch of n || "") h = (h * 31 + ch.charCodeAt(0)) >>> 0; return AVATARS[h % AVATARS.length]; }
-const band = (v) => (v >= 60 ? "High" : v >= 40 ? "Moderate" : "Low");
 
 export default function CandidateDetail() {
   const { jobId, candidateId } = useParams();
@@ -387,11 +395,17 @@ export default function CandidateDetail() {
             <div style={cardBox}>
               <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>Personality · OCEAN</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
-                {[["Openness", traits.openness], ["Conscientiousness", traits.conscientiousness], ["Extraversion", traits.extraversion], ["Agreeableness", traits.agreeableness], ["Neuroticism", traits.neuroticism]].map(([label, v]) => (
+                {[
+                  ["Openness", traits.openness, OCEAN_DESC.O],
+                  ["Conscientiousness", traits.conscientiousness, OCEAN_DESC.C],
+                  ["Extraversion", traits.extraversion, OCEAN_DESC.E],
+                  ["Agreeableness", traits.agreeableness, OCEAN_DESC.A],
+                  ["Emotional stability", traits.emotional_stability ?? 100 - (traits.neuroticism ?? 0), OCEAN_DESC.ES],
+                ].map(([label, v, descs]) => (
                   <div key={label}>
                     <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 5 }}><span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</span><span style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED" }}>{v}</span></div>
                     <div style={{ height: 7, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${v}%`, background: "linear-gradient(90deg,#A78BFA,#7C3AED)", borderRadius: 5 }} /></div>
-                    <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 4 }}>{band(v)}</div>
+                    <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 4 }}>{v >= 60 ? descs[0] : v >= 40 ? descs[1] : descs[2]}</div>
                   </div>
                 ))}
               </div>
