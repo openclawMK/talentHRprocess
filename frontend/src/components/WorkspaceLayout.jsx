@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
-  LayoutGrid, Briefcase, UploadCloud, Plus, Compass, Power, Search, Bell,
+  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -70,15 +70,6 @@ export default function WorkspaceLayout({ children }) {
             );
           })}
         </nav>
-
-        <div className="px-3 pb-2 pt-6 text-[11px] font-bold tracking-[1px]" style={{ color: "#6E6A8C" }}>CANDIDATE</div>
-        <button
-          onClick={() => navigate("/jobs")}
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium"
-          style={{ color: "#A7A3C4" }}
-        >
-          <Compass size={17} /> Preview OCEAN portal
-        </button>
 
         {/* user footer */}
         <div className="mt-auto flex items-center gap-2.5 rounded-xl px-2.5 py-2.5" style={{ backgroundColor: "#2A3040" }}>
