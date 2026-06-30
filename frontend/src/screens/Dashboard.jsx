@@ -300,6 +300,13 @@ export default function Dashboard() {
                     <div style={{ fontSize: 13, color: "#9AA0AE" }}>{years} yrs · {loc}</div>
                   </div>
                 </div>
+                {/* mobile-only compact score + lane (hidden from md up) */}
+                <div className="flex items-center gap-2.5 md:hidden" style={{ flexShrink: 0 }}>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: lane.color }}>{score}</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 700, color: lane.color, background: lane.bg, border: `1px solid ${lane.border}`, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap" }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: lane.dot }} />{lane.label}
+                  </span>
+                </div>
                 <div className="hidden items-center gap-2 md:flex">
                   <span style={{ fontSize: 17, fontWeight: 800, color: lane.color }}>{score}</span>
                   <div style={{ flex: 1, height: 6, background: "#F1F2F6", borderRadius: 4, overflow: "hidden" }}><div style={{ height: "100%", width: `${score}%`, background: lane.dot, borderRadius: 4 }} /></div>

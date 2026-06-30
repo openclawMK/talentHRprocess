@@ -55,7 +55,7 @@ export default function JobSelector() {
       </div>
 
       {/* role cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 18 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))", gap: 18 }}>
         {jobs === null
           ? Array.from({ length: 3 }).map((_, i) => <div key={i} style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 18, height: 220 }} className="animate-pulse" />)
           : jobs.map((j, i) => {
