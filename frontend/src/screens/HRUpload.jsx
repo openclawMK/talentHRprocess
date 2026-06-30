@@ -1,9 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { UploadCloud, FileText, Loader2 } from "lucide-react";
+import { displayLane, round } from "../lib/format.js";
 
-const STEPS = ["Uploading CV…", "Reading document…", "Extracting profile…", "Scoring candidate…"];
+const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
+const card = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 20, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
+const LANE = { green: { label: "Green", color: "#047857", bg: "#ECFDF5" }, amber: { label: "Amber", color: "#B45309", bg: "#FFFBEB" }, red: { label: "Red", color: "#B91C1C", bg: "#FEF2F2" }, in_progress: { label: "In progress", color: "#6B7280", bg: "#F3F4F6" } };
+const STEPS = ["Document parsed & text extracted", "Work history & skills identified", "Scoring against role criteria…", "Generating recommendation"];
 
 export default function HRUpload() {
   const navigate = useNavigate();
@@ -11,98 +14,149 @@ export default function HRUpload() {
   const inputRef = useRef(null);
   const [jobs, setJobs] = useState([]);
   const [jobId, setJobId] = useState(params.get("jobId") || "");
-  const [file, setFile] = useState(null);
-  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState("idle"); // idle | proc | done
   const [step, setStep] = useState(0);
+  const [fileName, setFileName] = useState("");
+  const [result, setResult] = useState(null);
+  const [recent, setRecent] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    axios.get("/api/jobs").then((r) => {
-      setJobs(r.data);
-      if (!jobId && r.data[0]) setJobId(r.data[0].job_id);
-    });
+    axios.get("/api/jobs").then((r) => { setJobs(r.data); if (!jobId && r.data[0]) setJobId(r.data[0].job_id); });
   }, []); // eslint-disable-line
 
-  function pick(f) {
+  const role = jobs.find((j) => j.job_id === jobId);
+
+  function onPick(f) {
     setError("");
     if (!f) return;
     if (!/\.(pdf|docx)$/i.test(f.name)) return setError("Please upload a PDF or DOCX file.");
     if (f.size > 5 * 1024 * 1024) return setError("File too large — keep it under 5MB.");
-    setFile(f);
+    if (!jobId) return setError("Please pick a role first.");
+    upload(f);
   }
 
-  async function upload() {
-    if (!file || !jobId) return;
-    setBusy(true);
-    setError("");
-    setStep(0);
-    const timer = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 900);
+  async function upload(f) {
+    setPhase("proc"); setStep(0); setFileName(f.name);
+    const timer = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 1000);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      fd.append("jobId", jobId);
+      const fd = new FormData(); fd.append("file", f); fd.append("jobId", jobId);
       const res = await axios.post("/api/upload-cv", fd);
       clearInterval(timer);
-      navigate(`/jobs/${jobId}/candidate/${res.data.candidate_id}`);
+      const c = res.data;
+      setResult(c);
+      const laneKey = displayLane(c.score);
+      setRecent((prev) => [{ name: c.profile?.name || "Candidate", file: f.name, score: round(c.score?.combined_score), lane: laneKey, id: c.candidate_id }, ...prev].slice(0, 5));
+      setPhase("done");
     } catch (err) {
       clearInterval(timer);
-      setBusy(false);
       setError(err?.response?.data?.error || "We couldn't read this CV. Try a cleaner PDF.");
+      setPhase("idle");
     }
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900">Upload a CV</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        AI parses, scores and slots the candidate into the selected role automatically.
-      </p>
-
-      <label className="mt-5 block">
-        <span className="mb-1 block text-sm font-medium text-gray-700">Role</span>
-        <select
-          value={jobId}
-          onChange={(e) => setJobId(e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-400 focus:outline-none"
-        >
-          {jobs.map((j) => (
-            <option key={j.job_id} value={j.job_id}>{j.role_title} — {j.industry}</option>
-          ))}
-        </select>
-      </label>
-
-      <div
-        onClick={() => !busy && inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => { e.preventDefault(); if (!busy) pick(e.dataTransfer.files?.[0]); }}
-        className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-white px-6 py-12 text-center hover:border-indigo-300"
-      >
-        {file ? (
-          <div className="flex items-center gap-2 text-sm text-gray-700"><FileText size={18} className="text-indigo-500" /> {file.name}</div>
-        ) : (
-          <>
-            <UploadCloud size={34} className="text-gray-400" />
-            <div className="mt-2 font-medium text-gray-700">Drag &amp; drop a CV here</div>
-            <div className="text-sm text-gray-400">or click to browse · PDF or DOCX, max 5MB</div>
-          </>
-        )}
-        <input ref={inputRef} type="file" accept=".pdf,.docx" className="hidden" onChange={(e) => pick(e.target.files?.[0])} />
+    <div style={{ maxWidth: 680, margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: 22 }}>
+        <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 6px" }}>Upload a CV</h1>
+        <p style={{ fontSize: 15, color: "#6B7280", margin: 0 }}>AI parses, scores and slots the candidate into <b style={{ color: "#374151" }}>{role?.role_title || "the selected role"}</b> automatically.</p>
       </div>
 
-      {file && !busy && (
-        <button onClick={upload} className="mt-4 inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>
-          Upload &amp; score →
-        </button>
-      )}
-
-      {busy && (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-4">
-          <Loader2 size={18} className="animate-spin text-indigo-500" />
-          <span className="text-sm font-medium text-gray-700">{STEPS[step]}</span>
+      {/* Role selector */}
+      {phase === "idle" && (
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 18 }}>
+          <select value={jobId} onChange={(e) => setJobId(e.target.value)} style={{ padding: "9px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 14, fontWeight: 600, color: "#374151", background: "#fff", outline: "none" }}>
+            {jobs.map((j) => <option key={j.job_id} value={j.job_id}>{j.role_title} — {j.industry}</option>)}
+          </select>
         </div>
       )}
 
-      {error && <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {/* IDLE */}
+      {phase === "idle" && (
+        <>
+          <div onClick={() => inputRef.current?.click()} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); onPick(e.dataTransfer.files?.[0]); }}
+            style={{ background: "#fff", border: "2px dashed #C7CBDA", borderRadius: 20, padding: "56px 30px", textAlign: "center", boxShadow: "0 1px 2px rgba(16,24,40,.04)", cursor: "pointer" }}>
+            <div style={{ width: 72, height: 72, borderRadius: 20, background: "linear-gradient(135deg,#EEF2FF,#F5F3FF)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px", fontSize: 32 }}>↥</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Drag &amp; drop a CV here</div>
+            <div style={{ fontSize: 14, color: "#9AA0AE", marginBottom: 22 }}>or click to browse from your computer</div>
+            <button style={{ padding: "12px 22px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 15, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.3)" }}>Select file</button>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 26 }}>
+              {["PDF", "Word"].map((t) => <span key={t} style={{ fontSize: 12, fontWeight: 600, color: "#6B7280", background: "#F3F4F8", padding: "6px 12px", borderRadius: 8 }}>{t}</span>)}
+              <span style={{ fontSize: 12, color: "#B6B9C6", alignSelf: "center" }}>· max 5 MB</span>
+            </div>
+            <input ref={inputRef} type="file" accept=".pdf,.docx" className="hidden" onChange={(e) => onPick(e.target.files?.[0])} />
+          </div>
+          {error && <div style={{ marginTop: 16, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: "12px 16px", fontSize: 14, color: "#B91C1C", textAlign: "center" }}>{error}</div>}
+
+          {recent.length > 0 && (
+            <div style={{ marginTop: 22, ...card, borderRadius: 16, padding: "18px 22px" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#9AA0AE", textTransform: "uppercase", letterSpacing: ".5px", marginBottom: 12 }}>Recently uploaded</div>
+              {recent.map((r, i) => {
+                const L = LANE[r.lane] || LANE.in_progress;
+                return (
+                  <div key={i} onClick={() => navigate(`/jobs/${jobId}/candidate/${r.id}`)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", cursor: "pointer" }}>
+                    <span style={{ width: 34, height: 34, borderRadius: 9, background: "#FEF2F2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700 }}>{r.file.split(".").pop().toUpperCase().slice(0, 4)}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 14, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.file}</div><div style={{ fontSize: 12, color: "#9AA0AE" }}>{r.name} · scored {r.score}</div></div>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: L.color, background: L.bg, padding: "4px 10px", borderRadius: 20 }}>{L.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* PROCESSING */}
+      {phase === "proc" && (
+        <div style={{ ...card, padding: "48px 30px", textAlign: "center" }}>
+          <div style={{ width: 64, height: 64, borderRadius: "50%", border: "4px solid #EEF2FF", borderTopColor: "#6366F1", margin: "0 auto 24px" }} className="animate-spin" />
+          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Analysing <b style={{ color: "#4F46E5" }}>{fileName}</b></div>
+          <div style={{ fontSize: 14, color: "#9AA0AE", marginBottom: 28 }}>AI is reading the document — this takes a few seconds.</div>
+          <div style={{ maxWidth: 340, margin: "0 auto", display: "flex", flexDirection: "column", gap: 12, textAlign: "left" }}>
+            {STEPS.map((label, i) => {
+              const done = i < step, active = i === step;
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: done ? "#374151" : active ? "#6366F1" : "#C4C7D2", fontWeight: active ? 600 : 400 }}>
+                  {done ? <span style={{ width: 22, height: 22, borderRadius: "50%", background: "#ECFDF5", color: "#059669", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>✓</span>
+                    : active ? <span style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #C7D2FE", borderTopColor: "#6366F1" }} className="animate-spin" />
+                    : <span style={{ width: 22, height: 22, borderRadius: "50%", border: "2px solid #ECEDF2" }} />}
+                  {label}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* DONE */}
+      {phase === "done" && result && (() => {
+        const L = LANE[displayLane(result.score)] || LANE.in_progress;
+        const bd = result.score_breakdown || {};
+        const layers = [
+          { label: "CV Fit", v: bd.cv_fit?.score, color: "#4F46E5" },
+          { label: "Personality", v: bd.personality_fit?.score, color: "#7C3AED" },
+          { label: "Interview", v: bd.interview_result?.score, color: "#0EA5E9" },
+        ];
+        return (
+          <div style={{ ...card, padding: "44px 30px", textAlign: "center" }}>
+            <div style={{ width: 76, height: 76, borderRadius: "50%", background: "#ECFDF5", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 22px", fontSize: 36, color: "#059669" }}>✓</div>
+            <div style={{ fontSize: 20, fontWeight: 800, marginBottom: 6 }}>Candidate scored &amp; added</div>
+            <div style={{ fontSize: 15, color: "#6B7280", marginBottom: 26 }}><b style={{ color: "#111827" }}>{result.profile?.name}</b> scored <b style={{ color: L.color }}>{round(result.score?.combined_score)} ({L.label})</b> and was added to the {role?.role_title} pipeline.</div>
+            <div className="grid grid-cols-3 gap-3" style={{ maxWidth: 420, margin: "0 auto 28px" }}>
+              {layers.map((l) => (
+                <div key={l.label} style={{ border: "1px solid #EEF0F4", borderRadius: 12, padding: 14 }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: l.v != null ? l.color : "#C4C7D2" }}>{l.v != null ? l.v : "—"}</div>
+                  <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 2 }}>{l.label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "center" }} className="flex-wrap">
+              <button onClick={() => { setPhase("idle"); setResult(null); }} style={{ padding: "12px 18px", background: "#fff", color: "#6B7280", border: "1px solid #E2E4EC", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Upload another</button>
+              <button onClick={() => navigate(`/jobs/${jobId}/candidate/${result.candidate_id}`)} style={{ padding: "12px 20px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)" }}>View candidate detail →</button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
