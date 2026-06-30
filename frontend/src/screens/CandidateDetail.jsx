@@ -55,10 +55,12 @@ export default function CandidateDetail() {
   const [showChat, setShowChat] = useState(false);
   const [chat, setChat] = useState(null);
   const [outcomeSaving, setOutcomeSaving] = useState(false);
+  const [sfit, setSfit] = useState(null);
 
   useEffect(() => {
     axios.get(`/api/candidates/${jobId}/${candidateId}`).then((r) => setCandidate(r.data)).catch(() => setCandidate(false));
     axios.get("/api/jobs").then((r) => setJob(r.data.find((j) => j.job_id === jobId) || null));
+    axios.get(`/api/candidates/${jobId}/${candidateId}/success-fit`).then((r) => setSfit(r.data)).catch(() => setSfit({ configured: false }));
   }, [jobId, candidateId]);
 
   async function loadChat() {
@@ -257,6 +259,68 @@ export default function CandidateDetail() {
               })}
             </div>
           </div>
+
+          {/* Success Profile fit */}
+          {sfit?.configured && (() => {
+            const fl = LANE[sfit.lane] || LANE.in_progress;
+            const Row = ({ ok, text, neutral }) => (
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, color: "#374151", lineHeight: 1.45, padding: "5px 0" }}>
+                <span style={{ flexShrink: 0, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, marginTop: 1, color: ok ? "#047857" : neutral ? "#6B7280" : "#B91C1C", background: ok ? "#ECFDF5" : neutral ? "#F3F4F6" : "#FEF2F2" }}>{ok ? "✓" : neutral ? "•" : "✕"}</span>
+                <span>{text}</span>
+              </div>
+            );
+            return (
+              <div style={cardBox}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 6 }} className="flex-wrap">
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700 }}>◎ Success Profile fit</div>
+                    <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 3 }}>How well this candidate matches the ideal hire defined for the role</div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: fl.color, background: fl.bg, border: `1px solid ${fl.border}`, padding: "5px 12px", borderRadius: 20 }}>{sfit.verdict}</span>
+                    <div style={{ textAlign: "right" }}>
+                      <div className="font-display" style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1, color: fl.color }}>{sfit.fit}<span style={{ fontSize: 16, color: "#9AA0AE", fontWeight: 700 }}>%</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{ height: 8, background: "#F1F2F6", borderRadius: 5, overflow: "hidden", margin: "10px 0 18px" }}><div style={{ height: "100%", width: `${sfit.fit}%`, background: fl.dot, borderRadius: 5 }} /></div>
+
+                {sfit.dealbreakers.some((d) => d.triggered) && (
+                  <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 11, padding: "12px 15px", marginBottom: 16 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: "#B91C1C", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>⛔ Dealbreaker triggered</div>
+                    {sfit.dealbreakers.filter((d) => d.triggered).map((d, i) => <div key={i} style={{ fontSize: 13, color: "#7F1D1D", lineHeight: 1.45 }}>{d.text}</div>)}
+                  </div>
+                )}
+
+                <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
+                  {sfit.must_haves.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Must-haves · {sfit.must_haves.filter((m) => m.met).length}/{sfit.must_haves.length}</div>
+                      {sfit.must_haves.map((m, i) => <Row key={i} ok={m.met} text={m.text} />)}
+                    </div>
+                  )}
+                  {sfit.nice_to_haves.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Nice-to-haves · {sfit.nice_to_haves.filter((m) => m.met).length}/{sfit.nice_to_haves.length}</div>
+                      {sfit.nice_to_haves.map((m, i) => <Row key={i} ok={m.met} neutral={!m.met} text={m.text} />)}
+                    </div>
+                  )}
+                  {sfit.benchmarks.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Benchmarks</div>
+                      {sfit.benchmarks.map((b, i) => <Row key={i} ok={b.met} text={`${b.label}: ${b.actual} vs target ${b.target}`} />)}
+                    </div>
+                  )}
+                  {sfit.has_ocean && sfit.ocean?.length > 0 && (
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Personality alignment · {sfit.ocean.filter((o) => o.match).length}/{sfit.ocean.length}</div>
+                      {sfit.ocean.map((o, i) => <Row key={i} ok={o.match} text={`${o.trait}: ${o.actual} (ideal ${o.ideal})`} />)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Criteria breakdown */}
           <div style={cardBox}>

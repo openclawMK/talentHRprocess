@@ -13,6 +13,7 @@ import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
+import { computeSuccessFit } from "../services/successFit.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
@@ -455,6 +456,25 @@ router.get("/candidates/:jobId/:candidateId/whatsapp-history", (req, res) => {
   } catch (err) {
     console.error("whatsapp-history error:", err);
     res.status(500).json({ error: "Failed to load conversation." });
+  }
+});
+
+/**
+ * GET /api/candidates/:jobId/:candidateId/success-fit
+ * Benchmark the candidate against the role's Success Profile.
+ */
+router.get("/candidates/:jobId/:candidateId/success-fit", (req, res) => {
+  try {
+    const candidate = findCandidate(req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+    const fit = computeSuccessFit(candidate, job);
+    if (!fit) return res.json({ configured: false });
+    res.json({ configured: true, ...fit });
+  } catch (err) {
+    console.error("success-fit error:", err);
+    res.status(500).json({ error: "Failed to compute success fit." });
   }
 });
 

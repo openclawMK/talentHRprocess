@@ -138,7 +138,7 @@ export default function Dashboard() {
           <div style={{ fontSize: 14, color: "#6B7280", marginTop: 6 }}>{job?.industry} · {job?.location}</div>
         </div>
         <div style={{ display: "flex", gap: 10 }} className="flex-wrap">
-          <button onClick={() => navigate(`/jobs/${jobId}/success-profile`)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: "#fff", color: "#374151", border: "1px solid #E2E4EC", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>◎ Success Profile</button>
+          <button onClick={() => navigate(`/jobs/${jobId}/success-profile`)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: "linear-gradient(135deg,#F5F3FF,#EDE9FE)", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>◎ Success Profile</button>
           <button onClick={() => { setWaResult(null); setWaModal(true); }} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: "#16A34A", color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(22,163,74,.25)" }}>💬 Send via WhatsApp</button>
           <button onClick={copyLink} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: copied ? "#ECFDF5" : "#fff", color: copied ? "#047857" : "#374151", border: `1px solid ${copied ? "#A7F3D0" : "#E2E4EC"}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{copied ? "✓ Link copied" : "🔗 Copy link"}</button>
         </div>

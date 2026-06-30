@@ -168,7 +168,7 @@ const SP_STOP = new Set([
 const spNorm = (s) => lc(s || "").replace(/f\s*&\s*b/g, "food beverage");
 
 // Richer evidence blob: skills, duties, titles, employers, industries, languages, education.
-function evidenceBlob(candidate) {
+export function evidenceBlob(candidate) {
   const p = candidate.profile || {};
   const wh = p.work_history || [];
   const parts = [
@@ -186,7 +186,7 @@ function evidenceBlob(candidate) {
 
 // Does the CV show evidence for a free-text requirement? Lenient: any stemmed
 // keyword match counts (stem = first 5 chars, so supervise≈supervising).
-function hasEvidence(blob, requirement) {
+export function hasEvidence(blob, requirement) {
   const tokens = spNorm(requirement)
     .replace(/[^a-z0-9 ]/g, " ")
     .split(/\s+/)
