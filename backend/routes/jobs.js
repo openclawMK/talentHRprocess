@@ -128,6 +128,114 @@ router.patch("/jobs/:jobId/whatsapp-settings", (req, res) => {
   }
 });
 
+// GET /api/analytics — global, cross-role analytics for the workspace dashboard
+router.get("/analytics", (req, res) => {
+  try {
+    const jobs = readJSON(JOBS_PATH);
+    let candidates = [];
+    try {
+      candidates = readJSON(CANDIDATES_PATH);
+    } catch {
+      candidates = [];
+    }
+
+    const todayMs = Date.now();
+    const by_stage = { cv_submission: 0, ocean_assessment: 0, interview: 0, offer: 0, rejected: 0 };
+    const by_lane = { green: 0, amber: 0, red: 0 };
+    const scores = [];
+    const stale = [];
+
+    const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
+    const perRole = {};
+    for (const j of jobs) {
+      perRole[j.job_id] = {
+        job_id: j.job_id,
+        title: j.role_title,
+        dept: j.industry,
+        location: j.location,
+        applicants: 0,
+        scoreSum: 0,
+        scoreN: 0,
+        g: 0,
+        a: 0,
+        r: 0,
+        stale: 0,
+      };
+    }
+
+    for (const c of candidates) {
+      const job = jobById[c.job_id];
+      if (!job) continue;
+      const pr = perRole[c.job_id];
+      pr.applicants += 1;
+
+      const stage = candidateStageKey(c, job);
+      by_stage[stage] = (by_stage[stage] || 0) + 1;
+
+      const lane = c.score?.lane;
+      if (lane && by_lane[lane] != null) {
+        by_lane[lane] += 1;
+        pr[lane === "green" ? "g" : lane === "amber" ? "a" : "r"] += 1;
+      }
+
+      if (typeof c.score?.combined_score === "number") {
+        scores.push(c.score.combined_score);
+        pr.scoreSum += c.score.combined_score;
+        pr.scoreN += 1;
+      }
+
+      const submitted = c.submitted_date ? new Date(c.submitted_date).getTime() : todayMs;
+      const days = Math.max(0, Math.round((todayMs - submitted) / 86400000));
+      if (stage !== "offer" && stage !== "rejected" && days >= 5) {
+        pr.stale += 1;
+        stale.push({ name: c.profile?.name || "Candidate", days_waiting: days, current_stage: stage, role: job.role_title });
+      }
+    }
+
+    const total = candidates.length;
+    const avg = (n, d) => (d ? Math.round(n / d) : 0);
+    const laneTotal = by_lane.green + by_lane.amber + by_lane.red || 1;
+    stale.sort((a, b) => b.days_waiting - a.days_waiting);
+
+    const roles = Object.values(perRole)
+      .map((p) => ({
+        job_id: p.job_id,
+        title: p.title,
+        dept: p.dept,
+        location: p.location,
+        applicants: p.applicants,
+        avg: avg(p.scoreSum, p.scoreN),
+        g: p.g,
+        a: p.a,
+        r: p.r,
+        stale: p.stale,
+      }))
+      .sort((a, b) => b.applicants - a.applicants);
+
+    res.json({
+      total_applicants: total,
+      avg_score: avg(scores.reduce((s, x) => s + x, 0), scores.length),
+      green_count: by_lane.green,
+      in_interview: by_stage.interview,
+      offers_pending: by_stage.offer,
+      open_roles: jobs.length,
+      by_stage,
+      lane_breakdown: {
+        green: { count: by_lane.green, pct: Math.round((by_lane.green / laneTotal) * 100) },
+        amber: { count: by_lane.amber, pct: Math.round((by_lane.amber / laneTotal) * 100) },
+        red: { count: by_lane.red, pct: Math.round((by_lane.red / laneTotal) * 100) },
+      },
+      roles,
+      stale_count: stale.length,
+      stale_top: stale[0] || null,
+      generated_at: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("global analytics error:", err);
+    res.status(500).json({ error: "Failed to load analytics." });
+  }
+});
+
 // GET /api/jobs/:jobId/analytics — pipeline analytics for a role
 router.get("/jobs/:jobId/analytics", (req, res) => {
   try {

@@ -1,8 +1,10 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Layout from "./components/Layout.jsx";
+import WorkspaceLayout from "./components/WorkspaceLayout.jsx";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 
 import Login from "./screens/Login.jsx";
+import GlobalDashboard from "./screens/GlobalDashboard.jsx";
+import HRUpload from "./screens/HRUpload.jsx";
 import JobSelector from "./screens/JobSelector.jsx";
 import JobBuilder from "./screens/JobBuilder.jsx";
 import Dashboard from "./screens/Dashboard.jsx";
@@ -18,12 +20,13 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 
-// HR-facing app (wrapped in the shared Layout with PeopleQuest header).
+// HR-facing app (wrapped in the workspace shell — sidebar + top bar).
 function HRApp() {
   return (
-    <Layout>
+    <WorkspaceLayout>
       <Routes>
-        <Route path="/" element={<Navigate to="/jobs" replace />} />
+        <Route path="/" element={<GlobalDashboard />} />
+        <Route path="/upload" element={<HRUpload />} />
         <Route path="/jobs" element={<JobSelector />} />
         <Route path="/jobs/new" element={<JobBuilder />} />
         <Route path="/jobs/:jobId/dashboard" element={<Dashboard />} />
@@ -37,9 +40,9 @@ function HRApp() {
           element={<InterviewScoring />}
         />
         <Route path="/jobs/:jobId/compare" element={<CompareView />} />
-        <Route path="*" element={<Navigate to="/jobs" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </Layout>
+    </WorkspaceLayout>
   );
 }
 
