@@ -43,17 +43,18 @@ function sourceScore(score, src) {
 function cvFactors(candidate, job) {
   const p = candidate.profile || {};
   const req = job.requirements || {};
+  const sp = job.successProfile || {};
   const factors = [];
 
-  // Experience
+  // Experience — prefer the Role Success Profile benchmark when set.
   const months = p.total_experience_months;
   if (months != null) {
     const yrs = Math.round((months / 12) * 10) / 10;
     const min = req.experience_years_min ?? 0;
-    const pref = req.experience_years_preferred ?? min + 1;
+    const bench = sp.benchmark_experience_years || req.experience_years_preferred || min + 1;
     let verdict, impact;
-    if (yrs >= pref) { verdict = `exceeds preferred of ${pref}`; impact = "positive"; }
-    else if (yrs >= min) { verdict = `meets minimum of ${min}`; impact = "partial"; }
+    if (yrs >= bench) { verdict = `meets benchmark of ${bench}`; impact = "positive"; }
+    else if (yrs >= min) { verdict = `meets minimum of ${min}, below benchmark of ${bench}`; impact = "partial"; }
     else { verdict = `below minimum of ${min}`; impact = "negative"; }
     factors.push({ factor: "Experience", result: `${yrs} years — ${verdict}`, impact });
   }
@@ -82,8 +83,8 @@ function cvFactors(candidate, job) {
     });
   }
 
-  // Team size vs benchmark (skip for non-management roles)
-  const benchTeam = job.benchmark?.avg_team_size || 0;
+  // Team size vs benchmark (Success Profile benchmark preferred; skip for non-management roles)
+  const benchTeam = sp.benchmark_team_size || job.benchmark?.avg_team_size || 0;
   if (benchTeam > 0) {
     const team = Math.max(0, ...(p.work_history || []).map((w) => w.team_size_managed || 0));
     const impact = team >= benchTeam ? "positive" : team > 0 ? "partial" : "negative";
