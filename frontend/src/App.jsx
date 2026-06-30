@@ -13,6 +13,7 @@ import InterviewScoring from "./screens/InterviewScoring.jsx";
 import SuccessProfile from "./screens/SuccessProfile.jsx";
 import CompareView from "./screens/CompareView.jsx";
 import CandidatePortal from "./screens/CandidatePortal.jsx";
+import CandidateAssessment from "./screens/CandidateAssessment.jsx";
 
 // Redirect to /login unless authenticated.
 function ProtectedRoute({ children }) {
@@ -52,6 +53,8 @@ export default function App() {
       <Routes>
         {/* Public candidate portal — no HR chrome, no auth */}
         <Route path="/apply/:token" element={<CandidatePortal />} />
+        {/* Public standalone OCEAN questionnaire for an individual candidate */}
+        <Route path="/assessment/:candidateId" element={<CandidateAssessment />} />
         {/* Public login */}
         <Route path="/login" element={<Login />} />
         {/* Everything else is the protected HR console */}

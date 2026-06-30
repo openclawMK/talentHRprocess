@@ -406,6 +406,45 @@ router.post("/candidates/:jobId/:candidateId/send-interview-invite", async (req,
 });
 
 /**
+ * POST /api/candidates/:jobId/:candidateId/send-ocean-test  { base_url? }
+ * Builds the candidate's standalone OCEAN assessment link and (if a phone is on
+ * file) sends it over WhatsApp. Always returns the link so HR can copy/share it.
+ */
+router.post("/candidates/:jobId/:candidateId/send-ocean-test", async (req, res) => {
+  try {
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const cand = candidates[idx];
+    const base = (req.body?.base_url || process.env.FRONTEND_URL || "").replace(/\/$/, "");
+    const url = `${base}/assessment/${cand.candidate_id}`;
+
+    const phone = cand.profile?.contact?.phone;
+    let result = { skipped: true, reason: "no_phone" };
+    if (phone) {
+      result = await notify(phone, "assessment_link", { name: cand.profile?.name, role: job.role_title, url, minutes: 5 });
+    }
+
+    cand.ocean_invite = { sent_at: today() };
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    res.json({
+      ok: true,
+      url,
+      message_id: result.sid || null,
+      skipped: !!result.skipped,
+      reason: result.reason || result.error || null,
+    });
+  } catch (err) {
+    console.error("send-ocean-test error:", err);
+    res.status(500).json({ error: "Failed to send the assessment link." });
+  }
+});
+
+/**
  * POST /api/candidates/:jobId/:candidateId/outcome  { outcome: "offer" | "rejected" }
  * Records the outcome and sends the candidate the matching WhatsApp message.
  */

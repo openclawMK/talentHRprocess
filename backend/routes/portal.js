@@ -54,6 +54,60 @@ router.get("/ocean-questions", (req, res) => {
 });
 
 /**
+ * GET /api/assessment/:candidateId — public lookup for the standalone OCEAN
+ * questionnaire that HR sends to an individual candidate who hasn't completed
+ * it yet. Exposes only the candidate's first name + role title (no scores).
+ */
+router.get("/assessment/:candidateId", (req, res) => {
+  try {
+    const candidate = readJSON(CANDIDATES_PATH).find((c) => c.candidate_id === req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "This assessment link is invalid or has expired." });
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === candidate.job_id);
+    const done = !!candidate.ocean_traits;
+    res.json({
+      name: candidate.profile?.name || "there",
+      role_title: job?.role_title || "the role",
+      already_done: done,
+    });
+  } catch (err) {
+    console.error("assessment lookup error:", err);
+    res.status(500).json({ error: "Couldn't load this assessment. Please try again." });
+  }
+});
+
+/**
+ * POST /api/assessment/:candidateId/ocean  { responses }
+ * Applies OCEAN scoring to an existing candidate (HR-uploaded or portal) and
+ * refreshes their breakdown + recommendation. Idempotent-ish: re-submitting
+ * simply rescores with the latest responses.
+ */
+router.post("/assessment/:candidateId/ocean", async (req, res) => {
+  try {
+    const { responses } = req.body;
+    if (!responses) return res.status(400).json({ error: "Missing responses." });
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "This assessment link is invalid or has expired." });
+
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === candidates[idx].job_id);
+    if (!job) return res.status(400).json({ error: "The role for this assessment no longer exists." });
+
+    const traits = computeTraits(responses);
+    applyOceanScores(candidates[idx], job, traits);
+    candidates[idx].portal_status = "submitted";
+    candidates[idx].score_breakdown = buildScoreBreakdown(candidates[idx], job);
+    candidates[idx].recommendation = await generateRecommendation(candidates[idx], job);
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    res.json({ ok: true, role_title: job.role_title });
+  } catch (err) {
+    console.error("assessment ocean error:", err);
+    res.status(500).json({ error: "Couldn't submit your assessment. Please try again." });
+  }
+});
+
+/**
  * GET /api/portal/:token — public role info for the application landing page.
  */
 router.get("/portal/:token", (req, res) => {

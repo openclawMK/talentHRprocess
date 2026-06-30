@@ -56,6 +56,9 @@ export default function CandidateDetail() {
   const [chat, setChat] = useState(null);
   const [outcomeSaving, setOutcomeSaving] = useState(false);
   const [sfit, setSfit] = useState(null);
+  const [oceanSending, setOceanSending] = useState(false);
+  const [oceanResult, setOceanResult] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     axios.get(`/api/candidates/${jobId}/${candidateId}`).then((r) => setCandidate(r.data)).catch(() => setCandidate(false));
@@ -82,6 +85,18 @@ export default function CandidateDetail() {
     setOutcomeSaving(true);
     try { setCandidate((await axios.post(`/api/candidates/${jobId}/${candidateId}/outcome`, { outcome })).data.candidate); }
     catch { /* ignore */ } finally { setOutcomeSaving(false); }
+  }
+  async function sendOceanTest() {
+    setOceanSending(true); setOceanResult(null);
+    try {
+      const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/send-ocean-test`, { base_url: window.location.origin });
+      setOceanResult(res.data); setChat(null);
+    } catch (e) { setOceanResult({ error: e.response?.data?.error || "Failed to send the assessment link." }); }
+    finally { setOceanSending(false); }
+  }
+  function copyOceanLink(url) {
+    const link = url || `${window.location.origin}/assessment/${candidateId}`;
+    navigator.clipboard?.writeText(link).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); });
   }
   async function regenerate() {
     setRegenLoading(true);
@@ -125,6 +140,8 @@ export default function CandidateDetail() {
   const traits = candidate.ocean_traits;
   const combined = round(s.combined_score);
   const interviewPending = pending.includes("interview");
+  const oceanPending = pending.includes("ocean") && !traits;
+  const oceanLink = `${window.location.origin}/assessment/${candidateId}`;
   const screenV = status === "screening" ? screeningVerdict(screeningScore(s)) : null;
   const { stages } = candidateStages(candidate, job);
 
@@ -236,6 +253,34 @@ export default function CandidateDetail() {
               </div>
             );
           })()}
+
+          {/* OCEAN test pending — send the candidate the questionnaire */}
+          {oceanPending && (
+            <div style={{ background: "#F7F3FF", border: "1px solid #DDD6FE", borderRadius: 16, padding: 22 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }} className="flex-wrap">
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#fff", border: "1px solid #E0D2FA", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>🧠</div>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "#5B21B6" }}>Personality assessment not completed</div>
+                  <div style={{ fontSize: 13.5, color: "#7C4DDB", lineHeight: 1.55, marginTop: 4 }}>Send {p.name?.split(" ")[0] || "this candidate"} a private link to complete the short OCEAN questionnaire. Their results attach automatically and unlock the personality score.</div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14 }} className="flex-wrap">
+                    <input readOnly value={oceanResult?.url || oceanLink} onFocus={(e) => e.target.select()} style={{ flex: 1, minWidth: 200, fontSize: 13, color: "#4B5563", background: "#fff", border: "1px solid #E0D2FA", borderRadius: 9, padding: "10px 12px", outline: "none" }} />
+                    <button onClick={() => copyOceanLink(oceanResult?.url)} style={{ padding: "10px 14px", background: "#fff", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap" }}>{copied ? "✓ Copied" : "Copy link"}</button>
+                    <button onClick={sendOceanTest} disabled={oceanSending} style={{ padding: "10px 16px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", opacity: oceanSending ? 0.6 : 1 }}>{oceanSending ? "Sending…" : "Send via WhatsApp"}</button>
+                  </div>
+
+                  {oceanResult?.ok && (
+                    <div style={{ fontSize: 13, color: oceanResult.skipped ? "#B45309" : "#047857", marginTop: 11 }}>
+                      {oceanResult.skipped
+                        ? (oceanResult.reason === "no_phone" ? "No phone on file — share the copied link with the candidate directly." : "WhatsApp isn't configured — share the copied link with the candidate directly.")
+                        : "Link sent via WhatsApp ✓ The candidate can complete it on their phone."}
+                    </div>
+                  )}
+                  {oceanResult?.error && <div style={{ fontSize: 13, color: "#DC2626", marginTop: 11 }}>{oceanResult.error}</div>}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Score breakdown */}
           <div style={cardBox}>

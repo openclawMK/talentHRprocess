@@ -114,6 +114,12 @@ const TEMPLATES = {
     `It takes about ${p.minutes || 8} minutes — CV upload + a short questionnaire.\n\n` +
     `Apply here: ${p.url}\n\n` +
     `Please complete it by ${p.expiry}.`,
+
+  assessment_link: (p) =>
+    `Hi ${p.name || "there"}! 👋 As part of your application for *${p.role}*, ` +
+    `please complete a short personality questionnaire. It takes about ${p.minutes || 5} minutes — ` +
+    `there are no right or wrong answers.\n\n` +
+    `Complete it here: ${p.url}`,
 };
 
 /** Build a message body from a template key + params. */
