@@ -160,6 +160,7 @@ router.get("/analytics", (req, res) => {
         a: 0,
         r: 0,
         stale: 0,
+        names: [],
       };
     }
 
@@ -168,6 +169,7 @@ router.get("/analytics", (req, res) => {
       if (!job) continue;
       const pr = perRole[c.job_id];
       pr.applicants += 1;
+      if (c.profile?.name) pr.names.push(c.profile.name);
 
       const stage = candidateStageKey(c, job);
       by_stage[stage] = (by_stage[stage] || 0) + 1;
@@ -209,6 +211,8 @@ router.get("/analytics", (req, res) => {
         a: p.a,
         r: p.r,
         stale: p.stale,
+        avatars: p.names.slice(0, 4).map((n) => n.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()),
+        more: Math.max(0, p.names.length - 4),
       }))
       .sort((a, b) => b.applicants - a.applicants);
 
