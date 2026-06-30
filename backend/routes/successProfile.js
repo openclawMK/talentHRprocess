@@ -38,6 +38,7 @@ router.put("/jobs/:jobId/success-profile", (req, res) => {
       ideal_ocean_profile: p.ideal_ocean_profile || {},
       benchmark_experience_years: Number(p.benchmark_experience_years) || 0,
       benchmark_team_size: Number(p.benchmark_team_size) || 0,
+      benchmark_education: p.benchmark_education || "",
       created_at: jobs[idx].successProfile?.created_at || now,
       last_updated: now,
     };
