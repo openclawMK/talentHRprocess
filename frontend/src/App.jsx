@@ -1,13 +1,22 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
+import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 
+import Login from "./screens/Login.jsx";
 import JobSelector from "./screens/JobSelector.jsx";
 import JobBuilder from "./screens/JobBuilder.jsx";
 import Dashboard from "./screens/Dashboard.jsx";
 import CandidateDetail from "./screens/CandidateDetail.jsx";
 import InterviewScoring from "./screens/InterviewScoring.jsx";
+import SuccessProfile from "./screens/SuccessProfile.jsx";
 import CompareView from "./screens/CompareView.jsx";
 import CandidatePortal from "./screens/CandidatePortal.jsx";
+
+// Redirect to /login unless authenticated.
+function ProtectedRoute({ children }) {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
 
 // HR-facing app (wrapped in the shared Layout with PeopleQuest header).
 function HRApp() {
@@ -18,6 +27,7 @@ function HRApp() {
         <Route path="/jobs" element={<JobSelector />} />
         <Route path="/jobs/new" element={<JobBuilder />} />
         <Route path="/jobs/:jobId/dashboard" element={<Dashboard />} />
+        <Route path="/jobs/:jobId/success-profile" element={<SuccessProfile />} />
         <Route
           path="/jobs/:jobId/candidate/:candidateId"
           element={<CandidateDetail />}
@@ -35,11 +45,22 @@ function HRApp() {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public candidate portal — no HR chrome */}
-      <Route path="/apply/:token" element={<CandidatePortal />} />
-      {/* Everything else is the HR console */}
-      <Route path="/*" element={<HRApp />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        {/* Public candidate portal — no HR chrome, no auth */}
+        <Route path="/apply/:token" element={<CandidatePortal />} />
+        {/* Public login */}
+        <Route path="/login" element={<Login />} />
+        {/* Everything else is the protected HR console */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute>
+              <HRApp />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </AuthProvider>
   );
 }

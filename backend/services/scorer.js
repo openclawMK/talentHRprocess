@@ -157,6 +157,73 @@ function benchmarkScore(candidate, job) {
   return parts.length ? Math.round(parts.reduce((a, x) => a + x, 0) / parts.length) : 60;
 }
 
+const SP_STOP = new Set([
+  "the", "a", "an", "of", "and", "or", "to", "in", "with", "at", "for", "least",
+  "years", "year", "minimum", "min", "experience", "strong", "ability", "staff",
+  "no", "any", "kind", "explanation", "month", "months", "least", "good", "able",
+  "have", "has", "must", "should", "record", "level", "work", "working",
+]);
+
+// Normalize text so "F&B" survives tokenization and matching is case-insensitive.
+const spNorm = (s) => lc(s || "").replace(/f\s*&\s*b/g, "food beverage");
+
+// Richer evidence blob: skills, duties, titles, employers, industries, languages, education.
+function evidenceBlob(candidate) {
+  const p = candidate.profile || {};
+  const wh = p.work_history || [];
+  const parts = [
+    ...(p.skills || []),
+    ...wh.flatMap((w) => w.duties || []),
+    ...wh.map((w) => w.title || ""),
+    ...wh.map((w) => w.employer || ""),
+    ...wh.map((w) => w.industry || ""),
+    ...(p.languages || []),
+    ...(p.education || []).map((e) => `${e.level || ""} ${e.field || ""}`),
+    p.career_direction || "",
+  ];
+  return spNorm(parts.join(" | "));
+}
+
+// Does the CV show evidence for a free-text requirement? Lenient: any stemmed
+// keyword match counts (stem = first 5 chars, so supervise≈supervising).
+function hasEvidence(blob, requirement) {
+  const tokens = spNorm(requirement)
+    .replace(/[^a-z0-9 ]/g, " ")
+    .split(/\s+/)
+    .filter((t) => t.length >= 4 && !SP_STOP.has(t));
+  if (!tokens.length) return true; // nothing concrete to check → no penalty
+  return tokens.some((t) => blob.includes(t.slice(0, 5)));
+}
+
+/**
+ * Evaluate a candidate against the job's Role Success Profile (Session 12).
+ * Returns missing must-haves, triggered dealbreakers, and a CV penalty.
+ */
+export function evaluateSuccessProfile(candidate, job) {
+  const sp = job.successProfile;
+  if (!sp) return { missing_must_haves: [], dealbreakers_hit: [], penalty: 0 };
+
+  const text = evidenceBlob(candidate);
+  const missing = (sp.must_haves || []).filter((m) => !hasEvidence(text, m));
+  const penalty = Math.min(20, missing.length * 8);
+
+  const dealbreakers_hit = [];
+  for (const d of sp.dealbreakers || []) {
+    const dl = lc(d);
+    if (dl.includes("gap")) {
+      const gaps = candidate.profile?.employment_gaps || [];
+      if (gaps.some((g) => (g.months || 0) > 12)) dealbreakers_hit.push(d);
+    } else if (dl.includes("supervis") || dl.includes("manage")) {
+      const wh = candidate.profile?.work_history || [];
+      const hasSup = wh.some(
+        (w) => /(supervis|manager|lead|team lead)/.test(lc(w.title)) || (w.team_size_managed || 0) > 0
+      );
+      if (!hasSup) dealbreakers_hit.push(d);
+    }
+  }
+  return { missing_must_haves: missing, dealbreakers_hit, penalty };
+}
+
 /**
  * Score a candidate against a job's dynamic criteria.
  */
@@ -190,10 +257,14 @@ export function scoreCandidate(candidate, job) {
 
   const cvItems = criteria_scores.filter((c) => c.source === "cv");
   const cvWeight = cvItems.reduce((a, c) => a + c.weight, 0);
-  const cv_partial_score = cvWeight
+  const rawCv = cvWeight
     ? Math.round(cvItems.reduce((a, c) => a + c.score * c.weight, 0) / cvWeight)
     : 0;
   const cv_coverage = Math.round(cvWeight * 100) / 100;
+
+  // Role Success Profile: penalise missing must-haves, flag dealbreakers.
+  const sp = evaluateSuccessProfile(candidate, job);
+  const cv_partial_score = clamp(rawCv - sp.penalty);
 
   // Only enabled stages with criteria are "pending"; disabled stages are N/A.
   const pending_sources = ["interview", "ocean"].filter(
@@ -217,5 +288,9 @@ export function scoreCandidate(candidate, job) {
     criteria_scores,
     combined_score,
     lane,
+    must_have_penalty: sp.penalty,
+    missing_must_haves: sp.missing_must_haves,
+    dealbreaker_triggered: sp.dealbreakers_hit.length > 0,
+    dealbreakers_hit: sp.dealbreakers_hit,
   };
 }

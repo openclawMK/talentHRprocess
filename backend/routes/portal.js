@@ -20,7 +20,7 @@ import { extractText } from "../services/fileExtractor.js";
 import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
-import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
@@ -47,6 +47,11 @@ const storage = multer.diskStorage({
     cb(null, `${uuidv4()}${path.extname(file.originalname)}`),
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// GET /api/ocean-questions — public BFI-10 items (used by the candidate portal).
+router.get("/ocean-questions", (req, res) => {
+  res.json({ items: OCEAN_ITEMS });
+});
 
 /**
  * GET /api/portal/:token — public role info for the application landing page.

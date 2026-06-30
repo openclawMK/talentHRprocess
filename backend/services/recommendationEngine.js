@@ -27,7 +27,9 @@ export async function generateRecommendation(candidate, job) {
 
   // STEP 1 — recommendation (rule-based)
   let recommendation;
-  if (combined < red || cvFit < 35 || parse < 40) {
+  if (score.dealbreaker_triggered) {
+    recommendation = "REJECT"; // Role Success Profile dealbreaker overrides everything
+  } else if (combined < red || cvFit < 35 || parse < 40) {
     recommendation = "REJECT";
   } else if (combined >= green && cvFit >= 65 && !hasCriticalRisk(candidate) && (full || oceanDone)) {
     recommendation = "HIRE";

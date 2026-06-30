@@ -133,6 +133,28 @@
       "avg_experience_years": 3,
       "avg_team_size": 9
     },
+    "successProfile": {
+      "summary": "An ideal Outlet Supervisor has 3+ years of F&B experience, has led teams of 8+ people, and scores high on Conscientiousness and Agreeableness.",
+      "must_haves": [
+        "Minimum 2 years F&B or hospitality experience",
+        "Experience supervising at least 5 staff",
+        "Strong complaint resolution ability"
+      ],
+      "nice_to_haves": [
+        "Food safety certification",
+        "Experience with POS systems",
+        "Fluent in Bahasa Malaysia and English"
+      ],
+      "dealbreakers": [
+        "Employment gap over 12 months with no explanation",
+        "No supervisory experience of any kind"
+      ],
+      "ideal_ocean_profile": { "O": "medium", "C": "high", "E": "medium-high", "A": "high", "N": "low" },
+      "benchmark_experience_years": 3,
+      "benchmark_team_size": 8,
+      "created_at": "2026-06-30T00:00:00.000Z",
+      "last_updated": "2026-06-30T00:00:00.000Z"
+    },
     "criteria_generated_by": "template",
     "criteria_locked": false
   },
@@ -261,6 +283,27 @@
       "maturity": "starter",
       "avg_experience_years": 1,
       "avg_team_size": 0
+    },
+    "successProfile": {
+      "summary": "An ideal Cashier is accurate with cash and POS, friendly with customers, dependable on attendance, and stays calm during busy periods.",
+      "must_haves": [
+        "Cash handling or POS experience",
+        "Customer-facing service experience",
+        "Reliable attendance record"
+      ],
+      "nice_to_haves": [
+        "Retail or F&B background",
+        "Product knowledge",
+        "Multilingual"
+      ],
+      "dealbreakers": [
+        "History of cash discrepancies or integrity issues"
+      ],
+      "ideal_ocean_profile": { "O": "medium", "C": "high", "E": "medium", "A": "medium-high", "N": "low" },
+      "benchmark_experience_years": 1,
+      "benchmark_team_size": 0,
+      "created_at": "2026-06-30T00:00:00.000Z",
+      "last_updated": "2026-06-30T00:00:00.000Z"
     },
     "criteria_generated_by": "template",
     "criteria_locked": false
@@ -399,6 +442,28 @@
       "maturity": "starter",
       "avg_experience_years": 2,
       "avg_team_size": 0
+    },
+    "successProfile": {
+      "summary": "An ideal Hotel Front Desk Officer has 2+ years hospitality experience, communicates warmly across languages, de-escalates guest issues calmly, and presents professionally.",
+      "must_haves": [
+        "Minimum 1 year hospitality or front-line customer service experience",
+        "Clear communication in English and Bahasa Malaysia",
+        "Guest complaint handling ability"
+      ],
+      "nice_to_haves": [
+        "Hotel PMS (Opera) experience",
+        "Additional languages (Mandarin, etc.)",
+        "Upselling experience"
+      ],
+      "dealbreakers": [
+        "Unable to work shift or weekend hours",
+        "No customer-facing experience"
+      ],
+      "ideal_ocean_profile": { "O": "medium", "C": "high", "E": "high", "A": "high", "N": "low" },
+      "benchmark_experience_years": 2,
+      "benchmark_team_size": 0,
+      "created_at": "2026-06-30T00:00:00.000Z",
+      "last_updated": "2026-06-30T00:00:00.000Z"
     },
     "criteria_generated_by": "template",
     "criteria_locked": false

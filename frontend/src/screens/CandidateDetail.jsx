@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, Trash2, MessageCircle, Send, CalendarClock, RefreshCw } from "lucide-react";
+import { ArrowLeft, Check, X, AlertTriangle, ClipboardList, MessageSquare, Sparkles, Trash2, MessageCircle, Send, CalendarClock, RefreshCw, Download } from "lucide-react";
 import LaneBadge from "../components/LaneBadge.jsx";
 import CriteriaRow from "../components/CriteriaRow.jsx";
 import Modal from "../components/Modal.jsx";
@@ -121,6 +121,25 @@ export default function CandidateDetail() {
     }
   }
 
+  async function exportPdf() {
+    // Fetch as a blob (carries the auth token) then trigger a download.
+    try {
+      const res = await axios.get(`/api/candidates/${jobId}/${candidateId}/export/pdf`, {
+        responseType: "blob",
+      });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${(p.name || "Candidate").replace(/[^a-z0-9]+/gi, "_")}_Report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Couldn't generate the PDF. Please try again.");
+    }
+  }
+
   const REC_STYLE = {
     HIRE: { bg: "#D1FAE5", text: "#065F46", border: "#059669" },
     HOLD: { bg: "#FEF3C7", text: "#92400E", border: "#D97706" },
@@ -200,14 +219,22 @@ export default function CandidateDetail() {
               <Sparkles size={16} className="text-gray-600" />
               <h2 className="text-xs font-semibold uppercase tracking-wide text-gray-500">AI Recommendation</h2>
             </div>
-            <button
-              onClick={regenerateRecommendation}
-              disabled={regenLoading}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 disabled:opacity-50"
-            >
-              <RefreshCw size={13} className={regenLoading ? "animate-spin" : ""} />
-              {regenLoading ? "Regenerating…" : "Regenerate"}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={exportPdf}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-800"
+              >
+                <Download size={13} /> Export Report
+              </button>
+              <button
+                onClick={regenerateRecommendation}
+                disabled={regenLoading}
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-800 disabled:opacity-50"
+              >
+                <RefreshCw size={13} className={regenLoading ? "animate-spin" : ""} />
+                {regenLoading ? "Regenerating…" : "Regenerate"}
+              </button>
+            </div>
           </div>
 
           <div className="mt-3 flex items-center gap-2">

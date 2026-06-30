@@ -81,9 +81,11 @@ export function recomputeCombined(score, job) {
   // Not-applicable criteria (disabled pipeline stages) never count.
   const scored = all.filter((c) => c.scored && c.score != null && !c.not_applicable);
   const scoredWeight = scored.reduce((a, c) => a + c.weight, 0);
-  const combined = scoredWeight
+  let combined = scoredWeight
     ? Math.round(scored.reduce((a, c) => a + c.score * c.weight, 0) / scoredWeight)
     : 0;
+  // Carry the Role Success Profile must-have penalty through later stages.
+  if (score.must_have_penalty) combined = Math.max(0, combined - score.must_have_penalty);
 
   const pending = ["interview", "ocean"].filter((s) =>
     all.some((c) => c.source === s && !c.scored && !c.not_applicable)

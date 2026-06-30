@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { Link2, Check, SlidersHorizontal, MessageCircle, Send } from "lucide-react";
+import { Link2, Check, SlidersHorizontal, MessageCircle, Send, Target } from "lucide-react";
 import CandidateCard from "../components/CandidateCard.jsx";
 import Modal from "../components/Modal.jsx";
 import { displayLane } from "../lib/format.js";
@@ -168,6 +168,12 @@ export default function Dashboard() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            to={`/jobs/${jobId}/success-profile`}
+            className="inline-flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <Target size={16} /> Success Profile
+          </Link>
           <button
             onClick={() => { setWaResult(null); setWaModal(true); }}
             className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-white"

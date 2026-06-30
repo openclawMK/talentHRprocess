@@ -9,7 +9,7 @@ import { extractText } from "../services/fileExtractor.js";
 import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
-import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
@@ -69,6 +69,10 @@ async function runScoring(candidate, job) {
     criteria_scores: scores.criteria_scores,
     combined_score: scores.combined_score,
     lane: scores.lane,
+    must_have_penalty: scores.must_have_penalty,
+    missing_must_haves: scores.missing_must_haves,
+    dealbreaker_triggered: scores.dealbreaker_triggered,
+    dealbreakers_hit: scores.dealbreakers_hit,
     strengths: insights.strengths,
     weaknesses: insights.weaknesses,
     gaps: insights.gaps,
@@ -275,13 +279,6 @@ Write 3-4 sentences for an HR manager explaining who is stronger for what reason
     console.error("compare-candidates error:", err);
     return res.status(500).json({ error: "Failed to compare candidates." });
   }
-});
-
-/**
- * GET /api/ocean-questions — the BFI-10 questionnaire items.
- */
-router.get("/ocean-questions", (req, res) => {
-  res.json({ items: OCEAN_ITEMS });
 });
 
 /**

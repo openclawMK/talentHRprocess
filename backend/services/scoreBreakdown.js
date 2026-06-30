@@ -135,6 +135,10 @@ function interviewFactors(score) {
 // ---- Missing evidence (rule-based) ----
 function missingEvidence(candidate, job) {
   const out = [];
+  // Role Success Profile must-haves not evidenced in the CV come first.
+  for (const m of candidate.score?.missing_must_haves || []) {
+    out.push(`Missing must-have: ${m}`);
+  }
   const pending = candidate.score?.pending_sources || [];
   if (pending.includes("interview")) out.push("Interview not yet completed — interview criteria unscored");
   if (pending.includes("ocean")) out.push("OCEAN assessment not yet completed");
@@ -186,7 +190,10 @@ export function buildScoreBreakdown(candidate, job) {
       contributing_factors: interviewFactors(score),
     },
     strengths: score.strengths || [],
-    risks: score.weaknesses || [],
+    risks: [
+      ...(score.dealbreakers_hit || []).map((d) => `Dealbreaker: ${d}`),
+      ...(score.weaknesses || []),
+    ],
     missing_evidence: missingEvidence(candidate, job),
   };
 }
