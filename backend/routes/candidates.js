@@ -354,7 +354,7 @@ router.get("/jobs/:jobId/best-match", async (req, res) => {
  * Body: { background|health|references: { status, notes } } — partial merge.
  * Post-interview due diligence: background check, health report, references.
  */
-router.post("/candidates/:jobId/:candidateId/pre-hire-checks", (req, res) => {
+router.post("/candidates/:jobId/:candidateId/pre-hire-checks", async (req, res) => {
   try {
     const CHECK_KEYS = ["background", "health", "references"];
     const STATUSES = ["pending", "clear", "flagged", "skipped"];
@@ -363,6 +363,7 @@ router.post("/candidates/:jobId/:candidateId/pre-hire-checks", (req, res) => {
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
 
     const cand = candidates[idx];
+    const before = JSON.stringify(cand.pre_hire_checks || {});
     cand.pre_hire_checks = cand.pre_hire_checks || {};
     for (const k of CHECK_KEYS) {
       const inc = req.body?.[k];
@@ -374,8 +375,20 @@ router.post("/candidates/:jobId/:candidateId/pre-hire-checks", (req, res) => {
         updated: today(),
       };
     }
+
+    // Auto-refresh the AI suggestion so it reflects the latest checks — but only
+    // if a status actually changed, to avoid a needless LLM call on note edits.
+    const statusChanged = CHECK_KEYS.some(
+      (k) => (JSON.parse(before)[k]?.status || null) !== (cand.pre_hire_checks[k]?.status || null)
+    );
+    const job = findJob(req.params.jobId);
+    if (statusChanged && job) {
+      try { cand.recommendation = await generateRecommendation(cand, job); }
+      catch (e) { console.error("recommendation refresh failed:", e.message); }
+    }
+
     writeJSON(CANDIDATES_PATH, candidates);
-    res.json({ ok: true, pre_hire_checks: cand.pre_hire_checks });
+    res.json({ ok: true, candidate: cand, pre_hire_checks: cand.pre_hire_checks, recommendation: cand.recommendation });
   } catch (err) {
     console.error("pre-hire-checks error:", err);
     res.status(500).json({ error: "Failed to save checks." });

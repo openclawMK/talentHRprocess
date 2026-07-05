@@ -7,10 +7,19 @@
  */
 import { chatJSON } from "./aiClient.js";
 
+function flaggedChecks(candidate) {
+  const LABELS = { background: "background check", health: "medical clearance", references: "previous-employer reference" };
+  const c = candidate.pre_hire_checks || {};
+  return Object.keys(LABELS).filter((k) => c[k]?.status === "flagged").map((k) => LABELS[k]);
+}
+
 function hasCriticalRisk(candidate) {
   const gaps = candidate.profile?.employment_gaps || [];
   if (gaps.some((g) => (g.months || 0) > 12)) return true;
   if ((candidate.parse_confidence_overall ?? 100) < 50) return true;
+  // A flagged pre-hire check blocks an automatic HIRE (pushes to HOLD) — advisory,
+  // never an auto-reject; HR still decides.
+  if (flaggedChecks(candidate).length) return true;
   return false;
 }
 
@@ -44,10 +53,13 @@ export async function generateRecommendation(candidate, job) {
   else confidence = "Low";
   if (pending.length > 1 || parse < 60) confidence = "Low";
 
+  const flagged = flaggedChecks(candidate);
+
   // STEP 5 — next action (rule-based)
   let next_action;
   const pendingLabel = pending.map((p) => (p === "ocean" ? "OCEAN" : "interview")).join(" + ");
-  if (recommendation === "HIRE" && full) next_action = "Proceed to offer — prepare employment letter";
+  if (flagged.length) next_action = `Resolve flagged ${flagged.join(" + ")} before any offer`;
+  else if (recommendation === "HIRE" && full) next_action = "Proceed to offer — prepare employment letter";
   else if (recommendation === "HIRE") next_action = `Complete ${pendingLabel} before making offer`;
   else if (recommendation === "HOLD" && pending.includes("ocean")) next_action = "Send OCEAN assessment link to candidate";
   else if (recommendation === "HOLD" && pending.includes("interview")) next_action = "Schedule interview to complete assessment";
@@ -70,6 +82,7 @@ Personality assessed: ${oceanDone ? "yes" : "no"}
 Pending stages: ${pending.join(", ") || "none"}
 Strengths: ${JSON.stringify(score.strengths || [])}
 Risks: ${JSON.stringify(score.weaknesses || [])}
+Flagged pre-hire checks: ${flagged.length ? flagged.join(", ") + " (treat as a serious concern; do not disclose medical specifics)" : "none"}
 Role: ${job.role_title} (${job.industry})
 
 Return exactly:

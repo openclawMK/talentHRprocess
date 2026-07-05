@@ -86,10 +86,19 @@ export default function CandidateDetail() {
   }, [jobId, candidateId]);
   useEffect(() => { if (candidate && candidate.pre_hire_checks) setChecks(candidate.pre_hire_checks); }, [candidate]);
 
+  const [recRefreshing, setRecRefreshing] = useState(false);
   async function saveCheck(key, patch) {
     const next = { ...checks, [key]: { ...(checks[key] || { status: "pending", notes: "" }), ...patch } };
     setChecks(next);
-    try { await axios.post(`/api/candidates/${jobId}/${candidateId}/pre-hire-checks`, { [key]: next[key] }); } catch { /* ignore */ }
+    const statusChange = "status" in patch;
+    if (statusChange) setRecRefreshing(true);
+    try {
+      const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/pre-hire-checks`, { [key]: next[key] });
+      // A status change re-runs the AI suggestion — merge the refreshed fields
+      // without clobbering GET-only fields (e.g. budget_fit) on the candidate.
+      if (res.data?.pre_hire_checks) setChecks(res.data.pre_hire_checks);
+      if (res.data?.recommendation) setCandidate((prev) => ({ ...prev, recommendation: res.data.recommendation, pre_hire_checks: res.data.pre_hire_checks }));
+    } catch { /* ignore */ } finally { setRecRefreshing(false); }
   }
 
   async function loadChat() {
@@ -259,6 +268,7 @@ export default function CandidateDetail() {
                       <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", color: r.color, opacity: 0.85 }}>
                         AI recommendation
                         <span onClick={regenerate} title="Regenerate" style={{ cursor: "pointer", opacity: regenLoading ? 0.5 : 0.7 }}>↻</span>
+                        {recRefreshing && <span style={{ fontWeight: 600, textTransform: "none", letterSpacing: 0, opacity: 0.7 }}>· updating…</span>}
                       </div>
                       <div className="font-display" style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.6px", color: r.color }}>{rec.recommendation}</div>
                     </div>
