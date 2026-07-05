@@ -12,7 +12,7 @@ import {
   reconcileCandidate,
   candidateStageKey,
 } from "../services/pipeline.js";
-import { notify } from "../services/whatsappService.js";
+import { notify, whatsappConfigured } from "../services/whatsappService.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -70,6 +70,18 @@ router.post("/generate-criteria", async (req, res) => {
     console.error("generate-criteria error:", err);
     res.status(500).json({ error: "Failed to generate criteria." });
   }
+});
+
+// GET /api/whatsapp/status — is WhatsApp actually wired up on THIS server?
+// Reports config state without exposing any secret (the sandbox FROM is public).
+router.get("/whatsapp/status", (req, res) => {
+  const from = process.env.TWILIO_WHATSAPP_FROM || "";
+  res.json({
+    configured: whatsappConfigured,
+    from: from ? from.replace(/\d(?=\d{4})/g, "*") : null,
+    sandbox: from.includes("14155238886"),
+    frontend_url_set: !!process.env.FRONTEND_URL,
+  });
 });
 
 // POST /api/jobs/:jobId/send-portal-link — share the application link via WhatsApp

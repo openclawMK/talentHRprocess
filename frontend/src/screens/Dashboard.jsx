@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [waForm, setWaForm] = useState({ candidate_name: "", phone: "" });
   const [waSending, setWaSending] = useState(false);
   const [waResult, setWaResult] = useState(null);
+  const [waStatus, setWaStatus] = useState(null);
   const [hrAlerts, setHrAlerts] = useState(false);
   const [hrPhone, setHrPhone] = useState("");
   const [hrSaved, setHrSaved] = useState(false);
@@ -94,6 +95,7 @@ export default function Dashboard() {
       if (j) { setHrAlerts(!!j.hr_whatsapp_alerts); setHrPhone(j.hr_contact_phone || ""); }
     });
     axios.get(`/api/jobs/${jobId}/pipeline`).then((r) => setPipeline(r.data)).catch(() => setPipeline(null));
+    axios.get("/api/whatsapp/status").then((r) => setWaStatus(r.data)).catch(() => setWaStatus(null));
   }, [jobId]);
   useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
@@ -149,11 +151,33 @@ export default function Dashboard() {
         <Modal title="Send application link via WhatsApp" onClose={() => setWaModal(false)}>
           {waResult?.ok ? (
             <div className="text-sm">
-              <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">{waResult.skipped ? "WhatsApp isn't configured yet — logged but not sent." : "Message sent! ✅"}</div>
+              {waResult.skipped ? (
+                <div className="rounded-md bg-amber-50 px-3 py-2 text-amber-800">
+                  {waResult.reason === "no_phone"
+                    ? "That phone number couldn't be read — check the format (e.g. 012-345 6789)."
+                    : "Not sent: WhatsApp isn't configured on this server. The link was logged only."}
+                </div>
+              ) : (
+                <>
+                  <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">Handed to WhatsApp ✅ {waResult.message_id ? `(id ${String(waResult.message_id).slice(-6)})` : ""}</div>
+                  {waStatus?.sandbox && (
+                    <div className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                      Sandbox mode: it will only arrive if that number has joined the Twilio sandbox (WhatsApp <b>join &lt;code&gt;</b> to the sandbox number) and messaged within the last 24h.
+                    </div>
+                  )}
+                </>
+              )}
+              <div className="mt-2 break-all rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-500">Link: {waResult.portal_url}</div>
               <button onClick={() => setWaModal(false)} className="mt-4 w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white">Done</button>
             </div>
           ) : (
             <div className="space-y-3">
+              {waStatus && !waStatus.configured && (
+                <div className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">⚠ WhatsApp isn't configured on this server — messages will be logged but not delivered. Add the Twilio env vars to the backend.</div>
+              )}
+              {waStatus?.configured && waStatus?.sandbox && (
+                <div className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">Using the Twilio sandbox — the recipient must first send the <b>join</b> code to the sandbox number, or the message won't arrive.</div>
+              )}
               <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Candidate name</span>
                 <input className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none" value={waForm.candidate_name} onChange={(e) => setWaForm({ ...waForm, candidate_name: e.target.value })} placeholder="Optional" /></label>
               <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Phone (Malaysian)</span>
