@@ -107,7 +107,15 @@ export default function CandidateDetail() {
   }
   async function setOutcome(outcome) {
     const verb = outcome === "offer" ? "send an OFFER message to" : "send a REJECTION message to";
-    if (!window.confirm(`This will ${verb} the candidate via WhatsApp and mark them as ${outcome}. Continue?`)) return;
+    let warn = "";
+    if (outcome === "offer") {
+      const flagged = CHECKS.filter((c) => checks[c.key]?.status === "flagged").map((c) => c.label);
+      const incomplete = CHECKS.filter((c) => !checks[c.key] || checks[c.key].status === "pending").map((c) => c.label);
+      if (flagged.length) warn += `⚠ FLAGGED: ${flagged.join(", ")}.\n`;
+      if (incomplete.length) warn += `Not yet completed: ${incomplete.join(", ")}.\n`;
+      if (warn) warn = `Pre-hire checks need attention:\n${warn}\n`;
+    }
+    if (!window.confirm(`${warn}This will ${verb} the candidate via WhatsApp and mark them as ${outcome}. Continue?`)) return;
     setOutcomeSaving(true);
     try { setCandidate((await axios.post(`/api/candidates/${jobId}/${candidateId}/outcome`, { outcome })).data.candidate); }
     catch { /* ignore */ } finally { setOutcomeSaving(false); }

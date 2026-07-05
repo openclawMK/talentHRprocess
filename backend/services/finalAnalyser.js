@@ -36,6 +36,18 @@ export async function generateFinalAnalysis(candidate, job) {
     .map((n) => `[${n.date}] ${n.text}`)
     .join("\n") || "None recorded";
 
+  // Pre-hire checks — post-interview due diligence. Health specifics are never
+  // exposed to the model (legal/fairness); only its clear/flagged state is.
+  const CK_LABEL = { background: "Background check", health: "Medical clearance", references: "Previous-employer reference" };
+  const checks = candidate.pre_hire_checks || {};
+  const checkLines = Object.entries(CK_LABEL).map(([k, label]) => {
+    const c = checks[k];
+    if (!c || c.status === "pending") return `  • ${label}: not yet completed`;
+    if (c.status === "skipped") return `  • ${label}: skipped`;
+    const note = k !== "health" && c.notes ? ` — "${c.notes}"` : "";
+    return `  • ${label}: ${c.status === "flagged" ? "FLAGGED" : "clear"}${note}`;
+  }).join("\n");
+
   const system =
     "You are a senior HR consultant producing a final hiring recommendation. " +
     "Be direct and honest — this is a decision-support document for a hiring manager. " +
@@ -58,10 +70,14 @@ ${fmt(interviewItems) || "  No interview criteria scored"}
 === HR OBSERVATIONS ===
 ${hrNotes}
 
+=== PRE-HIRE CHECKS (post-interview due diligence) ===
+${checkLines}
+Any check marked FLAGGED is a serious concern: weigh it heavily, name it in weaknesses, and let it move the recommendation toward Hold or Reject. Do not disclose medical details beyond clear/flagged/pending.
+
 === OUTCOME ===
 Overall lane: ${score.lane || "unknown"} (${score.combined_score ?? "?"}% combined)
 
-Produce a final holistic hiring assessment that synthesises ALL three stages plus the HR notes.
+Produce a final holistic hiring assessment that synthesises ALL three stages, the HR notes, and the pre-hire checks.
 
 Return exactly:
 {
