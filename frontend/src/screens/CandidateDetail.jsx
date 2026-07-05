@@ -19,6 +19,17 @@ const REC = {
   HOLD: { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", icon: "⏸" },
   REJECT: { color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", icon: "✕" },
 };
+const CHECKS = [
+  { key: "background", icon: "🛡", label: "Background check", hint: "Identity, criminal record, employment history" },
+  { key: "health", icon: "🩺", label: "Health report", hint: "Pre-employment medical screening" },
+  { key: "references", icon: "📞", label: "Previous employer review", hint: "Reference call with recent employer(s)" },
+];
+const CHECK_STATUS = {
+  pending: { label: "Pending", color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
+  clear: { label: "Clear ✓", color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" },
+  flagged: { label: "Flagged ⚠", color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" },
+  skipped: { label: "Skipped", color: "#9AA0AE", bg: "#FAFAFC", border: "#ECEDF2" },
+};
 const BUDGET = {
   green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0", icon: "✓" },
   amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A", icon: "≈" },
@@ -66,12 +77,20 @@ export default function CandidateDetail() {
   const [oceanSending, setOceanSending] = useState(false);
   const [oceanResult, setOceanResult] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [checks, setChecks] = useState({});
 
   useEffect(() => {
     axios.get(`/api/candidates/${jobId}/${candidateId}`).then((r) => setCandidate(r.data)).catch(() => setCandidate(false));
     axios.get("/api/jobs").then((r) => setJob(r.data.find((j) => j.job_id === jobId) || null));
     axios.get(`/api/candidates/${jobId}/${candidateId}/success-fit`).then((r) => setSfit(r.data)).catch(() => setSfit({ configured: false }));
   }, [jobId, candidateId]);
+  useEffect(() => { if (candidate && candidate.pre_hire_checks) setChecks(candidate.pre_hire_checks); }, [candidate]);
+
+  async function saveCheck(key, patch) {
+    const next = { ...checks, [key]: { ...(checks[key] || { status: "pending", notes: "" }), ...patch } };
+    setChecks(next);
+    try { await axios.post(`/api/candidates/${jobId}/${candidateId}/pre-hire-checks`, { [key]: next[key] }); } catch { /* ignore */ }
+  }
 
   async function loadChat() {
     setShowChat((v) => !v);
@@ -150,6 +169,7 @@ export default function CandidateDetail() {
   const oceanPending = pending.includes("ocean") && !traits;
   const oceanLink = `${window.location.origin}/assessment/${candidateId}`;
   const budget = candidate.budget_fit;
+  const interviewDone = criteria.some((m) => m.source === "interview" && m.scored && !m.not_applicable);
   const screenV = status === "screening" ? screeningVerdict(screeningScore(s)) : null;
   const { stages } = candidateStages(candidate, job);
 
@@ -463,6 +483,41 @@ export default function CandidateDetail() {
             </div>
             {missingSkills.length > 0 && <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 12 }}>Required by the role but not yet evidenced — confirm during screening or interview.</div>}
           </div>
+
+          {/* Pre-hire checks — post-interview due diligence */}
+          {interviewDone && (
+            <div style={cardBox}>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Pre-hire checks</div>
+              <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 16 }}>Post-interview due diligence — complete these before sending an offer.</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {CHECKS.map((c) => {
+                  const cur = checks[c.key] || { status: "pending", notes: "" };
+                  return (
+                    <div key={c.key} style={{ background: "#FAFAFC", borderRadius: 12, padding: "13px 15px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="flex-wrap">
+                        <span style={{ fontSize: 17 }}>{c.icon}</span>
+                        <div style={{ flex: 1, minWidth: 160 }}>
+                          <div style={{ fontSize: 14, fontWeight: 700 }}>{c.label}</div>
+                          <div style={{ fontSize: 12, color: "#9AA0AE" }}>{c.hint}</div>
+                        </div>
+                        <div style={{ display: "flex", gap: 6 }} className="flex-wrap">
+                          {Object.entries(CHECK_STATUS).map(([k, s]) => {
+                            const active = cur.status === k;
+                            return <span key={k} onClick={() => saveCheck(c.key, { status: k })} style={{ fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, cursor: "pointer", color: active ? s.color : "#9AA0AE", background: active ? s.bg : "#fff", border: `1px solid ${active ? s.border : "#E5E7EB"}` }}>{s.label}</span>;
+                          })}
+                        </div>
+                      </div>
+                      <input value={cur.notes || ""} onChange={(e) => setChecks({ ...checks, [c.key]: { ...cur, notes: e.target.value } })} onBlur={(e) => saveCheck(c.key, { notes: e.target.value })} placeholder="Notes — referee name, outcome, follow-ups…" style={{ width: "100%", marginTop: 10, fontSize: 13, padding: "8px 12px", border: "1px solid #ECEDF2", borderRadius: 9, outline: "none", background: "#fff", color: "#374151" }} />
+                      {cur.updated && <div style={{ fontSize: 11, color: "#C4C7D2", marginTop: 5 }}>Updated {cur.updated}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+              {Object.values(checks).some((c) => c?.status === "flagged") && (
+                <div style={{ marginTop: 12, fontSize: 13, color: "#B91C1C", fontWeight: 600 }}>⚠ A check is flagged — review it before proceeding to an offer.</div>
+              )}
+            </div>
+          )}
 
           {/* HR notes */}
           <div style={cardBox}>

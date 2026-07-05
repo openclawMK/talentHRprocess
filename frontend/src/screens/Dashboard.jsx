@@ -19,6 +19,11 @@ const LANE = {
   in_progress: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB", dot: "#9CA3AF", label: "In progress" },
 };
 const STAGE_LABEL = { cv_submission: "CV review", ocean_assessment: "OCEAN", interview: "Interview", offer: "Ready / offer" };
+const BUDGET_COLORS = {
+  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" }, amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A" },
+  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" }, blue: { color: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE" },
+  neutral: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
+};
 const FUNNEL = [
   { key: "cv_submission", label: "CV review" },
   { key: "ocean_assessment", label: "OCEAN" },
@@ -57,6 +62,9 @@ export default function Dashboard() {
   const [waSending, setWaSending] = useState(false);
   const [waResult, setWaResult] = useState(null);
   const [waStatus, setWaStatus] = useState(null);
+  const [showBm, setShowBm] = useState(false);
+  const [bm, setBm] = useState(null);
+  const [bmLoading, setBmLoading] = useState(false);
   const [hrAlerts, setHrAlerts] = useState(false);
   const [hrPhone, setHrPhone] = useState("");
   const [hrSaved, setHrSaved] = useState(false);
@@ -107,6 +115,16 @@ export default function Dashboard() {
     setSavingStage(key);
     try { setPipeline((await axios.patch(`/api/jobs/${jobId}/pipeline`, { stages: { [key]: !stage.enabled } })).data); load(); }
     catch { /* ignore */ } finally { setSavingStage(null); }
+  }
+  async function loadBestMatch() {
+    if (showBm) { setShowBm(false); return; }
+    setShowBm(true);
+    if (!bm) {
+      setBmLoading(true);
+      try { setBm((await axios.get(`/api/jobs/${jobId}/best-match`)).data); }
+      catch { setBm({ error: true }); }
+      finally { setBmLoading(false); }
+    }
   }
   function toggleSel(id) {
     setSelected((p) => p.includes(id) ? p.filter((x) => x !== id) : p.length < 4 ? [...p, id] : p);
@@ -281,10 +299,59 @@ export default function Dashboard() {
           })}
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <span onClick={loadBestMatch} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: showBm ? "#fff" : "#6D28D9", background: showBm ? "linear-gradient(135deg,#8B5CF6,#7C3AED)" : "#F5F3FF", border: "1px solid #E9E5FF" }}>✨ Best match</span>
           <span onClick={() => { setCompareMode((v) => !v); setSelected([]); }} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: compareMode ? "#fff" : "#4338CA", background: compareMode ? GRAD : "#EEF2FF" }}>{compareMode ? "Cancel compare" : "⇄ Compare"}</span>
           <span style={{ fontSize: 13, color: "#6B7280" }}>Sorted by <b style={{ color: "#374151" }}>Score ↓</b></span>
         </div>
       </div>
+
+      {/* AI best match panel */}
+      {showBm && (
+        <div style={{ background: "#F8F6FE", border: "1px solid #ECE7FB", borderRadius: 16, padding: "20px 22px", marginBottom: 14 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1px", color: "#7C3AED", marginBottom: 12 }}>✦ AI BEST MATCH — vs Success Profile &amp; budget</div>
+          {bmLoading ? (
+            <div style={{ fontSize: 14, color: "#6D5D9E" }}>Comparing all candidates against your Success Profile…</div>
+          ) : !bm || bm.error ? (
+            <div style={{ fontSize: 14, color: "#B91C1C" }}>Couldn't run the comparison — please try again.</div>
+          ) : (bm.rows || []).length < 2 ? (
+            <div style={{ fontSize: 14, color: "#6D5D9E" }}>You need at least 2 scored candidates to run a best-match comparison.</div>
+          ) : (() => {
+            const reasons = Object.fromEntries((bm.ai?.ranking || []).map((r) => [r.candidate_id, r.reason]));
+            const byId = Object.fromEntries(bm.rows.map((r) => [r.candidate_id, r]));
+            const aiOrder = (bm.ai?.ranking || []).map((r) => byId[r.candidate_id]).filter(Boolean);
+            const rows = aiOrder.length === bm.rows.length ? aiOrder : bm.rows;
+            const top = byId[bm.ai?.top_candidate_id] || rows[0];
+            return (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, background: "#fff", border: "1px solid #E4DBFB", borderRadius: 13, padding: "14px 16px", marginBottom: 12 }} className="flex-wrap">
+                  <span style={{ fontSize: 22 }}>🏆</span>
+                  <div style={{ flex: 1, minWidth: 180 }}>
+                    <div style={{ fontSize: 15, fontWeight: 800 }}>{top.name}</div>
+                    <div style={{ fontSize: 12.5, color: "#6B7280" }}>Score {round(top.score)} · Fit {top.fit != null ? `${top.fit}%` : "—"}{top.expected_salary ? ` · asks RM${top.expected_salary.toLocaleString()}` : ""}</div>
+                  </div>
+                  <button onClick={() => navigate(`/jobs/${jobId}/candidate/${top.candidate_id}`)} style={{ padding: "9px 14px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Open profile →</button>
+                </div>
+                {bm.ai?.summary && <div style={{ fontSize: 14, color: "#44405A", lineHeight: 1.6, marginBottom: 14 }}>{bm.ai.summary}</div>}
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {rows.map((r, i) => {
+                    const bc = BUDGET_COLORS[r.budget_lane] || BUDGET_COLORS.neutral;
+                    return (
+                      <div key={r.candidate_id} onClick={() => navigate(`/jobs/${jobId}/candidate/${r.candidate_id}`)} style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 11, padding: "10px 14px", cursor: "pointer", border: "1px solid #F0EDFA" }} className="flex-wrap">
+                        <span style={{ width: 22, height: 22, borderRadius: "50%", background: i === 0 ? "#7C3AED" : "#EDE9FE", color: i === 0 ? "#fff" : "#6D28D9", fontSize: 12, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, minWidth: 120 }}>{r.name}</span>
+                        <span style={{ fontSize: 12.5, color: "#6B7280" }}>Score {round(r.score)} · Fit {r.fit != null ? `${r.fit}%` : "—"} · {r.experience_years != null ? `${r.experience_years} yrs` : "—"}{r.expected_salary ? ` · RM${r.expected_salary.toLocaleString()}` : ""}</span>
+                        {r.budget_label && r.budget_status !== "unknown" && <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, color: bc.color, background: bc.bg, border: `1px solid ${bc.border}` }}>{r.budget_label}</span>}
+                        {r.dealbreaker && <span style={{ fontSize: 11, fontWeight: 700, color: "#B91C1C" }}>⛔ dealbreaker</span>}
+                        {reasons[r.candidate_id] && <span style={{ fontSize: 12.5, color: "#8A85A6", fontStyle: "italic", flexBasis: "100%" }}>{reasons[r.candidate_id]}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {/* compare bar */}
       {compareMode && (

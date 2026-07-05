@@ -14,6 +14,7 @@ import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
 import { computeSuccessFit, computeBudgetFit } from "../services/successFit.js";
+import { buildRoleComparison } from "../services/bestMatch.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
@@ -303,6 +304,81 @@ router.post("/ocean-assessment", (req, res) => {
   } catch (err) {
     console.error("ocean-assessment error:", err);
     return res.status(500).json({ error: "Failed to score assessment." });
+  }
+});
+
+/**
+ * GET /api/jobs/:jobId/best-match — compare ALL scored candidates for a role
+ * against the Success Profile + budget; AI names the ideal hire with reasoning.
+ */
+router.get("/jobs/:jobId/best-match", async (req, res) => {
+  try {
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+    const list = readJSON(CANDIDATES_PATH).filter((c) => c.job_id === job.job_id);
+    const rows = buildRoleComparison(job, list);
+    if (rows.length < 2) return res.json({ rows, ai: null });
+
+    let ai = null;
+    try {
+      const sp = job.successProfile || {};
+      const system =
+        "You are an expert Malaysian HR advisor. Compare candidates applying for one role against the role's " +
+        "Success Profile and salary budget. Never consider gender, race, religion, nationality, age or marital status. " +
+        "Return strict JSON: { top_candidate_id, summary, ranking: [{ candidate_id, reason }] } — ranking ordered " +
+        "best to worst, each reason ONE short sentence naming the deciding factor (fit, experience, salary, or risk). " +
+        "summary is 2-3 sentences for an HR manager explaining who to hire and why, mentioning salary vs budget where relevant.";
+      const user = `Role: ${job.role_title} (${job.industry}). Success profile: ${JSON.stringify({
+        summary: sp.summary, must_haves: sp.must_haves, dealbreakers: sp.dealbreakers,
+        benchmark_experience_years: sp.benchmark_experience_years,
+        salary_budget_min: sp.salary_budget_min, salary_budget_max: sp.salary_budget_max,
+      })}. Candidates: ${JSON.stringify(rows.map((r) => ({
+        candidate_id: r.candidate_id, name: r.name, ai_score: r.score,
+        success_profile_fit_pct: r.fit, fit_verdict: r.fit_verdict, dealbreaker: r.dealbreaker,
+        expected_salary_rm: r.expected_salary, budget_status: r.budget_status,
+        experience_years: r.experience_years, pending_stages: r.pending,
+      })))}`;
+      ai = await chatJSON({ system, user, temperature: 0.3 });
+    } catch (e) {
+      console.error("best-match AI error:", e.message); // deterministic rows still returned
+    }
+    res.json({ rows, ai });
+  } catch (err) {
+    console.error("best-match error:", err);
+    res.status(500).json({ error: "Failed to compare candidates." });
+  }
+});
+
+/**
+ * POST /api/candidates/:jobId/:candidateId/pre-hire-checks
+ * Body: { background|health|references: { status, notes } } — partial merge.
+ * Post-interview due diligence: background check, health report, references.
+ */
+router.post("/candidates/:jobId/:candidateId/pre-hire-checks", (req, res) => {
+  try {
+    const CHECK_KEYS = ["background", "health", "references"];
+    const STATUSES = ["pending", "clear", "flagged", "skipped"];
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+
+    const cand = candidates[idx];
+    cand.pre_hire_checks = cand.pre_hire_checks || {};
+    for (const k of CHECK_KEYS) {
+      const inc = req.body?.[k];
+      if (!inc) continue;
+      const cur = cand.pre_hire_checks[k] || {};
+      cand.pre_hire_checks[k] = {
+        status: STATUSES.includes(inc.status) ? inc.status : cur.status || "pending",
+        notes: typeof inc.notes === "string" ? inc.notes : cur.notes || "",
+        updated: today(),
+      };
+    }
+    writeJSON(CANDIDATES_PATH, candidates);
+    res.json({ ok: true, pre_hire_checks: cand.pre_hire_checks });
+  } catch (err) {
+    console.error("pre-hire-checks error:", err);
+    res.status(500).json({ error: "Failed to save checks." });
   }
 });
 
