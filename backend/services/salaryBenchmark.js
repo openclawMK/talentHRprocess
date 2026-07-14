@@ -67,7 +67,7 @@ export function getSalaryBenchmark(roleTitle, location) {
     estimated: (rule.basis || "role-level") === "estimate",
     region: region ? region.replace(/\b\w/g, (c) => c.toUpperCase()) : "Malaysia (national)",
     sources,
-    source_short: (rule.sources || []).map((id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : "Market")).join(" + "),
+    source_short: (rule.sources || []).map((id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : "Market")).join(" + "),
     indicative: true,
   };
 }

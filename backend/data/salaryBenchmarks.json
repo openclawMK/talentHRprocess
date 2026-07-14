@@ -3,6 +3,7 @@
     "sources": [
       { "id": "DOSM2023", "name": "DOSM Salaries & Wages Survey Report 2023", "url": "https://open.dosm.gov.my/publications/salaries_wages_2023", "type": "official" },
       { "id": "JobStreet2026", "name": "JobStreet Malaysia role salary pages 2026", "url": "https://my.jobstreet.com/career-advice", "type": "platform" },
+      { "id": "Jobstore2023", "name": "Jobstore Malaysia Salary Guide 2023", "url": "https://www.jobstore.com", "type": "guide" },
       { "id": "Industry", "name": "Malaysian recruitment-market ranges", "type": "industry" }
     ],
     "currency": "MYR",
@@ -32,19 +33,21 @@
     { "sector": "professional", "match": ["admin clerk", "general clerk", "data entry", "clerk"], "category": "Clerk / data entry", "min": 2000, "median": 2400, "max": 3000, "sources": ["DOSM2023", "Industry"], "basis": "estimate" },
     { "sector": "professional", "match": ["admin executive", "administrative executive", "administrator", "office administrator", "admin assistant"], "category": "Admin executive", "min": 2800, "median": 3100, "max": 3500, "sources": ["JobStreet2026"], "basis": "role-level" },
     { "sector": "professional", "match": ["customer service", "call centre", "call center", "customer support"], "category": "Customer service executive", "min": 2500, "median": 3000, "max": 3800, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
-    { "sector": "professional", "match": ["accounts executive", "finance executive", "account assistant"], "category": "Accounts / finance executive", "min": 3000, "median": 3600, "max": 4500, "sources": ["JobStreet2026", "Industry"], "basis": "estimate" },
+    { "sector": "professional", "match": ["accounts executive", "finance executive", "account assistant"], "category": "Accounts / finance executive", "min": 3200, "median": 4200, "max": 5500, "sources": ["Jobstore2023", "JobStreet2026"], "basis": "role-level" },
+    { "sector": "professional", "match": ["senior accountant", "financial controller", "finance head", "tax manager", "audit manager"], "category": "Senior accountant / finance lead", "min": 7500, "median": 12000, "max": 20000, "sources": ["Jobstore2023"], "basis": "role-level" },
     { "sector": "professional", "match": ["accountant", "auditor"], "category": "Accountant", "min": 3750, "median": 4800, "max": 6250, "sources": ["JobStreet2026"], "basis": "role-level" },
     { "sector": "professional", "match": ["sales executive", "business development", "account manager", "sales representative"], "category": "Sales / business development", "min": 2800, "median": 3600, "max": 5000, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
     { "sector": "professional", "match": ["marketing executive", "digital marketing", "social media", "marketing"], "category": "Marketing executive", "min": 3200, "median": 3700, "max": 4300, "sources": ["JobStreet2026"], "basis": "role-level" },
     { "sector": "professional", "match": ["graphic designer", "ui designer", "ux designer", "web designer", "designer"], "category": "Designer (graphic/UI/UX)", "min": 2800, "median": 3600, "max": 4800, "sources": ["Industry", "JobStreet2026"], "basis": "estimate" },
     { "sector": "professional", "match": ["data analyst", "business analyst", "data scientist", "analyst"], "category": "Data / business analyst", "min": 3500, "median": 4500, "max": 6000, "sources": ["JobStreet2026", "Industry"], "basis": "estimate" },
-    { "sector": "professional", "match": ["software engineer", "software developer", "developer", "programmer", "full stack", "backend", "frontend"], "category": "Software engineer / developer", "min": 4300, "median": 5200, "max": 6300, "sources": ["JobStreet2026"], "basis": "role-level" },
+    { "sector": "professional", "match": ["software engineer", "software developer", "developer", "programmer", "full stack", "backend", "frontend", "java developer", "web developer"], "category": "Software engineer / developer", "min": 4300, "median": 6500, "max": 10000, "sources": ["JobStreet2026", "Jobstore2023"], "basis": "role-level" },
     { "sector": "professional", "match": ["civil engineer"], "category": "Civil engineer", "min": 3000, "median": 3700, "max": 4500, "sources": ["JobStreet2026"], "basis": "role-level" },
     { "sector": "professional", "match": ["mechanical engineer", "electrical engineer"], "category": "Mechanical / electrical engineer", "min": 3500, "median": 4300, "max": 5300, "sources": ["JobStreet2026"], "basis": "role-level" },
     { "sector": "professional", "match": ["engineer"], "category": "Engineer (general)", "min": 3200, "median": 4000, "max": 5000, "sources": ["JobStreet2026", "DOSM2023"], "basis": "estimate" },
     { "sector": "professional", "match": ["hr executive", "human resource executive", "recruiter", "talent acquisition"], "category": "HR executive", "min": 3000, "median": 3600, "max": 4500, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
     { "sector": "professional", "match": ["hr manager", "human resource manager"], "category": "HR manager", "min": 6550, "median": 7500, "max": 9050, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["finance manager", "marketing manager", "operations manager", "project manager", "engineering manager", "it manager", "product manager", "sales manager"], "category": "Manager (professional)", "min": 6000, "median": 8000, "max": 11000, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
-    { "sector": "professional", "match": ["general manager", "director", "head of", "vice president", "chief"], "category": "Senior management", "min": 12000, "median": 16000, "max": 24000, "sources": ["Industry"], "basis": "estimate" }
+    { "sector": "professional", "match": ["finance manager", "marketing manager", "operations manager", "project manager", "engineering manager", "it manager", "product manager", "sales manager", "key account manager", "business development manager"], "category": "Manager (professional)", "min": 9000, "median": 12000, "max": 15000, "sources": ["Jobstore2023"], "basis": "role-level" },
+    { "sector": "professional", "match": ["senior manager", "regional manager", "head of", "head of department"], "category": "Senior / regional manager", "min": 12000, "median": 18000, "max": 25000, "sources": ["Jobstore2023"], "basis": "role-level" },
+    { "sector": "professional", "match": ["general manager", "director", "vice president", "chief", "managing director", "ceo", "cfo", "coo"], "category": "Director / C-suite", "min": 18000, "median": 30000, "max": 50000, "sources": ["Jobstore2023"], "basis": "role-level" }
   ]
 }
