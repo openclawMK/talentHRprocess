@@ -19,18 +19,21 @@ export default function JobSelector() {
   const { companyId } = useParams();
   const [jobs, setJobs] = useState(null);
   const [a, setA] = useState(null);
+  const [company, setCompany] = useState(null);
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJobs(r.data)).catch(() => setJobs([]));
     axios.get("/api/analytics").then((r) => setA(r.data)).catch(() => setA(null));
-  }, []);
+    if (companyId) axios.get(`/api/companies/${companyId}`).then((r) => setCompany(r.data)).catch(() => setCompany(null));
+    else setCompany(null);
+  }, [companyId]);
 
   const roleMap = {};
   (a?.roles || []).forEach((x) => { roleMap[x.job_id] = x; });
 
-  // When opened from a company, show only that company's roles + a company header.
+  // When opened from a company, show only that company's roles + a company header
+  // fetched directly (not inferred from job data, since a company can have 0 roles).
   const shown = companyId ? (jobs || []).filter((j) => (j.company?.id || "other") === companyId) : jobs;
-  const company = companyId ? (shown && shown[0]?.company) || null : null;
 
   const summary = [
     { icon: "▤", value: a?.open_roles ?? (jobs?.length || 0), label: "Open roles", accent: "#6366F1" },
@@ -52,7 +55,7 @@ export default function JobSelector() {
             <p style={{ fontSize: 15, color: "#6B7280", margin: 0 }}>{company ? `${company.industry} · ${(shown || []).length} open role${(shown || []).length === 1 ? "" : "s"}` : "Open a role to review applicants, or create a new one."}</p>
           </div>
         </div>
-        <button onClick={() => navigate("/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create job</button>
+        <button onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create role</button>
       </div>
 
       {/* summary stat cards (workspace-wide; hidden inside a single company) */}
@@ -122,10 +125,10 @@ export default function JobSelector() {
             })}
 
         {jobs !== null && (
-          <div onClick={() => navigate("/jobs/new")} style={{ border: "1.5px dashed #D6D8E3", borderRadius: 18, padding: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", cursor: "pointer", minHeight: 220 }} className="transition-colors hover:border-violet-300 hover:bg-violet-50/30">
+          <div onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ border: "1.5px dashed #D6D8E3", borderRadius: 18, padding: 24, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", cursor: "pointer", minHeight: 220 }} className="transition-colors hover:border-violet-300 hover:bg-violet-50/30">
             <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#F3F4F8", color: "#6B7280", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, marginBottom: 14 }}>＋</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#374151" }}>Create new role</div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 4, maxWidth: 180 }}>AI drafts the scoring criteria from your job description</div>
+            <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 4, maxWidth: 180 }}>AI drafts the Success Profile from your job description</div>
           </div>
         )}
       </div>

@@ -52,37 +52,45 @@ router.put("/jobs/:jobId/success-profile", (req, res) => {
   }
 });
 
+/**
+ * AI-generate a Success Profile suggestion for a job. Shared by the manual
+ * "Generate with AI" button and by auto-generation right after a role is
+ * published, so a brand-new role is immediately scoreable.
+ */
+export async function generateSuccessProfileForJob(job) {
+  const system =
+    "You are a senior HR consultant specializing in Malaysian hiring. Generate a Role Success Profile. " +
+    "Return valid JSON only, matching exactly: { summary, must_haves (array of strings), nice_to_haves (array of strings), " +
+    "dealbreakers (array of strings), ideal_ocean_profile: { O, C, E, A, N } where each value is one of " +
+    "'low','medium-low','medium','medium-high','high', benchmark_experience_years (number), benchmark_team_size (number), " +
+    "salary_budget_min (number, monthly RM), salary_budget_max (number, monthly RM) }. " +
+    "For salary, give a realistic monthly gross range in Malaysian Ringgit for this role and industry. " +
+    "Be specific and realistic for the Malaysian job market.";
+
+  const user = `Job title: ${job.role_title}. Industry: ${job.industry}. Key responsibilities: ${
+    (job.requirements?.key_responsibilities || []).join("; ") || "n/a"
+  }.`;
+
+  const result = await chatJSON({ system, user, temperature: 0.4 });
+  return {
+    summary: result.summary || "",
+    must_haves: result.must_haves || [],
+    nice_to_haves: result.nice_to_haves || [],
+    dealbreakers: result.dealbreakers || [],
+    ideal_ocean_profile: result.ideal_ocean_profile || { O: "medium", C: "high", E: "medium", A: "high", N: "low" },
+    benchmark_experience_years: Number(result.benchmark_experience_years) || 2,
+    benchmark_team_size: Number(result.benchmark_team_size) || 0,
+    salary_budget_min: Number(result.salary_budget_min) || 0,
+    salary_budget_max: Number(result.salary_budget_max) || 0,
+  };
+}
+
 // POST /api/jobs/:jobId/success-profile/generate — AI suggestion (not saved)
 router.post("/jobs/:jobId/success-profile/generate", async (req, res) => {
   try {
     const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
-
-    const system =
-      "You are a senior HR consultant specializing in Malaysian hiring. Generate a Role Success Profile. " +
-      "Return valid JSON only, matching exactly: { summary, must_haves (array of strings), nice_to_haves (array of strings), " +
-      "dealbreakers (array of strings), ideal_ocean_profile: { O, C, E, A, N } where each value is one of " +
-      "'low','medium-low','medium','medium-high','high', benchmark_experience_years (number), benchmark_team_size (number), " +
-      "salary_budget_min (number, monthly RM), salary_budget_max (number, monthly RM) }. " +
-      "For salary, give a realistic monthly gross range in Malaysian Ringgit for this role and industry. " +
-      "Be specific and realistic for the Malaysian job market.";
-
-    const user = `Job title: ${job.role_title}. Industry: ${job.industry}. Key responsibilities: ${
-      (job.requirements?.key_responsibilities || []).join("; ") || "n/a"
-    }.`;
-
-    const result = await chatJSON({ system, user, temperature: 0.4 });
-    res.json({
-      summary: result.summary || "",
-      must_haves: result.must_haves || [],
-      nice_to_haves: result.nice_to_haves || [],
-      dealbreakers: result.dealbreakers || [],
-      ideal_ocean_profile: result.ideal_ocean_profile || { O: "medium", C: "high", E: "medium", A: "high", N: "low" },
-      benchmark_experience_years: Number(result.benchmark_experience_years) || 2,
-      benchmark_team_size: Number(result.benchmark_team_size) || 0,
-      salary_budget_min: Number(result.salary_budget_min) || 0,
-      salary_budget_max: Number(result.salary_budget_max) || 0,
-    });
+    res.json(await generateSuccessProfileForJob(job));
   } catch (err) {
     console.error("generate success-profile error:", err);
     res.status(500).json({ error: "Failed to generate success profile." });

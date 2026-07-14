@@ -14,11 +14,13 @@ import {
 } from "../services/pipeline.js";
 import { notify, whatsappConfigured } from "../services/whatsappService.js";
 import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary } from "../services/salaryBenchmark.js";
+import { generateSuccessProfileForJob } from "./successProfile.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
 const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
+const COMPANIES_PATH = path.join(DATA_DIR, "companies.json");
 const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
 const TEMPLATES_PATH = path.join(DATA_DIR, "industry-templates.json");
 
@@ -479,10 +481,17 @@ router.post("/jobs", async (req, res) => {
       key_responsibilities = [],
       criteria: suppliedCriteria,
       score_weights: suppliedWeights,
+      company_id,
     } = req.body;
 
     if (!role_title || !industry)
       return res.status(400).json({ error: "role_title and industry are required." });
+
+    let company;
+    if (company_id) {
+      company = readJSON(COMPANIES_PATH).find((c) => c.id === company_id);
+      if (!company) return res.status(400).json({ error: "Unknown company." });
+    }
 
     let criteria = suppliedCriteria;
     if (!Array.isArray(criteria) || criteria.length === 0) {
@@ -508,6 +517,7 @@ router.post("/jobs", async (req, res) => {
     const expMin = Number(requirements.experience_years_min) || 0;
     const newJob = {
       job_id,
+      company,
       role_title,
       industry,
       location,
@@ -532,6 +542,15 @@ router.post("/jobs", async (req, res) => {
       criteria_generated_by: suppliedCriteria ? "edited" : "ai",
       criteria_locked: false,
     };
+
+    // Auto-generate the Success Profile so a new role is immediately scoreable —
+    // HR reviews/edits on the Success Profile screen rather than starting blank.
+    // Never blocks role creation if the AI call fails.
+    try {
+      newJob.successProfile = { ...(await generateSuccessProfileForJob(newJob)), created_at: new Date().toISOString(), last_updated: new Date().toISOString() };
+    } catch (spErr) {
+      console.error("auto success-profile generation failed:", spErr.message);
+    }
 
     jobs.push(newJob);
     writeJSON(JOBS_PATH, jobs);

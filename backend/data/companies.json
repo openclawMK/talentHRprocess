@@ -1,0 +1,16 @@
+[
+  {
+    "id": "moonbucks",
+    "name": "Moonbucks Coffee",
+    "industry": "F&B / Coffee chain",
+    "accent": "#0E7C5A",
+    "initials": "MB"
+  },
+  {
+    "id": "hsb",
+    "name": "HSB Accounting Firm",
+    "industry": "Professional Services / Accounting",
+    "accent": "#4338CA",
+    "initials": "HSB"
+  }
+]
