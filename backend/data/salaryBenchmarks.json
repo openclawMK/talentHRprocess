@@ -1,10 +1,29 @@
 {
   "meta": {
     "sources": [
-      { "id": "DOSM2023", "name": "DOSM Salaries & Wages Survey Report 2023", "url": "https://open.dosm.gov.my/publications/salaries_wages_2023", "type": "official" },
-      { "id": "JobStreet2026", "name": "JobStreet Malaysia role salary pages 2026", "url": "https://my.jobstreet.com/career-advice", "type": "platform" },
-      { "id": "Jobstore2023", "name": "Jobstore Malaysia Salary Guide 2023", "url": "https://www.jobstore.com", "type": "guide" },
-      { "id": "Industry", "name": "Malaysian recruitment-market ranges", "type": "industry" }
+      {
+        "id": "DOSM2023",
+        "name": "DOSM Salaries & Wages Survey Report 2023",
+        "url": "https://open.dosm.gov.my/publications/salaries_wages_2023",
+        "type": "official"
+      },
+      {
+        "id": "JobStreet2026",
+        "name": "JobStreet Malaysia role salary pages 2026",
+        "url": "https://my.jobstreet.com/career-advice",
+        "type": "platform"
+      },
+      {
+        "id": "Jobstore2023",
+        "name": "Jobstore Malaysia Salary Guide 2023",
+        "url": "https://www.jobstore.com",
+        "type": "guide"
+      },
+      {
+        "id": "Industry",
+        "name": "Malaysian recruitment-market ranges",
+        "type": "industry"
+      }
     ],
     "currency": "MYR",
     "period": "monthly",
@@ -14,63 +33,891 @@
     "note": "Role bands are cross-validated across DOSM (official occupation-group medians) and JobStreet (role-level Malaysian listings), with recruitment-market ranges elsewhere. Roles with basis 'role-level' carry real per-role source figures; basis 'estimate' are indicative anchors (DOSM group + adjacent roles) pending a professional salary guide (e.g. Michael Page/Hays). Regional multipliers (from DOSM state medians) are damped to 60%. Bands floored at minimum wage. Indicative benchmarks, not offers."
   },
   "regional_multipliers": {
-    "kuala lumpur": 1.33, "putrajaya": 1.25, "selangor": 1.24, "labuan": 1.05,
-    "penang": 1.04, "pulau pinang": 1.04, "johor": 1.0, "melaka": 0.95,
-    "negeri sembilan": 0.95, "perak": 0.9, "kedah": 0.88, "pahang": 0.9,
-    "terengganu": 0.9, "kelantan": 0.85, "perlis": 0.85, "sabah": 0.88,
-    "sarawak": 0.9, "default": 1.0
+    "kuala lumpur": 1.33,
+    "putrajaya": 1.25,
+    "selangor": 1.24,
+    "labuan": 1.05,
+    "penang": 1.04,
+    "pulau pinang": 1.04,
+    "johor": 1,
+    "melaka": 0.95,
+    "negeri sembilan": 0.95,
+    "perak": 0.9,
+    "kedah": 0.88,
+    "pahang": 0.9,
+    "terengganu": 0.9,
+    "kelantan": 0.85,
+    "perlis": 0.85,
+    "sabah": 0.88,
+    "sarawak": 0.9,
+    "default": 1
   },
   "roles": [
-    { "sector": "frontline", "match": ["kitchen helper", "kitchen assistant", "dishwasher", "steward", "cleaner", "packer", "general worker", "helper"], "category": "Kitchen / general helper", "min": 1700, "median": 1850, "max": 2100, "sources": ["DOSM2023", "JobStreet2026"], "basis": "role-level" },
-    { "sector": "frontline", "match": ["barista"], "category": "Barista", "min": 1900, "median": 2000, "max": 2400, "sources": ["JobStreet2026", "DOSM2023"], "basis": "role-level" },
-    { "sector": "frontline", "match": ["cashier"], "category": "Cashier", "min": 1900, "median": 2050, "max": 2400, "sources": ["JobStreet2026", "DOSM2023"], "basis": "role-level" },
-    { "sector": "frontline", "match": ["waiter", "waitress", "waitstaff", "server", "service crew", "runner", "host", "hostess"], "category": "Waiter / service crew", "min": 1900, "median": 2200, "max": 2700, "sources": ["JobStreet2026", "DOSM2023"], "basis": "role-level" },
-    { "sector": "frontline", "match": ["retail assistant", "sales assistant", "shop assistant", "retail sales", "promoter", "front desk", "receptionist", "crew", "attendant"], "category": "Retail / front-of-house crew", "min": 1900, "median": 2100, "max": 2500, "sources": ["JobStreet2026", "DOSM2023"], "basis": "role-level" },
-    { "sector": "frontline", "match": ["cook", "chef de partie", "line cook", "baker", "senior crew", "bartender"], "category": "Cook / skilled crew", "min": 2000, "median": 2500, "max": 3200, "sources": ["JobStreet2026", "DOSM2023"], "basis": "role-level" },
-    { "sector": "frontline", "match": ["outlet supervisor", "floor supervisor", "shift supervisor", "shift lead", "shift leader", "team lead", "team leader", "supervisor", "captain", "duty manager"], "category": "Supervisor / team lead", "min": 2400, "median": 3000, "max": 3800, "sources": ["DOSM2023", "Industry"], "basis": "estimate" },
-    { "sector": "frontline", "match": ["outlet manager", "store manager", "restaurant manager", "branch manager", "head chef", "executive chef", "bar manager"], "category": "Outlet / restaurant manager", "min": 4000, "median": 5500, "max": 8000, "sources": ["JobStreet2026", "Industry", "DOSM2023"], "basis": "role-level" },
-
-    { "sector": "professional", "match": ["admin clerk", "general clerk", "data entry", "clerk"], "category": "Clerk / data entry", "min": 2000, "median": 2400, "max": 3000, "sources": ["DOSM2023", "Industry"], "basis": "estimate" },
-    { "sector": "professional", "match": ["admin executive", "administrative executive", "administrator", "office administrator", "admin assistant"], "category": "Admin executive", "min": 2800, "median": 3100, "max": 3500, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["customer service", "call centre", "call center", "customer support"], "category": "Customer service executive", "min": 2500, "median": 3000, "max": 3800, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
-    { "sector": "professional", "match": ["accounts executive", "finance executive", "account assistant"], "category": "Accounts / finance executive", "min": 3200, "median": 4200, "max": 5500, "sources": ["Jobstore2023", "JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["senior accountant", "financial controller", "finance head", "tax manager", "audit manager"], "category": "Senior accountant / finance lead", "min": 7500, "median": 12000, "max": 20000, "sources": ["Jobstore2023"], "basis": "role-level" },
-    { "sector": "professional", "match": ["accountant", "auditor"], "category": "Accountant", "min": 3750, "median": 4800, "max": 6250, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["sales executive", "business development", "account manager", "sales representative"], "category": "Sales / business development", "min": 2800, "median": 3600, "max": 5000, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
-    { "sector": "professional", "match": ["marketing executive", "digital marketing", "social media", "marketing"], "category": "Marketing executive", "min": 3200, "median": 3700, "max": 4300, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["graphic designer", "ui designer", "ux designer", "web designer", "designer"], "category": "Designer (graphic/UI/UX)", "min": 2800, "median": 3600, "max": 4800, "sources": ["Industry", "JobStreet2026"], "basis": "estimate" },
-    { "sector": "professional", "match": ["data analyst", "business analyst", "data scientist", "analyst"], "category": "Data / business analyst", "min": 3500, "median": 4500, "max": 6000, "sources": ["JobStreet2026", "Industry"], "basis": "estimate" },
-    { "sector": "professional", "match": ["software engineer", "software developer", "developer", "programmer", "full stack", "backend", "frontend", "java developer", "web developer"], "category": "Software engineer / developer", "min": 4300, "median": 6500, "max": 10000, "sources": ["JobStreet2026", "Jobstore2023"], "basis": "role-level" },
-    { "sector": "professional", "match": ["civil engineer"], "category": "Civil engineer", "min": 3000, "median": 3700, "max": 4500, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["mechanical engineer", "electrical engineer"], "category": "Mechanical / electrical engineer", "min": 3500, "median": 4300, "max": 5300, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["engineer"], "category": "Engineer (general)", "min": 3200, "median": 4000, "max": 5000, "sources": ["JobStreet2026", "DOSM2023"], "basis": "estimate" },
-    { "sector": "professional", "match": ["hr executive", "human resource executive", "recruiter", "talent acquisition"], "category": "HR executive", "min": 3000, "median": 3600, "max": 4500, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
-    { "sector": "professional", "match": ["hr manager", "human resource manager"], "category": "HR manager", "min": 6550, "median": 7500, "max": 9050, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "match": ["finance manager", "marketing manager", "operations manager", "project manager", "engineering manager", "it manager", "product manager", "sales manager", "key account manager", "business development manager"], "category": "Manager (professional)", "min": 9000, "median": 12000, "max": 15000, "sources": ["Jobstore2023"], "basis": "role-level" },
-    { "sector": "professional", "match": ["senior manager", "regional manager", "head of", "head of department"], "category": "Senior / regional manager", "min": 12000, "median": 18000, "max": 25000, "sources": ["Jobstore2023"], "basis": "role-level" },
-    { "sector": "professional", "match": ["general manager", "director", "vice president", "chief", "managing director", "ceo", "cfo", "coo"], "category": "Director / C-suite", "min": 18000, "median": 30000, "max": 50000, "sources": ["Jobstore2023"], "basis": "role-level" },
-
-    { "sector": "frontline", "industry": "Logistics & warehousing", "match": ["warehouse assistant", "warehouse operator", "warehouse", "store assistant", "picker", "packer warehouse"], "category": "Warehouse assistant / operator", "min": 1900, "median": 2300, "max": 2700, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "frontline", "industry": "Logistics & warehousing", "match": ["forklift operator", "forklift", "reach truck operator"], "category": "Forklift operator", "min": 1900, "median": 2200, "max": 2600, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "frontline", "industry": "Logistics & warehousing", "match": ["dispatch", "despatch", "delivery driver", "lorry driver", "van driver"], "category": "Dispatch / driver", "min": 1800, "median": 2300, "max": 2900, "sources": ["JobStreet2026", "Industry"], "basis": "estimate" },
-    { "sector": "professional", "industry": "Logistics & warehousing", "match": ["logistics executive", "logistics officer", "logistics assistant", "logistics coordinator", "supply chain executive", "shipping executive"], "category": "Logistics executive", "min": 2800, "median": 3400, "max": 4500, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "industry": "Logistics & warehousing", "match": ["logistics manager", "warehouse manager", "supply chain manager"], "category": "Logistics / warehouse manager", "min": 6000, "median": 7200, "max": 8500, "sources": ["JobStreet2026"], "basis": "role-level" },
-
-    { "sector": "frontline", "industry": "Manufacturing / production", "match": ["production operator", "machine operator", "operator", "assembler", "factory worker", "production worker"], "category": "Production operator", "min": 1700, "median": 2050, "max": 2400, "sources": ["JobStreet2026", "DOSM2023"], "basis": "role-level" },
-    { "sector": "frontline", "industry": "Manufacturing / production", "match": ["quality control inspector", "qc inspector", "qa inspector", "quality inspector"], "category": "QC inspector", "min": 1900, "median": 2200, "max": 2500, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "frontline", "industry": "Manufacturing / production", "match": ["line leader", "production leader"], "category": "Line leader", "min": 2200, "median": 2700, "max": 3200, "sources": ["Industry", "DOSM2023"], "basis": "estimate" },
-    { "sector": "frontline", "industry": "Manufacturing / production", "match": ["technician", "maintenance technician", "mechanical technician", "electrical technician"], "category": "Technician", "min": 2000, "median": 2600, "max": 3400, "sources": ["JobStreet2026", "Industry"], "basis": "estimate" },
-    { "sector": "professional", "industry": "Manufacturing / production", "match": ["quality assurance officer", "qa officer", "quality officer", "quality engineer"], "category": "QA officer / engineer", "min": 2200, "median": 3000, "max": 3900, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "industry": "Manufacturing / production", "match": ["production supervisor", "production executive", "manufacturing supervisor"], "category": "Production supervisor", "min": 2800, "median": 3400, "max": 4200, "sources": ["JobStreet2026"], "basis": "role-level" },
-
-    { "sector": "frontline", "industry": "Healthcare / clinics", "match": ["clinic assistant", "healthcare assistant", "care worker", "caregiver", "nursing aide"], "category": "Clinic / care assistant", "min": 1800, "median": 2200, "max": 2800, "sources": ["Industry"], "basis": "estimate" },
-    { "sector": "professional", "industry": "Healthcare / clinics", "match": ["staff nurse", "clinic nurse", "registered nurse", "nurse"], "category": "Nurse", "min": 2600, "median": 3000, "max": 3500, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "industry": "Healthcare / clinics", "match": ["medical assistant", "paramedic"], "category": "Medical assistant", "min": 2200, "median": 2700, "max": 3300, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "professional", "industry": "Healthcare / clinics", "match": ["pharmacist"], "category": "Pharmacist", "min": 6500, "median": 7200, "max": 8000, "sources": ["JobStreet2026"], "basis": "role-level" },
-
-    { "sector": "frontline", "industry": "Beauty & wellness", "match": ["beauty therapist", "spa therapist", "aesthetician", "facial therapist"], "category": "Beauty / spa therapist", "min": 3300, "median": 3800, "max": 4300, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "frontline", "industry": "Beauty & wellness", "match": ["beautician", "nail technician", "makeup artist"], "category": "Beautician", "min": 2800, "median": 3500, "max": 4500, "sources": ["JobStreet2026"], "basis": "role-level" },
-    { "sector": "frontline", "industry": "Beauty & wellness", "match": ["hairstylist", "hair stylist", "hairdresser", "hair dresser"], "category": "Hairstylist", "min": 2000, "median": 2800, "max": 4000, "sources": ["Industry"], "basis": "estimate" },
-    { "sector": "professional", "industry": "Beauty & wellness", "match": ["spa manager", "salon manager", "beauty trainer"], "category": "Spa / salon manager", "min": 3500, "median": 4500, "max": 6000, "sources": ["JobStreet2026", "Industry"], "basis": "estimate" }
+    {
+      "sector": "frontline",
+      "match": [
+        "kitchen helper",
+        "kitchen assistant",
+        "dishwasher",
+        "steward",
+        "cleaner",
+        "packer",
+        "general worker",
+        "helper"
+      ],
+      "category": "Kitchen / general helper",
+      "min": 1700,
+      "median": 1850,
+      "max": 2100,
+      "sources": [
+        "DOSM2023",
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "barista"
+      ],
+      "category": "Barista",
+      "min": 1900,
+      "median": 2000,
+      "max": 2400,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "cashier"
+      ],
+      "category": "Cashier",
+      "min": 1900,
+      "median": 2050,
+      "max": 2400,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "waiter",
+        "waitress",
+        "waitstaff",
+        "server",
+        "service crew",
+        "runner",
+        "host",
+        "hostess"
+      ],
+      "category": "Waiter / service crew",
+      "min": 1900,
+      "median": 2200,
+      "max": 2700,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "retail assistant",
+        "sales assistant",
+        "shop assistant",
+        "retail sales",
+        "promoter",
+        "front desk",
+        "receptionist",
+        "crew",
+        "attendant"
+      ],
+      "category": "Retail / front-of-house crew",
+      "min": 1900,
+      "median": 2100,
+      "max": 2500,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "cook",
+        "chef de partie",
+        "line cook",
+        "baker",
+        "senior crew",
+        "bartender"
+      ],
+      "category": "Cook / skilled crew",
+      "min": 2000,
+      "median": 2500,
+      "max": 3200,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "outlet supervisor",
+        "floor supervisor",
+        "shift supervisor",
+        "shift lead",
+        "shift leader",
+        "team lead",
+        "team leader",
+        "supervisor",
+        "captain",
+        "duty manager"
+      ],
+      "category": "Supervisor / team lead",
+      "min": 2400,
+      "median": 3000,
+      "max": 3800,
+      "sources": [
+        "DOSM2023",
+        "Industry"
+      ],
+      "basis": "estimate",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "frontline",
+      "match": [
+        "outlet manager",
+        "store manager",
+        "restaurant manager",
+        "branch manager",
+        "head chef",
+        "executive chef",
+        "bar manager"
+      ],
+      "category": "Outlet / restaurant manager",
+      "min": 4000,
+      "median": 5500,
+      "max": 8000,
+      "sources": [
+        "JobStreet2026",
+        "Industry",
+        "DOSM2023"
+      ],
+      "basis": "role-level",
+      "industry": "F&B / Retail / Hospitality"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "admin clerk",
+        "general clerk",
+        "data entry",
+        "clerk"
+      ],
+      "category": "Clerk / data entry",
+      "min": 2000,
+      "median": 2400,
+      "max": 3000,
+      "sources": [
+        "DOSM2023",
+        "Industry"
+      ],
+      "basis": "estimate",
+      "industry": "Admin & office"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "admin executive",
+        "administrative executive",
+        "administrator",
+        "office administrator",
+        "admin assistant"
+      ],
+      "category": "Admin executive",
+      "min": 2800,
+      "median": 3100,
+      "max": 3500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Admin & office"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "customer service",
+        "call centre",
+        "call center",
+        "customer support"
+      ],
+      "category": "Customer service executive",
+      "min": 2800,
+      "median": 3150,
+      "max": 3500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Customer service / BPO"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "accounts executive",
+        "finance executive",
+        "account assistant"
+      ],
+      "category": "Accounts / finance executive",
+      "min": 3200,
+      "median": 4200,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023",
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Accounting & finance"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "senior accountant",
+        "financial controller",
+        "finance head",
+        "tax manager",
+        "audit manager"
+      ],
+      "category": "Senior accountant / finance lead",
+      "min": 7500,
+      "median": 12000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "industry": "Accounting & finance"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "accountant",
+        "auditor"
+      ],
+      "category": "Accountant",
+      "min": 3750,
+      "median": 4800,
+      "max": 6250,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Accounting & finance"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "sales executive",
+        "business development",
+        "account manager",
+        "sales representative"
+      ],
+      "category": "Sales / business development",
+      "min": 3100,
+      "median": 4000,
+      "max": 5500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Sales & business development"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "marketing executive",
+        "digital marketing",
+        "social media",
+        "marketing"
+      ],
+      "category": "Marketing executive",
+      "min": 3200,
+      "median": 3700,
+      "max": 4300,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Marketing & creative"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "graphic designer",
+        "ui designer",
+        "ux designer",
+        "web designer",
+        "designer"
+      ],
+      "category": "Designer (graphic/UI/UX)",
+      "min": 2800,
+      "median": 3500,
+      "max": 4800,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Marketing & creative"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "data analyst",
+        "business analyst",
+        "data scientist",
+        "analyst"
+      ],
+      "category": "Data / business analyst",
+      "min": 3500,
+      "median": 4500,
+      "max": 6500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "IT & software"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "software engineer",
+        "software developer",
+        "developer",
+        "programmer",
+        "full stack",
+        "backend",
+        "frontend",
+        "java developer",
+        "web developer"
+      ],
+      "category": "Software engineer / developer",
+      "min": 4300,
+      "median": 6500,
+      "max": 10000,
+      "sources": [
+        "JobStreet2026",
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "industry": "IT & software"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "civil engineer"
+      ],
+      "category": "Civil engineer",
+      "min": 3000,
+      "median": 3700,
+      "max": 4500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Engineering"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "mechanical engineer",
+        "electrical engineer"
+      ],
+      "category": "Mechanical / electrical engineer",
+      "min": 3500,
+      "median": 4300,
+      "max": 5300,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Engineering"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "engineer"
+      ],
+      "category": "Engineer (general)",
+      "min": 3200,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "estimate",
+      "industry": "Engineering"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "hr executive",
+        "human resource executive",
+        "recruiter",
+        "talent acquisition"
+      ],
+      "category": "HR executive",
+      "min": 3000,
+      "median": 3600,
+      "max": 4500,
+      "sources": [
+        "Industry",
+        "DOSM2023"
+      ],
+      "basis": "estimate",
+      "industry": "Human resources"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "hr manager",
+        "human resource manager"
+      ],
+      "category": "HR manager",
+      "min": 6550,
+      "median": 7500,
+      "max": 9050,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level",
+      "industry": "Human resources"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "finance manager",
+        "marketing manager",
+        "operations manager",
+        "project manager",
+        "engineering manager",
+        "it manager",
+        "product manager",
+        "sales manager",
+        "key account manager",
+        "business development manager"
+      ],
+      "category": "Manager (professional)",
+      "min": 9000,
+      "median": 12000,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "industry": "Management / leadership"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "senior manager",
+        "regional manager",
+        "head of",
+        "head of department"
+      ],
+      "category": "Senior / regional manager",
+      "min": 12000,
+      "median": 18000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "industry": "Management / leadership"
+    },
+    {
+      "sector": "professional",
+      "match": [
+        "general manager",
+        "director",
+        "vice president",
+        "chief",
+        "managing director",
+        "ceo",
+        "cfo",
+        "coo"
+      ],
+      "category": "Director / C-suite",
+      "min": 18000,
+      "median": 30000,
+      "max": 50000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "industry": "Management / leadership"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "warehouse assistant",
+        "warehouse operator",
+        "warehouse",
+        "store assistant",
+        "picker",
+        "packer warehouse"
+      ],
+      "category": "Warehouse assistant / operator",
+      "min": 1900,
+      "median": 2300,
+      "max": 2700,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "forklift operator",
+        "forklift",
+        "reach truck operator"
+      ],
+      "category": "Forklift operator",
+      "min": 1900,
+      "median": 2200,
+      "max": 2600,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "dispatch",
+        "despatch",
+        "delivery driver",
+        "lorry driver",
+        "van driver"
+      ],
+      "category": "Dispatch / driver",
+      "min": 1800,
+      "median": 2300,
+      "max": 2900,
+      "sources": [
+        "JobStreet2026",
+        "Industry"
+      ],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "logistics executive",
+        "logistics officer",
+        "logistics assistant",
+        "logistics coordinator",
+        "supply chain executive",
+        "shipping executive"
+      ],
+      "category": "Logistics executive",
+      "min": 2800,
+      "median": 3400,
+      "max": 4500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "logistics manager",
+        "warehouse manager",
+        "supply chain manager"
+      ],
+      "category": "Logistics / warehouse manager",
+      "min": 6000,
+      "median": 7200,
+      "max": 8500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Manufacturing / production",
+      "match": [
+        "production operator",
+        "machine operator",
+        "operator",
+        "assembler",
+        "factory worker",
+        "production worker"
+      ],
+      "category": "Production operator",
+      "min": 1700,
+      "median": 2050,
+      "max": 2400,
+      "sources": [
+        "JobStreet2026",
+        "DOSM2023"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Manufacturing / production",
+      "match": [
+        "quality control inspector",
+        "qc inspector",
+        "qa inspector",
+        "quality inspector"
+      ],
+      "category": "QC inspector",
+      "min": 1900,
+      "median": 2200,
+      "max": 2500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Manufacturing / production",
+      "match": [
+        "line leader",
+        "production leader"
+      ],
+      "category": "Line leader",
+      "min": 2200,
+      "median": 2700,
+      "max": 3200,
+      "sources": [
+        "Industry",
+        "DOSM2023"
+      ],
+      "basis": "estimate"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Manufacturing / production",
+      "match": [
+        "technician",
+        "maintenance technician",
+        "mechanical technician",
+        "electrical technician"
+      ],
+      "category": "Technician",
+      "min": 2000,
+      "median": 2600,
+      "max": 3400,
+      "sources": [
+        "JobStreet2026",
+        "Industry"
+      ],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "quality assurance officer",
+        "qa officer",
+        "quality officer",
+        "quality engineer"
+      ],
+      "category": "QA officer / engineer",
+      "min": 2200,
+      "median": 3000,
+      "max": 3900,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "production supervisor",
+        "production executive",
+        "manufacturing supervisor"
+      ],
+      "category": "Production supervisor",
+      "min": 2800,
+      "median": 3400,
+      "max": 4200,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Healthcare / clinics",
+      "match": [
+        "clinic assistant",
+        "healthcare assistant",
+        "care worker",
+        "caregiver",
+        "nursing aide"
+      ],
+      "category": "Clinic / care assistant",
+      "min": 1800,
+      "median": 2200,
+      "max": 2800,
+      "sources": [
+        "Industry"
+      ],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Healthcare / clinics",
+      "match": [
+        "staff nurse",
+        "clinic nurse",
+        "registered nurse",
+        "nurse"
+      ],
+      "category": "Nurse",
+      "min": 2600,
+      "median": 3000,
+      "max": 3500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Healthcare / clinics",
+      "match": [
+        "medical assistant",
+        "paramedic"
+      ],
+      "category": "Medical assistant",
+      "min": 2200,
+      "median": 2700,
+      "max": 3300,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Healthcare / clinics",
+      "match": [
+        "pharmacist"
+      ],
+      "category": "Pharmacist",
+      "min": 6500,
+      "median": 7200,
+      "max": 8000,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Beauty & wellness",
+      "match": [
+        "beauty therapist",
+        "spa therapist",
+        "aesthetician",
+        "facial therapist"
+      ],
+      "category": "Beauty / spa therapist",
+      "min": 3300,
+      "median": 3800,
+      "max": 4300,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Beauty & wellness",
+      "match": [
+        "beautician",
+        "nail technician",
+        "makeup artist"
+      ],
+      "category": "Beautician",
+      "min": 2800,
+      "median": 3500,
+      "max": 4500,
+      "sources": [
+        "JobStreet2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Beauty & wellness",
+      "match": [
+        "hairstylist",
+        "hair stylist",
+        "hairdresser",
+        "hair dresser"
+      ],
+      "category": "Hairstylist",
+      "min": 2000,
+      "median": 2800,
+      "max": 4000,
+      "sources": [
+        "Industry"
+      ],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Beauty & wellness",
+      "match": [
+        "spa manager",
+        "salon manager",
+        "beauty trainer"
+      ],
+      "category": "Spa / salon manager",
+      "min": 3500,
+      "median": 4500,
+      "max": 6000,
+      "sources": [
+        "JobStreet2026",
+        "Industry"
+      ],
+      "basis": "estimate"
+    }
   ]
 }
