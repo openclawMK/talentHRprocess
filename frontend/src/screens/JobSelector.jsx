@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
@@ -16,6 +16,7 @@ const avgColor = (v) => (v >= 70 ? "#047857" : v >= 40 ? "#D97706" : "#DC2626");
 
 export default function JobSelector() {
   const navigate = useNavigate();
+  const { companyId } = useParams();
   const [jobs, setJobs] = useState(null);
   const [a, setA] = useState(null);
 
@@ -27,6 +28,10 @@ export default function JobSelector() {
   const roleMap = {};
   (a?.roles || []).forEach((x) => { roleMap[x.job_id] = x; });
 
+  // When opened from a company, show only that company's roles + a company header.
+  const shown = companyId ? (jobs || []).filter((j) => (j.company?.id || "other") === companyId) : jobs;
+  const company = companyId ? (shown && shown[0]?.company) || null : null;
+
   const summary = [
     { icon: "▤", value: a?.open_roles ?? (jobs?.length || 0), label: "Open roles", accent: "#6366F1" },
     { icon: "👥", value: a?.total_applicants ?? 0, label: "Total applicants", accent: "#0EA5E9" },
@@ -36,16 +41,22 @@ export default function JobSelector() {
 
   return (
     <div>
+      {companyId && (
+        <div onClick={() => navigate("/companies")} style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer", marginBottom: 14, display: "inline-flex", alignItems: "center", gap: 6 }}>← All companies</div>
+      )}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 22 }} className="flex-wrap">
-        <div>
-          <h1 className="font-display" style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.7px", margin: "0 0 5px" }}>Job roles</h1>
-          <p style={{ fontSize: 15, color: "#6B7280", margin: 0 }}>Open a role to review applicants, or create a new one.</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 15 }}>
+          {company && <div style={{ width: 52, height: 52, borderRadius: 14, background: company.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, flexShrink: 0 }}>{company.initials}</div>}
+          <div>
+            <h1 className="font-display" style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.7px", margin: "0 0 5px" }}>{company ? company.name : "Job roles"}</h1>
+            <p style={{ fontSize: 15, color: "#6B7280", margin: 0 }}>{company ? `${company.industry} · ${(shown || []).length} open role${(shown || []).length === 1 ? "" : "s"}` : "Open a role to review applicants, or create a new one."}</p>
+          </div>
         </div>
         <button onClick={() => navigate("/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create job</button>
       </div>
 
-      {/* summary stat cards */}
-      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4" style={{ marginBottom: 26 }}>
+      {/* summary stat cards (workspace-wide; hidden inside a single company) */}
+      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4" style={{ marginBottom: 26, display: companyId ? "none" : undefined }}>
         {summary.map((s) => (
           <div key={s.label} style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 14, padding: "18px 20px", boxShadow: "0 1px 2px rgba(16,24,40,.04)", display: "flex", alignItems: "center", gap: 14 }}>
             <div style={{ width: 42, height: 42, borderRadius: 12, background: s.accent + "1A", color: s.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{s.icon}</div>
@@ -58,8 +69,8 @@ export default function JobSelector() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 320px), 1fr))", gap: 18 }}>
         {jobs === null
           ? Array.from({ length: 3 }).map((_, i) => <div key={i} style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 18, height: 220 }} className="animate-pulse" />)
-          : jobs.map((j, i) => {
-              const acc = ACCENTS[i % ACCENTS.length];
+          : (shown || []).map((j, i) => {
+              const acc = company ? { color: company.accent, bg: company.accent + "1A", avatar: company.accent } : ACCENTS[i % ACCENTS.length];
               const r = roleMap[j.job_id] || { applicants: 0, avg: 0, g: 0, a: 0, r: 0, avatars: [], more: 0 };
               const tot = Math.max(1, r.g + r.a + r.r);
               const needsReview = r.a > 0;

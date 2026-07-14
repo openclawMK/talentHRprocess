@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutGrid, section: "WORKSPACE", match: (p) => p === "/" },
-  { to: "/jobs", label: "Job roles", icon: Briefcase, match: (p) => p.startsWith("/jobs") && p !== "/jobs/new" },
+  { to: "/companies", label: "Companies", icon: Briefcase, match: (p) => p.startsWith("/companies") || (p.startsWith("/jobs") && p !== "/jobs/new") },
   { to: "/upload", label: "Upload CV", icon: UploadCloud, match: (p) => p.startsWith("/upload") },
   { to: "/jobs/new", label: "Create job", icon: Plus, match: (p) => p === "/jobs/new" },
   { to: "/salary-center", label: "Salary Center", icon: Wallet, match: (p) => p.startsWith("/salary-center") },

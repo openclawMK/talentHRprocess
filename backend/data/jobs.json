@@ -1,170 +1,18 @@
 [
   {
     "job_id": "job_001",
-    "role_title": "Outlet Supervisor",
-    "industry": "F&B",
-    "location": "Kuala Lumpur",
-    "role_level": "supervisory",
-    "portal_token": "pq-outlet-sup-7f3a9c",
-    "pipeline_stages": {
-      "cv_submission": {
-        "enabled": true,
-        "locked": true
-      },
-      "ocean_assessment": {
-        "enabled": true,
-        "locked": false
-      },
-      "interview": {
-        "enabled": true,
-        "locked": false
-      },
-      "offer": {
-        "enabled": true,
-        "locked": true
-      }
+    "company": {
+      "id": "moonbucks",
+      "name": "Moonbucks Coffee",
+      "industry": "F&B / Coffee chain",
+      "accent": "#0E7C5A",
+      "initials": "MB"
     },
-    "requirements": {
-      "experience_years_min": 2,
-      "experience_years_preferred": 3,
-      "education_level_min": "SPM",
-      "required_skills": [
-        "customer service",
-        "cash handling",
-        "team supervision",
-        "opening closing procedures"
-      ],
-      "preferred_skills": [
-        "POS system",
-        "inventory management",
-        "staff scheduling"
-      ],
-      "key_responsibilities": [
-        "Manage outlet team of 8-12 staff",
-        "Handle customer escalations",
-        "Open and close procedures",
-        "Daily cash reconciliation"
-      ]
-    },
-    "age_band": {
-      "min": 18,
-      "ideal_min": 21,
-      "ideal_max": 40,
-      "max": 55
-    },
-    "criteria": [
-      {
-        "id": "c1",
-        "name": "F&B experience (years)",
-        "weight": 0.15,
-        "source": "cv",
-        "description": "Years of relevant food & beverage industry experience"
-      },
-      {
-        "id": "c2",
-        "name": "Team supervision",
-        "weight": 0.13,
-        "source": "cv",
-        "description": "Direct supervisory experience managing a team"
-      },
-      {
-        "id": "c3",
-        "name": "Cash handling & reconciliation",
-        "weight": 0.09,
-        "source": "cv",
-        "description": "Experience with daily cash management and POS systems"
-      },
-      {
-        "id": "c4",
-        "name": "Outlet operations knowledge",
-        "weight": 0.05,
-        "source": "cv",
-        "description": "Opening/closing, inventory, scheduling, SOP compliance"
-      },
-      {
-        "id": "c5",
-        "name": "Age fit",
-        "weight": 0.03,
-        "source": "cv",
-        "description": "Candidate age relative to the preferred age band for the role"
-      },
-      {
-        "id": "c6",
-        "name": "Stress tolerance & composure",
-        "weight": 0.06,
-        "source": "ocean",
-        "description": "Low Neuroticism — handles peak-hour pressure without breaking down"
-      },
-      {
-        "id": "c7",
-        "name": "Initiative & conscientiousness",
-        "weight": 0.04,
-        "source": "ocean",
-        "description": "High Conscientiousness — proactive, follows through without being told"
-      },
-      {
-        "id": "c8",
-        "name": "Guest complaint resolution",
-        "weight": 0.18,
-        "source": "interview",
-        "description": "Situational judgment: how candidate handles escalated complaints"
-      },
-      {
-        "id": "c9",
-        "name": "Leadership style & team motivation",
-        "weight": 0.17,
-        "source": "interview",
-        "description": "How candidate motivates and manages team members under pressure"
-      },
-      {
-        "id": "c10",
-        "name": "Operational decision-making",
-        "weight": 0.1,
-        "source": "interview",
-        "description": "Judgment in handling shift-level operational challenges"
-      }
-    ],
-    "thresholds": {
-      "green": 70,
-      "red": 40
-    },
-    "benchmark": {
-      "maturity": "starter",
-      "avg_experience_years": 3,
-      "avg_team_size": 9
-    },
-    "successProfile": {
-      "summary": "An ideal Outlet Supervisor has 3+ years of F&B experience, has led teams of 8+ people, and scores high on Conscientiousness and Agreeableness.",
-      "must_haves": [
-        "Minimum 2 years F&B or hospitality experience",
-        "Experience supervising at least 5 staff",
-        "Strong complaint resolution ability"
-      ],
-      "nice_to_haves": [
-        "Food safety certification",
-        "Experience with POS systems",
-        "Fluent in Bahasa Malaysia and English"
-      ],
-      "dealbreakers": [
-        "Employment gap over 12 months with no explanation",
-        "No supervisory experience of any kind"
-      ],
-      "ideal_ocean_profile": { "O": "medium", "C": "high", "E": "medium-high", "A": "high", "N": "low" },
-      "benchmark_experience_years": 3,
-      "benchmark_team_size": 8,
-      "created_at": "2026-06-30T00:00:00.000Z",
-      "last_updated": "2026-06-30T00:00:00.000Z"
-    },
-    "criteria_generated_by": "template",
-    "criteria_locked": false
-  },
-  {
-    "job_id": "job_002",
-    "role_title": "Cashier",
-    "industry": "F&B / Retail",
+    "role_title": "Barista",
+    "industry": "F&B / Coffee",
     "location": "Kuala Lumpur",
     "role_level": "entry",
-    "portal_token": "pq-cashier-2b8e1d",
+    "portal_token": "pq-moonbucks-barista",
     "pipeline_stages": {
       "cv_submission": {
         "enabled": true,
@@ -183,101 +31,93 @@
         "locked": true
       }
     },
+    "hr_whatsapp_alerts": false,
+    "hr_contact_phone": "",
     "requirements": {
       "experience_years_min": 0,
       "experience_years_preferred": 1,
       "education_level_min": "SPM",
       "required_skills": [
-        "cash handling",
         "customer service",
-        "accuracy",
-        "basic maths"
+        "cash handling",
+        "coffee",
+        "pos"
       ],
-      "preferred_skills": [
-        "POS system",
-        "product knowledge"
-      ],
+      "preferred_skills": [],
       "key_responsibilities": [
-        "Process customer transactions",
-        "Handle cash and card payments",
-        "Maintain accurate till records",
-        "Assist customers with queries"
+        "Prepare coffee and beverages to standard",
+        "Serve customers warmly and quickly",
+        "Handle cash and POS",
+        "Keep the station clean and stocked"
       ]
     },
     "age_band": {
       "min": 18,
       "ideal_min": 18,
-      "ideal_max": 35,
-      "max": 50
+      "ideal_max": 45,
+      "max": 60
     },
     "criteria": [
       {
         "id": "c1",
-        "name": "Accuracy & attention to detail",
-        "weight": 0.12,
+        "name": "Coffee / F&B experience",
         "source": "cv",
-        "description": "Track record of accurate transaction and record keeping"
+        "weight": 0.15,
+        "description": "Barista or food & beverage experience"
       },
       {
         "id": "c2",
-        "name": "Customer interaction quality",
-        "weight": 0.11,
+        "name": "Customer service",
         "source": "cv",
-        "description": "Customer service experience at the front line"
+        "weight": 0.12,
+        "description": "Front-of-house customer service"
       },
       {
         "id": "c3",
-        "name": "Cash handling experience",
-        "weight": 0.09,
+        "name": "Cash handling & POS",
         "source": "cv",
-        "description": "Hands-on cash and card payment handling"
-      },
-      {
-        "id": "c4",
-        "name": "Age fit",
-        "weight": 0.03,
-        "source": "cv",
-        "description": "Candidate age relative to the preferred age band for the role"
-      },
-      {
-        "id": "c5",
-        "name": "Reliability & punctuality",
         "weight": 0.08,
-        "source": "ocean",
-        "description": "High Conscientiousness — dependable attendance and punctuality"
+        "description": "Handling cash and point-of-sale"
       },
       {
-        "id": "c6",
-        "name": "Composure under queue pressure",
+        "id": "o1",
+        "name": "Conscientiousness — reliability",
+        "source": "ocean",
+        "weight": 0.08,
+        "description": "Dependable, consistent attendance"
+      },
+      {
+        "id": "o2",
+        "name": "Agreeableness — customer warmth",
+        "source": "ocean",
         "weight": 0.07,
-        "source": "ocean",
-        "description": "Low Neuroticism — stays calm during busy periods"
+        "description": "Warm, friendly service orientation"
       },
       {
-        "id": "c7",
-        "name": "Upselling & customer persuasion",
-        "weight": 0.17,
+        "id": "i1",
+        "name": "Communication & friendliness",
         "source": "interview",
-        "description": "Openness and ability to suggest add-ons and promotions at the till"
+        "weight": 0.2,
+        "description": "Warmth and clarity with customers"
       },
       {
-        "id": "c8",
-        "name": "Handling errors & difficult customers",
-        "weight": 0.18,
+        "id": "i2",
+        "name": "Product knowledge & learning",
         "source": "interview",
-        "description": "How candidate responds to till errors and frustrated customers"
-      },
-      {
-        "id": "c9",
-        "name": "Work ethic & attendance attitude",
         "weight": 0.15,
+        "description": "Willingness to learn the menu"
+      },
+      {
+        "id": "i3",
+        "name": "Handling busy periods",
         "source": "interview",
-        "description": "Commitment to reliability, punctuality and shift responsibilities"
+        "weight": 0.15,
+        "description": "Composure during peak hours"
       }
     ],
     "thresholds": {
-      "green": 65,
-      "red": 35
+      "green": 72,
+      "red": 45
     },
     "benchmark": {
       "maturity": "starter",
@@ -285,36 +125,55 @@
       "avg_team_size": 0
     },
     "successProfile": {
-      "summary": "An ideal Cashier is accurate with cash and POS, friendly with customers, dependable on attendance, and stays calm during busy periods.",
+      "summary": "A friendly, reliable barista who delivers fast, warm service and learns the menu quickly.",
       "must_haves": [
-        "Cash handling or POS experience",
-        "Customer-facing service experience",
-        "Reliable attendance record"
+        "Customer service experience",
+        "Cash handling"
       ],
       "nice_to_haves": [
-        "Retail or F&B background",
-        "Product knowledge",
-        "Multilingual"
+        "Barista / coffee experience",
+        "Food safety awareness"
       ],
       "dealbreakers": [
-        "History of cash discrepancies or integrity issues"
+        "No customer-facing experience of any kind"
       ],
-      "ideal_ocean_profile": { "O": "medium", "C": "high", "E": "medium", "A": "medium-high", "N": "low" },
+      "ideal_ocean_profile": {
+        "O": "medium",
+        "C": "high",
+        "E": "medium-high",
+        "A": "high",
+        "N": "low"
+      },
       "benchmark_experience_years": 1,
       "benchmark_team_size": 0,
-      "created_at": "2026-06-30T00:00:00.000Z",
-      "last_updated": "2026-06-30T00:00:00.000Z"
+      "benchmark_education": "SPM",
+      "salary_budget_min": 2280,
+      "salary_budget_max": 2400,
+      "created_at": "2026-07-14T07:05:37.000Z",
+      "last_updated": "2026-07-14T07:05:37.000Z"
     },
-    "criteria_generated_by": "template",
+    "score_weights": {
+      "ocean": 0.15,
+      "profile": 0.35,
+      "interview": 0.5
+    },
+    "criteria_generated_by": "seed",
     "criteria_locked": false
   },
   {
-    "job_id": "job_003",
-    "role_title": "Hotel Front Desk Officer",
-    "industry": "Hospitality",
+    "job_id": "job_002",
+    "company": {
+      "id": "moonbucks",
+      "name": "Moonbucks Coffee",
+      "industry": "F&B / Coffee chain",
+      "accent": "#0E7C5A",
+      "initials": "MB"
+    },
+    "role_title": "Cashier",
+    "industry": "F&B / Retail",
     "location": "Kuala Lumpur",
     "role_level": "entry",
-    "portal_token": "pq-frontdesk-9d4c5a",
+    "portal_token": "pq-moonbucks-cashier",
     "pipeline_stages": {
       "cv_submission": {
         "enabled": true,
@@ -333,110 +192,577 @@
         "locked": true
       }
     },
+    "hr_whatsapp_alerts": false,
+    "hr_contact_phone": "",
+    "requirements": {
+      "experience_years_min": 0,
+      "experience_years_preferred": 1,
+      "education_level_min": "SPM",
+      "required_skills": [
+        "cash handling",
+        "customer service",
+        "pos"
+      ],
+      "preferred_skills": [],
+      "key_responsibilities": [
+        "Process payments accurately",
+        "Reconcile the till",
+        "Assist customers at checkout",
+        "Uphold cash-handling integrity"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 18,
+      "ideal_max": 45,
+      "max": 60
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.15,
+        "description": "Daily cash management and till balancing"
+      },
+      {
+        "id": "c2",
+        "name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "description": "Polite, efficient checkout service"
+      },
+      {
+        "id": "c3",
+        "name": "POS systems",
+        "source": "cv",
+        "weight": 0.08,
+        "description": "Point-of-sale familiarity"
+      },
+      {
+        "id": "o1",
+        "name": "Conscientiousness — accuracy",
+        "source": "ocean",
+        "weight": 0.08,
+        "description": "Careful, error-free handling"
+      },
+      {
+        "id": "o2",
+        "name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "description": "Calm under queues and pressure"
+      },
+      {
+        "id": "i1",
+        "name": "Numeracy & accuracy",
+        "source": "interview",
+        "weight": 0.2,
+        "description": "Handling money correctly under pressure"
+      },
+      {
+        "id": "i2",
+        "name": "Customer handling",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Courteous checkout interactions"
+      },
+      {
+        "id": "i3",
+        "name": "Integrity scenarios",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Honesty in cash situations"
+      }
+    ],
+    "thresholds": {
+      "green": 72,
+      "red": 45
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 1,
+      "avg_team_size": 0
+    },
+    "successProfile": {
+      "summary": "An accurate, honest cashier who is fast and courteous at the till.",
+      "must_haves": [
+        "Cash handling",
+        "Customer service"
+      ],
+      "nice_to_haves": [
+        "POS experience",
+        "Retail experience"
+      ],
+      "dealbreakers": [
+        "No cash-handling experience"
+      ],
+      "ideal_ocean_profile": {
+        "O": "medium",
+        "C": "high",
+        "E": "medium",
+        "A": "medium-high",
+        "N": "low"
+      },
+      "benchmark_experience_years": 1,
+      "benchmark_team_size": 0,
+      "benchmark_education": "SPM",
+      "salary_budget_min": 2280,
+      "salary_budget_max": 2460,
+      "created_at": "2026-07-14T07:05:37.000Z",
+      "last_updated": "2026-07-14T07:05:37.000Z"
+    },
+    "score_weights": {
+      "ocean": 0.15,
+      "profile": 0.35,
+      "interview": 0.5
+    },
+    "criteria_generated_by": "seed",
+    "criteria_locked": false
+  },
+  {
+    "job_id": "job_003",
+    "company": {
+      "id": "moonbucks",
+      "name": "Moonbucks Coffee",
+      "industry": "F&B / Coffee chain",
+      "accent": "#0E7C5A",
+      "initials": "MB"
+    },
+    "role_title": "Shift Supervisor",
+    "industry": "F&B / Coffee",
+    "location": "Kuala Lumpur",
+    "role_level": "supervisory",
+    "portal_token": "pq-moonbucks-shift-supervisor",
+    "pipeline_stages": {
+      "cv_submission": {
+        "enabled": true,
+        "locked": true
+      },
+      "ocean_assessment": {
+        "enabled": true,
+        "locked": false
+      },
+      "interview": {
+        "enabled": true,
+        "locked": false
+      },
+      "offer": {
+        "enabled": true,
+        "locked": true
+      }
+    },
+    "hr_whatsapp_alerts": false,
+    "hr_contact_phone": "",
+    "requirements": {
+      "experience_years_min": 2,
+      "experience_years_preferred": 3,
+      "education_level_min": "SPM",
+      "required_skills": [
+        "team supervision",
+        "complaint resolution",
+        "cash handling",
+        "f&b"
+      ],
+      "preferred_skills": [],
+      "key_responsibilities": [
+        "Lead the outlet team during shifts",
+        "Resolve customer complaints",
+        "Manage cash and closing",
+        "Coach and schedule staff"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 18,
+      "ideal_max": 45,
+      "max": 60
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "description": "Years in food & beverage"
+      },
+      {
+        "id": "c2",
+        "name": "Team supervision",
+        "source": "cv",
+        "weight": 0.12,
+        "description": "Direct supervisory experience"
+      },
+      {
+        "id": "c3",
+        "name": "Complaint resolution",
+        "source": "cv",
+        "weight": 0.08,
+        "description": "Handling escalations and complaints"
+      },
+      {
+        "id": "o1",
+        "name": "Conscientiousness — dependability",
+        "source": "ocean",
+        "weight": 0.08,
+        "description": "Owns outcomes, reliable"
+      },
+      {
+        "id": "o2",
+        "name": "Extraversion — leadership",
+        "source": "ocean",
+        "weight": 0.07,
+        "description": "Confident directing a team"
+      },
+      {
+        "id": "i1",
+        "name": "Leadership & delegation",
+        "source": "interview",
+        "weight": 0.2,
+        "description": "Directing and motivating staff"
+      },
+      {
+        "id": "i2",
+        "name": "Conflict & complaint resolution",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "De-escalating customer issues"
+      },
+      {
+        "id": "i3",
+        "name": "Operational decision-making",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Judgment during the shift"
+      }
+    ],
+    "thresholds": {
+      "green": 72,
+      "red": 45
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 3,
+      "avg_team_size": 5
+    },
+    "successProfile": {
+      "summary": "A dependable shift leader with F&B supervisory experience who resolves problems and keeps the outlet running.",
+      "must_haves": [
+        "2 years F&B or hospitality experience",
+        "Experience supervising staff",
+        "Complaint resolution ability"
+      ],
+      "nice_to_haves": [
+        "POS systems",
+        "Food safety certification"
+      ],
+      "dealbreakers": [
+        "No supervisory experience of any kind"
+      ],
+      "ideal_ocean_profile": {
+        "O": "medium",
+        "C": "high",
+        "E": "medium-high",
+        "A": "high",
+        "N": "low"
+      },
+      "benchmark_experience_years": 2,
+      "benchmark_team_size": 5,
+      "benchmark_education": "SPM",
+      "salary_budget_min": 3590,
+      "salary_budget_max": 4323,
+      "created_at": "2026-07-14T07:05:37.000Z",
+      "last_updated": "2026-07-14T07:05:37.000Z"
+    },
+    "score_weights": {
+      "ocean": 0.15,
+      "profile": 0.35,
+      "interview": 0.5
+    },
+    "criteria_generated_by": "seed",
+    "criteria_locked": false
+  },
+  {
+    "job_id": "job_004",
+    "company": {
+      "id": "hsb",
+      "name": "HSB Accounting Firm",
+      "industry": "Professional Services / Accounting",
+      "accent": "#4338CA",
+      "initials": "HSB"
+    },
+    "role_title": "Accountant",
+    "industry": "Accounting / Professional Services",
+    "location": "Kuala Lumpur",
+    "role_level": "mid",
+    "portal_token": "pq-hsb-accountant",
+    "pipeline_stages": {
+      "cv_submission": {
+        "enabled": true,
+        "locked": true
+      },
+      "ocean_assessment": {
+        "enabled": true,
+        "locked": false
+      },
+      "interview": {
+        "enabled": true,
+        "locked": false
+      },
+      "offer": {
+        "enabled": true,
+        "locked": true
+      }
+    },
+    "hr_whatsapp_alerts": false,
+    "hr_contact_phone": "",
+    "requirements": {
+      "experience_years_min": 3,
+      "experience_years_preferred": 4,
+      "education_level_min": "Degree",
+      "required_skills": [
+        "financial reporting",
+        "mfrs",
+        "tax",
+        "excel"
+      ],
+      "preferred_skills": [],
+      "key_responsibilities": [
+        "Prepare financial statements",
+        "Handle month-end close",
+        "Support audit and tax",
+        "Ensure MFRS compliance"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 18,
+      "ideal_max": 45,
+      "max": 60
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "Accounting experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "description": "Years in accounting / audit"
+      },
+      {
+        "id": "c2",
+        "name": "Accounting qualification",
+        "source": "cv",
+        "weight": 0.12,
+        "description": "Degree / ACCA / CPA progress"
+      },
+      {
+        "id": "c3",
+        "name": "MFRS & tax knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "description": "Reporting standards and tax"
+      },
+      {
+        "id": "o1",
+        "name": "Conscientiousness — precision",
+        "source": "ocean",
+        "weight": 0.08,
+        "description": "Accuracy and thoroughness"
+      },
+      {
+        "id": "o2",
+        "name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "description": "Calm under deadlines"
+      },
+      {
+        "id": "i1",
+        "name": "Technical accounting",
+        "source": "interview",
+        "weight": 0.2,
+        "description": "Depth of accounting knowledge"
+      },
+      {
+        "id": "i2",
+        "name": "Attention to detail",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Accuracy in scenarios"
+      },
+      {
+        "id": "i3",
+        "name": "Deadline management",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Handling reporting timelines"
+      }
+    ],
+    "thresholds": {
+      "green": 72,
+      "red": 45
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 4,
+      "avg_team_size": 0
+    },
+    "successProfile": {
+      "summary": "A qualified, detail-oriented accountant who can own reporting and stay calm under deadlines.",
+      "must_haves": [
+        "Accounting or finance qualification",
+        "3 years accounting experience",
+        "Financial reporting"
+      ],
+      "nice_to_haves": [
+        "Audit experience",
+        "Tax knowledge",
+        "Accounting software (SQL/AutoCount)"
+      ],
+      "dealbreakers": [
+        "No formal accounting qualification"
+      ],
+      "ideal_ocean_profile": {
+        "O": "medium",
+        "C": "high",
+        "E": "medium",
+        "A": "medium",
+        "N": "low"
+      },
+      "benchmark_experience_years": 3,
+      "benchmark_team_size": 0,
+      "benchmark_education": "Degree",
+      "salary_budget_min": 5750,
+      "salary_budget_max": 7116,
+      "created_at": "2026-07-14T07:05:37.000Z",
+      "last_updated": "2026-07-14T07:05:37.000Z"
+    },
+    "score_weights": {
+      "ocean": 0.15,
+      "profile": 0.35,
+      "interview": 0.5
+    },
+    "criteria_generated_by": "seed",
+    "criteria_locked": false
+  },
+  {
+    "job_id": "job_005",
+    "company": {
+      "id": "hsb",
+      "name": "HSB Accounting Firm",
+      "industry": "Professional Services / Accounting",
+      "accent": "#4338CA",
+      "initials": "HSB"
+    },
+    "role_title": "Admin Executive",
+    "industry": "Professional Services / Administration",
+    "location": "Kuala Lumpur",
+    "role_level": "entry",
+    "portal_token": "pq-hsb-admin-executive",
+    "pipeline_stages": {
+      "cv_submission": {
+        "enabled": true,
+        "locked": true
+      },
+      "ocean_assessment": {
+        "enabled": true,
+        "locked": false
+      },
+      "interview": {
+        "enabled": true,
+        "locked": false
+      },
+      "offer": {
+        "enabled": true,
+        "locked": true
+      }
+    },
+    "hr_whatsapp_alerts": false,
+    "hr_contact_phone": "",
     "requirements": {
       "experience_years_min": 1,
       "experience_years_preferred": 2,
       "education_level_min": "Diploma",
       "required_skills": [
-        "customer service",
-        "communication",
-        "check-in check-out",
-        "complaint handling",
-        "multilingual"
+        "ms office",
+        "administration",
+        "documentation"
       ],
-      "preferred_skills": [
-        "hotel PMS system",
-        "upselling",
-        "concierge knowledge"
-      ],
+      "preferred_skills": [],
       "key_responsibilities": [
-        "Handle guest check-in and check-out",
-        "Manage room assignments",
-        "Resolve guest complaints",
-        "Coordinate with housekeeping and other departments"
+        "Manage office documentation",
+        "Coordinate schedules and correspondence",
+        "Support the accounting team",
+        "Maintain records accurately"
       ]
     },
     "age_band": {
       "min": 18,
-      "ideal_min": 20,
-      "ideal_max": 38,
-      "max": 50
+      "ideal_min": 18,
+      "ideal_max": 45,
+      "max": 60
     },
     "criteria": [
       {
         "id": "c1",
-        "name": "Hospitality / hotel experience",
-        "weight": 0.12,
+        "name": "Administrative experience",
         "source": "cv",
-        "description": "Years of relevant hotel or hospitality experience"
+        "weight": 0.15,
+        "description": "Office administration background"
       },
       {
         "id": "c2",
-        "name": "Multilingual communication",
-        "weight": 0.1,
+        "name": "MS Office proficiency",
         "source": "cv",
-        "description": "Ability to communicate across multiple languages"
+        "weight": 0.12,
+        "description": "Word, Excel, Outlook"
       },
       {
         "id": "c3",
-        "name": "PMS system experience (Opera etc.)",
+        "name": "Organisation & documentation",
+        "source": "cv",
         "weight": 0.08,
-        "source": "cv",
-        "description": "Experience with hotel property management systems"
+        "description": "Filing and record accuracy"
       },
       {
-        "id": "c4",
-        "name": "Age fit",
-        "weight": 0.03,
-        "source": "cv",
-        "description": "Candidate age relative to the preferred age band for the role"
-      },
-      {
-        "id": "c5",
-        "name": "Upselling background",
-        "weight": 0.02,
-        "source": "cv",
-        "description": "Experience upselling rooms or packages"
-      },
-      {
-        "id": "c6",
-        "name": "Warmth & agreeableness",
-        "weight": 0.08,
+        "id": "o1",
+        "name": "Conscientiousness — organisation",
         "source": "ocean",
-        "description": "High Agreeableness — warm, guest-focused disposition"
+        "weight": 0.08,
+        "description": "Orderly and systematic"
       },
       {
-        "id": "c7",
-        "name": "Composure under pressure",
+        "id": "o2",
+        "name": "Agreeableness — cooperation",
+        "source": "ocean",
         "weight": 0.07,
-        "source": "ocean",
-        "description": "Low Neuroticism — stays composed during busy check-in periods"
+        "description": "Supportive team player"
       },
       {
-        "id": "c8",
-        "name": "Complaint de-escalation",
+        "id": "i1",
+        "name": "Organisation & multitasking",
+        "source": "interview",
         "weight": 0.2,
-        "source": "interview",
-        "description": "Situational judgment: de-escalating upset guests"
+        "description": "Juggling admin tasks"
       },
       {
-        "id": "c9",
-        "name": "VIP & loyalty guest handling",
-        "weight": 0.16,
+        "id": "i2",
+        "name": "Communication",
         "source": "interview",
-        "description": "Handling VIP and loyalty-program guests with care"
+        "weight": 0.15,
+        "description": "Clear written and verbal"
       },
       {
-        "id": "c10",
-        "name": "First impression & check-in flow",
-        "weight": 0.14,
+        "id": "i3",
+        "name": "Software proficiency",
         "source": "interview",
-        "description": "Poise and efficiency in the guest check-in experience"
+        "weight": 0.15,
+        "description": "Comfort with office tools"
       }
     ],
     "thresholds": {
-      "green": 70,
-      "red": 40
+      "green": 72,
+      "red": 45
     },
     "benchmark": {
       "maturity": "starter",
@@ -444,28 +770,195 @@
       "avg_team_size": 0
     },
     "successProfile": {
-      "summary": "An ideal Hotel Front Desk Officer has 2+ years hospitality experience, communicates warmly across languages, de-escalates guest issues calmly, and presents professionally.",
+      "summary": "An organised, dependable admin executive who keeps the office running and supports the team.",
       "must_haves": [
-        "Minimum 1 year hospitality or front-line customer service experience",
-        "Clear communication in English and Bahasa Malaysia",
-        "Guest complaint handling ability"
+        "Administrative experience",
+        "MS Office proficiency"
       ],
       "nice_to_haves": [
-        "Hotel PMS (Opera) experience",
-        "Additional languages (Mandarin, etc.)",
-        "Upselling experience"
+        "Data-entry accuracy",
+        "Diploma or above"
       ],
-      "dealbreakers": [
-        "Unable to work shift or weekend hours",
-        "No customer-facing experience"
+      "dealbreakers": [],
+      "ideal_ocean_profile": {
+        "O": "medium",
+        "C": "high",
+        "E": "medium",
+        "A": "high",
+        "N": "low"
+      },
+      "benchmark_experience_years": 1,
+      "benchmark_team_size": 0,
+      "benchmark_education": "Diploma",
+      "salary_budget_min": 3350,
+      "salary_budget_max": 3710,
+      "created_at": "2026-07-14T07:05:37.000Z",
+      "last_updated": "2026-07-14T07:05:37.000Z"
+    },
+    "score_weights": {
+      "ocean": 0.15,
+      "profile": 0.35,
+      "interview": 0.5
+    },
+    "criteria_generated_by": "seed",
+    "criteria_locked": false
+  },
+  {
+    "job_id": "job_006",
+    "company": {
+      "id": "hsb",
+      "name": "HSB Accounting Firm",
+      "industry": "Professional Services / Accounting",
+      "accent": "#4338CA",
+      "initials": "HSB"
+    },
+    "role_title": "HR Executive",
+    "industry": "Professional Services / Human Resources",
+    "location": "Kuala Lumpur",
+    "role_level": "mid",
+    "portal_token": "pq-hsb-hr-executive",
+    "pipeline_stages": {
+      "cv_submission": {
+        "enabled": true,
+        "locked": true
+      },
+      "ocean_assessment": {
+        "enabled": true,
+        "locked": false
+      },
+      "interview": {
+        "enabled": true,
+        "locked": false
+      },
+      "offer": {
+        "enabled": true,
+        "locked": true
+      }
+    },
+    "hr_whatsapp_alerts": false,
+    "hr_contact_phone": "",
+    "requirements": {
+      "experience_years_min": 2,
+      "experience_years_preferred": 3,
+      "education_level_min": "Degree",
+      "required_skills": [
+        "recruitment",
+        "payroll",
+        "employee relations"
       ],
-      "ideal_ocean_profile": { "O": "medium", "C": "high", "E": "high", "A": "high", "N": "low" },
+      "preferred_skills": [],
+      "key_responsibilities": [
+        "Manage recruitment end-to-end",
+        "Process payroll and benefits",
+        "Handle employee relations",
+        "Maintain HR compliance"
+      ]
+    },
+    "age_band": {
+      "min": 18,
+      "ideal_min": 18,
+      "ideal_max": 45,
+      "max": 60
+    },
+    "criteria": [
+      {
+        "id": "c1",
+        "name": "HR experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "description": "Years in human resources"
+      },
+      {
+        "id": "c2",
+        "name": "Recruitment / payroll knowledge",
+        "source": "cv",
+        "weight": 0.12,
+        "description": "Hiring and payroll processes"
+      },
+      {
+        "id": "c3",
+        "name": "Employment law / HR systems",
+        "source": "cv",
+        "weight": 0.08,
+        "description": "Compliance and HRIS"
+      },
+      {
+        "id": "o1",
+        "name": "Agreeableness — people orientation",
+        "source": "ocean",
+        "weight": 0.08,
+        "description": "Approachable, people-first"
+      },
+      {
+        "id": "o2",
+        "name": "Conscientiousness — process",
+        "source": "ocean",
+        "weight": 0.07,
+        "description": "Follows process reliably"
+      },
+      {
+        "id": "i1",
+        "name": "People handling",
+        "source": "interview",
+        "weight": 0.2,
+        "description": "Managing sensitive people issues"
+      },
+      {
+        "id": "i2",
+        "name": "HR knowledge",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Depth of HR practice"
+      },
+      {
+        "id": "i3",
+        "name": "Confidentiality & judgment",
+        "source": "interview",
+        "weight": 0.15,
+        "description": "Discretion and fairness"
+      }
+    ],
+    "thresholds": {
+      "green": 72,
+      "red": 45
+    },
+    "benchmark": {
+      "maturity": "starter",
+      "avg_experience_years": 3,
+      "avg_team_size": 0
+    },
+    "successProfile": {
+      "summary": "A capable HR executive who can recruit, run payroll, and handle people matters with discretion.",
+      "must_haves": [
+        "HR experience",
+        "Recruitment or payroll experience"
+      ],
+      "nice_to_haves": [
+        "HR degree",
+        "Payroll / HRDF systems"
+      ],
+      "dealbreakers": [],
+      "ideal_ocean_profile": {
+        "O": "medium",
+        "C": "high",
+        "E": "medium-high",
+        "A": "high",
+        "N": "low"
+      },
       "benchmark_experience_years": 2,
       "benchmark_team_size": 0,
-      "created_at": "2026-06-30T00:00:00.000Z",
-      "last_updated": "2026-06-30T00:00:00.000Z"
+      "benchmark_education": "Degree",
+      "salary_budget_min": 4310,
+      "salary_budget_max": 5121,
+      "created_at": "2026-07-14T07:05:37.000Z",
+      "last_updated": "2026-07-14T07:05:37.000Z"
     },
-    "criteria_generated_by": "template",
+    "score_weights": {
+      "ocean": 0.15,
+      "profile": 0.35,
+      "interview": 0.5
+    },
+    "criteria_generated_by": "seed",
     "criteria_locked": false
   }
 ]

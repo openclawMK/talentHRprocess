@@ -6,6 +6,7 @@ import Login from "./screens/Login.jsx";
 import GlobalDashboard from "./screens/GlobalDashboard.jsx";
 import HRUpload from "./screens/HRUpload.jsx";
 import JobSelector from "./screens/JobSelector.jsx";
+import CompanySelector from "./screens/CompanySelector.jsx";
 import JobBuilder from "./screens/JobBuilder.jsx";
 import Dashboard from "./screens/Dashboard.jsx";
 import CandidateDetail from "./screens/CandidateDetail.jsx";
@@ -29,6 +30,8 @@ function HRApp() {
       <Routes>
         <Route path="/" element={<GlobalDashboard />} />
         <Route path="/upload" element={<HRUpload />} />
+        <Route path="/companies" element={<CompanySelector />} />
+        <Route path="/companies/:companyId" element={<JobSelector />} />
         <Route path="/jobs" element={<JobSelector />} />
         <Route path="/jobs/new" element={<JobBuilder />} />
         <Route path="/jobs/:jobId/dashboard" element={<Dashboard />} />
