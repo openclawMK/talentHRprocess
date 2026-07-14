@@ -478,6 +478,7 @@ router.post("/jobs", async (req, res) => {
       requirements = {},
       key_responsibilities = [],
       criteria: suppliedCriteria,
+      score_weights: suppliedWeights,
     } = req.body;
 
     if (!role_title || !industry)
@@ -488,6 +489,17 @@ router.post("/jobs", async (req, res) => {
       criteria = await generateCriteria({ industry, role_title, key_responsibilities, role_level });
     } else if (!weightsValid(criteria)) {
       return res.status(400).json({ error: "Criteria weights must sum to 100%" });
+    }
+
+    // The Create Job weight sliders set per-criterion cv/ocean/interview weights;
+    // their SUMS become the real top-level score_weights the composite engine
+    // uses (profile/ocean/interview), so what HR sees and edits is what scores.
+    let score_weights;
+    if (suppliedWeights && typeof suppliedWeights === "object") {
+      score_weights = suppliedWeights;
+    } else {
+      const sumBy = (src) => criteria.filter((c) => c.source === src).reduce((a, c) => a + (Number(c.weight) || 0), 0);
+      score_weights = { profile: sumBy("cv"), ocean: sumBy("ocean"), interview: sumBy("interview") };
     }
 
     const jobs = readJSON(JOBS_PATH);
@@ -513,7 +525,8 @@ router.post("/jobs", async (req, res) => {
       hr_whatsapp_alerts: false,
       hr_contact_phone: "",
       criteria,
-      thresholds: { green: 70, red: 40 },
+      score_weights,
+      thresholds: { green: 72, red: 45 },
       benchmark: { maturity: "starter", avg_experience_years: expMin || 1, avg_team_size: 0 },
       role_level,
       criteria_generated_by: suppliedCriteria ? "edited" : "ai",

@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
-const INDUSTRIES = ["F&B", "Hospitality", "Retail", "Manufacturing & Production", "Logistics & Warehouse", "Early Childhood Education", "Other"];
+// Fallback list if the industries lookup fails — the live list is fetched from
+// the Salary Center's industry set so both stay in sync.
+const FALLBACK_INDUSTRIES = ["F&B / Retail / Hospitality", "Professional / Office", "Other"];
 const EDUCATION = ["SPM", "Diploma", "Degree", "Any"];
 const ROLE_LEVELS = [
-  { value: "entry", label: "Entry-level", hint: "CV 35% · OCEAN 15% · Interview 50%" },
-  { value: "supervisory", label: "Supervisory", hint: "CV 45% · OCEAN 10% · Interview 45%" },
+  { value: "entry", label: "Entry-level", hint: "Adjust the weight sliders below — they set the real score" },
+  { value: "supervisory", label: "Supervisory", hint: "Adjust the weight sliders below — they set the real score" },
 ];
 const SRC = { cv: { bg: "#EEF2FF", color: "#4338CA" }, ocean: { bg: "#ECFDF5", color: "#047857" }, interview: { bg: "#F5F3FF", color: "#6D28D9" } };
 
@@ -16,12 +18,20 @@ const label = { display: "block", fontSize: 13, fontWeight: 600, color: "#374151
 
 export default function JobBuilder() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ role_title: "", industry: "F&B", location: "Kuala Lumpur", role_level: "entry", experience_years_min: 1, education_level_min: "SPM", key_responsibilities: "" });
+  const [form, setForm] = useState({ role_title: "", industry: "F&B / Retail / Hospitality", location: "Kuala Lumpur", role_level: "entry", experience_years_min: 1, education_level_min: "SPM", key_responsibilities: "" });
+  const [industries, setIndustries] = useState(FALLBACK_INDUSTRIES);
   const [criteria, setCriteria] = useState([]);
   const [original, setOriginal] = useState([]);
   const [generating, setGenerating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    axios.get("/api/salary-center").then((r) => {
+      const list = [...(r.data?.industries || []), "Other"];
+      if (list.length > 1) setIndustries(list);
+    }).catch(() => {});
+  }, []);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const total = criteria.reduce((a, c) => a + (Number(c.weight) || 0), 0);
@@ -67,7 +77,7 @@ export default function JobBuilder() {
         <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
           <div><label style={label}>Job title</label><input style={input} value={form.role_title} onChange={(e) => set("role_title", e.target.value)} placeholder="e.g. Restaurant Manager" /></div>
           <div><label style={label}>Industry</label>
-            <select style={input} value={form.industry} onChange={(e) => set("industry", e.target.value)}>{INDUSTRIES.map((i) => <option key={i}>{i}</option>)}</select>
+            <select style={input} value={form.industry} onChange={(e) => set("industry", e.target.value)}>{industries.map((i) => <option key={i}>{i}</option>)}</select>
           </div>
         </div>
         <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
@@ -105,7 +115,7 @@ export default function JobBuilder() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }} className="flex-wrap gap-3">
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 40, height: 40, borderRadius: 11, background: GRAD, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>✨</div>
-              <div><div style={{ fontSize: 15, fontWeight: 700, color: "#312E81" }}>AI-generated scoring criteria</div><div style={{ fontSize: 13, color: "#6D5D9E" }}>Adjust weights to total 100% before publishing.</div></div>
+              <div><div style={{ fontSize: 15, fontWeight: 700, color: "#312E81" }}>AI-generated scoring criteria</div><div style={{ fontSize: 13, color: "#6D5D9E" }}>These weights set the real score — CV/OCEAN/Interview bucket sizes come from the sums below. Adjust to total 100% before publishing.</div></div>
             </div>
             <span style={{ fontSize: 13, fontWeight: 700, color: valid ? "#047857" : "#B91C1C" }}>Total {totalPct}%{valid ? " ✓" : ""}</span>
           </div>

@@ -1,10 +1,12 @@
 import { chatJSON } from "./aiClient.js";
+import { DEFAULT_WEIGHTS } from "./composite.js";
 
-// Weight budget per role level (cv / ocean / interview must sum to 1.0)
-const WEIGHT_BUDGET = {
-  entry:        { cv: 0.35, ocean: 0.15, interview: 0.50 },
-  supervisory:  { cv: 0.45, ocean: 0.10, interview: 0.45 },
-};
+// Unified weight budget (cv / ocean / interview must sum to 1.0), matching the
+// composite scoring model (composite.js) exactly — the same regardless of role
+// level, so the "cv" bucket here always aligns with the Success-Profile-fit 35%
+// the score actually uses. role_level shapes CRITERIA CONTENT (e.g. leadership
+// framing for supervisory roles), never the bucket split.
+const WEIGHT_BUDGET = { cv: DEFAULT_WEIGHTS.profile, ocean: DEFAULT_WEIGHTS.ocean, interview: DEFAULT_WEIGHTS.interview };
 
 function buildSystemPrompt(budget) {
   return `You are an expert HR consultant and industrial-organisational psychologist specialising in the Malaysian job market.
@@ -100,7 +102,7 @@ function normaliseBySource(criteria, budget) {
  * @returns {Promise<Array>} criteria array
  */
 export async function generateCriteria({ industry, role_title, key_responsibilities = [], role_level = "entry" }) {
-  const budget = WEIGHT_BUDGET[role_level] || WEIGHT_BUDGET.entry;
+  const budget = WEIGHT_BUDGET;
   const fallback = FALLBACK[role_level] || FALLBACK.entry;
 
   try {
@@ -116,7 +118,7 @@ Return: { "criteria": [ ...criteria objects... ] }`;
 
     const result = await chatJSON({ system, user, temperature: 0.4 });
     const arr = Array.isArray(result) ? result : result.criteria;
-    if (!Array.isArray(arr) || arr.length < 5) return [...fallback];
+    if (!Array.isArray(arr) || arr.length < 5) return normaliseBySource(fallback, budget);
 
     const valid = arr.filter(
       (c) => c && c.name && ["cv", "interview", "ocean"].includes(c.source)
@@ -124,6 +126,6 @@ Return: { "criteria": [ ...criteria objects... ] }`;
     return normaliseBySource(valid, budget);
   } catch (err) {
     console.error("generateCriteria error:", err.message);
-    return [...fallback];
+    return normaliseBySource(fallback, budget);
   }
 }
