@@ -1,10 +1,11 @@
 /**
  * Salary benchmark — maps a role + location to an indicative Malaysian market
- * band, anchored on official DOSM 2023 occupation-group medians, adjusted by a
- * role/seniority factor and a state regional multiplier. Also compares a given
- * expected salary or budget against that band.
+ * band built from real per-role figures cross-validated across DOSM (official)
+ * and JobStreet (role-level), with recruitment-market ranges for manager tiers.
+ * Regional multipliers (from DOSM state medians) are damped to avoid
+ * double-counting the location mix already baked into platform data.
  *
- * Data: backend/data/salaryBenchmarks.json (see meta.note for the methodology).
+ * Data + methodology: backend/data/salaryBenchmarks.json (see meta.note).
  */
 import fs from "fs";
 import path from "path";
@@ -12,12 +13,12 @@ import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "salaryBenchmarks.json"), "utf-8"));
+const SRC = Object.fromEntries((DATA.meta.sources || []).map((s) => [s.id, s]));
 
 const norm = (s) => (s || "").toLowerCase().trim();
 const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
 
-// Pick the best role rule: longest keyword match wins (so "outlet supervisor"
-// beats a bare "manager" substring, and "supervisor" beats "crew").
+// Longest keyword match wins, so "outlet supervisor" beats a bare "manager".
 function matchRole(roleTitle) {
   const t = norm(roleTitle);
   let best = null, bestLen = 0;
@@ -31,7 +32,7 @@ function matchRole(roleTitle) {
 
 function regionMultiplier(location) {
   const loc = norm(location);
-  if (!loc) return { mult: DATA.regional_multipliers.default, region: null };
+  if (!loc) return { mult: 1, region: null };
   for (const [state, mult] of Object.entries(DATA.regional_multipliers)) {
     if (state !== "default" && loc.includes(state)) return { mult, region: state };
   }
@@ -40,29 +41,31 @@ function regionMultiplier(location) {
 
 /**
  * Indicative market band for a role at a location.
- * @returns null when no role rule matches, else { median, min, max, ... }.
+ * @returns null when no role rule matches.
  */
 export function getSalaryBenchmark(roleTitle, location) {
   const rule = matchRole(roleTitle);
   if (!rule) return null;
-  const grp = DATA.occupation_groups[rule.group];
-  const { mult, region } = regionMultiplier(location);
   const floor = DATA.meta.minimum_wage;
+  const { mult, region } = regionMultiplier(location);
+  // Damp the regional multiplier — platform ranges already blend locations.
+  const eff = 1 + (mult - 1) * (DATA.meta.regional_damping ?? 0.6);
+  const adj = (n) => Math.max(floor, Math.round((n * eff) / 10) * 10);
 
-  const median = Math.max(floor, Math.round(grp.median * rule.seniority_factor * mult));
-  // Band: median down to ~-16%, up toward the group mean (skew) — floored at min wage.
-  const min = Math.max(floor, Math.round(median * 0.84));
-  const max = Math.max(median + 100, Math.round(grp.mean * rule.seniority_factor * mult));
+  const median = adj(rule.median);
+  const min = Math.min(median, adj(rule.min));
+  const max = Math.max(median, adj(rule.max));
+  const sources = (rule.sources || []).map((id) => SRC[id]?.name || id);
 
   return {
     median, min, max,
     range_label: `${rm(min)}–${rm(max)}`,
     median_label: rm(median),
     category: rule.category,
-    occupation_group: grp.label,
+    basis: rule.basis || "role-level",
     region: region ? region.replace(/\b\w/g, (c) => c.toUpperCase()) : "Malaysia (national)",
-    source: DATA.meta.source,
-    data_year: DATA.meta.data_year,
+    sources,
+    source_short: (rule.sources || []).map((id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : "Market")).join(" + "),
     indicative: true,
   };
 }

@@ -228,7 +228,7 @@ export default function Dashboard() {
             <div style={{ flex: 1, minWidth: 200 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px" }}>Market rate · {b.category} · {b.region}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginTop: 3 }}>{b.range_label} <span style={{ fontSize: 13, color: "#9AA0AE", fontWeight: 600 }}>· median {b.median_label}/mo</span></div>
-              <div style={{ fontSize: 11.5, color: "#9AA0AE", marginTop: 3 }}>Indicative — Source: {b.source}</div>
+              <div style={{ fontSize: 11.5, color: "#9AA0AE", marginTop: 3 }}>Indicative — Sources: {b.source_short}</div>
             </div>
             {bv && (
               <div style={{ textAlign: "right" }}>

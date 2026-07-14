@@ -424,7 +424,7 @@ export default function CandidateDetail() {
                         <div style={{ fontSize: 12.5, color: "#6B7280", marginTop: 4 }}>
                           💰 Market {candidate.market.benchmark.range_label} (median {candidate.market.benchmark.median_label})
                           {candidate.market.vs && <span style={{ fontWeight: 700, color: (BUDGET[candidate.market.vs.lane] || BUDGET.neutral).color }}> · {candidate.market.vs.label} ({candidate.market.vs.pct_diff >= 0 ? "+" : ""}{candidate.market.vs.pct_diff}%)</span>}
-                          <span style={{ color: "#B6B9C6" }}> · DOSM {candidate.market.benchmark.data_year}</span>
+                          <span style={{ color: "#B6B9C6" }}> · {candidate.market.benchmark.source_short}</span>
                         </div>
                       )}
                     </div>
