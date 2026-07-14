@@ -19,18 +19,24 @@ const SRC_BADGE = {
   Market: { color: "#B45309", bg: "#FFF7ED" },
 };
 
+const PAGE_SIZE = 25;
+
 export default function SalaryCenter() {
   const [data, setData] = useState(null);
   const [region, setRegion] = useState("");
   const [sector, setSector] = useState("all");
   const [industry, setIndustry] = useState("all");
   const [q, setQ] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     axios.get(`/api/salary-center${region ? `?region=${encodeURIComponent(region)}` : ""}`).then((r) => setData(r.data)).catch(() => setData(false));
   }, [region]);
 
-  const rows = useMemo(() => {
+  // Reset to page 1 whenever a filter changes.
+  useEffect(() => { setPage(1); }, [sector, industry, q]);
+
+  const filtered = useMemo(() => {
     if (!data?.roles) return [];
     return data.roles.filter((r) =>
       (sector === "all" || r.sector === sector) &&
@@ -38,7 +44,17 @@ export default function SalaryCenter() {
       (!q || r.category.toLowerCase().includes(q.toLowerCase()))
     );
   }, [data, sector, industry, q]);
-  const scaleMax = useMemo(() => Math.max(1, ...rows.map((r) => r.max)), [rows]);
+
+  const industryCounts = useMemo(() => {
+    const c = {};
+    (data?.roles || []).forEach((r) => { c[r.industry] = (c[r.industry] || 0) + 1; });
+    return c;
+  }, [data]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const rows = filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+  const scaleMax = useMemo(() => Math.max(1, ...filtered.map((r) => r.max)), [filtered]);
 
   if (data === false) return <div className="text-gray-500">Couldn't load the salary center.</div>;
 
@@ -68,13 +84,20 @@ export default function SalaryCenter() {
         <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }} className="flex-wrap">
           {data?.industries?.length > 0 && (
             <select value={industry} onChange={(e) => setIndustry(e.target.value)} style={{ padding: "9px 12px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "#374151", background: "#fff", cursor: "pointer" }}>
-              <option value="all">All industries</option>
-              {data.industries.map((i) => <option key={i} value={i}>{i}</option>)}
+              <option value="all">All industries ({data.roles?.length ?? 0})</option>
+              {data.industries.map((i) => <option key={i} value={i}>{i} ({industryCounts[i] || 0})</option>)}
             </select>
           )}
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search a role…" style={{ padding: "9px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 14, minWidth: 180, outline: "none" }} />
         </div>
       </div>
+
+      {/* Result count */}
+      {data && (
+        <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 10 }}>
+          {filtered.length === 0 ? "No roles match" : `Showing ${(pageSafe - 1) * PAGE_SIZE + 1}–${Math.min(pageSafe * PAGE_SIZE, filtered.length)} of ${filtered.length} role${filtered.length === 1 ? "" : "s"}`}
+        </div>
+      )}
 
       {/* Table */}
       <div style={{ ...cardBox, overflow: "hidden" }}>
@@ -112,6 +135,15 @@ export default function SalaryCenter() {
           );
         })}
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 16 }}>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1} style={{ padding: "8px 14px", border: "1px solid #E2E4EC", borderRadius: 9, background: "#fff", fontSize: 13, fontWeight: 600, color: "#374151", cursor: pageSafe === 1 ? "default" : "pointer", opacity: pageSafe === 1 ? 0.4 : 1 }}>← Prev</button>
+          <span style={{ fontSize: 13, color: "#6B7280", padding: "0 6px" }}>Page {pageSafe} of {totalPages}</span>
+          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={pageSafe === totalPages} style={{ padding: "8px 14px", border: "1px solid #E2E4EC", borderRadius: 9, background: "#fff", fontSize: 13, fontWeight: 600, color: "#374151", cursor: pageSafe === totalPages ? "default" : "pointer", opacity: pageSafe === totalPages ? 0.4 : 1 }}>Next →</button>
+        </div>
+      )}
 
       {/* Source footnote */}
       {data && (
