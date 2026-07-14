@@ -20,6 +20,12 @@
         "type": "guide"
       },
       {
+        "id": "Hays2026",
+        "name": "Hays Asia Salary Guide 2026 (Malaysia)",
+        "url": "https://www.hays.com.my/salary-guide",
+        "type": "guide"
+      },
+      {
         "id": "Industry",
         "name": "Malaysian recruitment-market ranges",
         "type": "industry"
@@ -247,8 +253,6 @@
       "sector": "professional",
       "match": [
         "admin executive",
-        "administrative executive",
-        "administrator",
         "office administrator",
         "admin assistant"
       ],
@@ -265,7 +269,6 @@
     {
       "sector": "professional",
       "match": [
-        "customer service",
         "call centre",
         "call center",
         "customer support"
@@ -283,8 +286,6 @@
     {
       "sector": "professional",
       "match": [
-        "accounts executive",
-        "finance executive",
         "account assistant"
       ],
       "category": "Accounts / finance executive",
@@ -301,44 +302,8 @@
     {
       "sector": "professional",
       "match": [
-        "senior accountant",
-        "financial controller",
-        "finance head",
-        "tax manager",
-        "audit manager"
-      ],
-      "category": "Senior accountant / finance lead",
-      "min": 7500,
-      "median": 12000,
-      "max": 20000,
-      "sources": [
-        "Jobstore2023"
-      ],
-      "basis": "role-level",
-      "industry": "Accounting & finance"
-    },
-    {
-      "sector": "professional",
-      "match": [
-        "accountant",
-        "auditor"
-      ],
-      "category": "Accountant",
-      "min": 3750,
-      "median": 4800,
-      "max": 6250,
-      "sources": [
-        "JobStreet2026"
-      ],
-      "basis": "role-level",
-      "industry": "Accounting & finance"
-    },
-    {
-      "sector": "professional",
-      "match": [
         "sales executive",
         "business development",
-        "account manager",
         "sales representative"
       ],
       "category": "Sales / business development",
@@ -354,7 +319,6 @@
     {
       "sector": "professional",
       "match": [
-        "marketing executive",
         "digital marketing",
         "social media",
         "marketing"
@@ -375,7 +339,6 @@
         "graphic designer",
         "ui designer",
         "ux designer",
-        "web designer",
         "designer"
       ],
       "category": "Designer (graphic/UI/UX)",
@@ -409,20 +372,18 @@
     {
       "sector": "professional",
       "match": [
-        "software engineer",
         "software developer",
         "developer",
-        "programmer",
         "full stack",
         "backend",
         "frontend",
-        "java developer",
-        "web developer"
+        "web developer",
+        "software engineer"
       ],
       "category": "Software engineer / developer",
       "min": 4300,
-      "median": 6500,
-      "max": 10000,
+      "median": 8150,
+      "max": 12000,
       "sources": [
         "JobStreet2026",
         "Jobstore2023"
@@ -433,30 +394,17 @@
     {
       "sector": "professional",
       "match": [
-        "civil engineer"
-      ],
-      "category": "Civil engineer",
-      "min": 3000,
-      "median": 3700,
-      "max": 4500,
-      "sources": [
-        "JobStreet2026"
-      ],
-      "basis": "role-level",
-      "industry": "Engineering"
-    },
-    {
-      "sector": "professional",
-      "match": [
+        "electrical engineer",
         "mechanical engineer",
-        "electrical engineer"
+        "mechanical engineers"
       ],
       "category": "Mechanical / electrical engineer",
       "min": 3500,
-      "median": 4300,
-      "max": 5300,
+      "median": 6750,
+      "max": 10000,
       "sources": [
-        "JobStreet2026"
+        "JobStreet2026",
+        "Jobstore2023"
       ],
       "basis": "role-level",
       "industry": "Engineering"
@@ -499,7 +447,6 @@
     {
       "sector": "professional",
       "match": [
-        "hr manager",
         "human resource manager"
       ],
       "category": "HR manager",
@@ -511,70 +458,6 @@
       ],
       "basis": "role-level",
       "industry": "Human resources"
-    },
-    {
-      "sector": "professional",
-      "match": [
-        "finance manager",
-        "marketing manager",
-        "operations manager",
-        "project manager",
-        "engineering manager",
-        "it manager",
-        "product manager",
-        "sales manager",
-        "key account manager",
-        "business development manager"
-      ],
-      "category": "Manager (professional)",
-      "min": 9000,
-      "median": 12000,
-      "max": 15000,
-      "sources": [
-        "Jobstore2023"
-      ],
-      "basis": "role-level",
-      "industry": "Management / leadership"
-    },
-    {
-      "sector": "professional",
-      "match": [
-        "senior manager",
-        "regional manager",
-        "head of",
-        "head of department"
-      ],
-      "category": "Senior / regional manager",
-      "min": 12000,
-      "median": 18000,
-      "max": 25000,
-      "sources": [
-        "Jobstore2023"
-      ],
-      "basis": "role-level",
-      "industry": "Management / leadership"
-    },
-    {
-      "sector": "professional",
-      "match": [
-        "general manager",
-        "director",
-        "vice president",
-        "chief",
-        "managing director",
-        "ceo",
-        "cfo",
-        "coo"
-      ],
-      "category": "Director / C-suite",
-      "min": 18000,
-      "median": 30000,
-      "max": 50000,
-      "sources": [
-        "Jobstore2023"
-      ],
-      "basis": "role-level",
-      "industry": "Management / leadership"
     },
     {
       "sector": "frontline",
@@ -658,15 +541,15 @@
       "industry": "Logistics & warehousing",
       "match": [
         "logistics manager",
-        "warehouse manager",
         "supply chain manager"
       ],
       "category": "Logistics / warehouse manager",
       "min": 6000,
-      "median": 7200,
-      "max": 8500,
+      "median": 13000,
+      "max": 20000,
       "sources": [
-        "JobStreet2026"
+        "JobStreet2026",
+        "Jobstore2023"
       ],
       "basis": "role-level"
     },
@@ -697,7 +580,6 @@
       "match": [
         "quality control inspector",
         "qc inspector",
-        "qa inspector",
         "quality inspector"
       ],
       "category": "QC inspector",
@@ -751,8 +633,7 @@
       "match": [
         "quality assurance officer",
         "qa officer",
-        "quality officer",
-        "quality engineer"
+        "quality officer"
       ],
       "category": "QA officer / engineer",
       "min": 2200,
@@ -767,7 +648,6 @@
       "sector": "professional",
       "industry": "Manufacturing / production",
       "match": [
-        "production supervisor",
         "production executive",
         "manufacturing supervisor"
       ],
@@ -828,21 +708,6 @@
       "min": 2200,
       "median": 2700,
       "max": 3300,
-      "sources": [
-        "JobStreet2026"
-      ],
-      "basis": "role-level"
-    },
-    {
-      "sector": "professional",
-      "industry": "Healthcare / clinics",
-      "match": [
-        "pharmacist"
-      ],
-      "category": "Pharmacist",
-      "min": 6500,
-      "median": 7200,
-      "max": 8000,
       "sources": [
         "JobStreet2026"
       ],
@@ -918,6 +783,6009 @@
         "Industry"
       ],
       "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "network engineer",
+        "noc engineer",
+        "infrastructure engineer"
+      ],
+      "category": "Network / systems engineer",
+      "min": 7000,
+      "median": 11000,
+      "max": 16700,
+      "sources": [
+        "Hays2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "head of digital",
+        "digital marketing manager",
+        "digital manager",
+        "performance marketing manager"
+      ],
+      "category": "Head of digital / digital manager",
+      "min": 18000,
+      "median": 28000,
+      "max": 40000,
+      "sources": [
+        "Hays2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "global brand manager",
+        "senior brand manager"
+      ],
+      "category": "Brand manager",
+      "min": 25000,
+      "median": 30000,
+      "max": 35000,
+      "sources": [
+        "Hays2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "hr business partner"
+      ],
+      "category": "Senior HR manager / HRBP",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Hays2026"
+      ],
+      "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "chief information officers"
+      ],
+      "category": "Chief Information Officers",
+      "min": 25000,
+      "median": 32500,
+      "max": 40000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-18 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "program director"
+      ],
+      "category": "Program Director",
+      "min": 20000,
+      "median": 25000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-18 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "project director"
+      ],
+      "category": "Project Director",
+      "min": 15000,
+      "median": 20000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-18 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "service delivery directors"
+      ],
+      "category": "Service Delivery Directors",
+      "min": 20000,
+      "median": 25000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-18 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "sales directors"
+      ],
+      "category": "Sales Directors",
+      "min": 25000,
+      "median": 32500,
+      "max": 40000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-18 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "inside sales manager"
+      ],
+      "category": "Inside Sales Manager",
+      "min": 5000,
+      "median": 6000,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "project manager"
+      ],
+      "category": "Project Manager",
+      "min": 5000,
+      "median": 12500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "business development manager"
+      ],
+      "category": "Business Development Manager",
+      "min": 5000,
+      "median": 9000,
+      "max": 13000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it supply chain manager"
+      ],
+      "category": "IT Supply Chain Manager",
+      "min": 4500,
+      "median": 5750,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "account manager"
+      ],
+      "category": "Account Manager",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it procurement specialist"
+      ],
+      "category": "IT Procurement Specialist",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it trainers"
+      ],
+      "category": "IT Trainers",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "channel sales specialist"
+      ],
+      "category": "Channel Sales Specialist",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "inside sales specialists"
+      ],
+      "category": "Inside Sales Specialists",
+      "min": 3000,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "software development manager"
+      ],
+      "category": "Software Development Manager",
+      "min": 13000,
+      "median": 16500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "senior solutions architect"
+      ],
+      "category": "Senior Solutions Architect",
+      "min": 9000,
+      "median": 10000,
+      "max": 11000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "lead software developer"
+      ],
+      "category": "Lead Software Developer",
+      "min": 9000,
+      "median": 11500,
+      "max": 14000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "business consultant"
+      ],
+      "category": "Business Consultant",
+      "min": 8000,
+      "median": 11000,
+      "max": 14000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "sap consultants"
+      ],
+      "category": "SAP Consultants",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "software sales manager"
+      ],
+      "category": "Software Sales Manager",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "websphere application developer"
+      ],
+      "category": "Websphere Application Developer",
+      "min": 8000,
+      "median": 9000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "bi consultant"
+      ],
+      "category": "BI Consultant",
+      "min": 6500,
+      "median": 8250,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "systems analyst"
+      ],
+      "category": "Systems Analyst",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "quality assurance specialist test engineers"
+      ],
+      "category": "Quality Assurance Specialist/Test Engineers",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "junior solutions architect"
+      ],
+      "category": "Junior Solutions Architect",
+      "min": 4500,
+      "median": 5750,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "systems programmer"
+      ],
+      "category": "Systems Programmer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "web designer"
+      ],
+      "category": "Web Designer",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "analyst programmer"
+      ],
+      "category": "Analyst Programmer",
+      "min": 7000,
+      "median": 9000,
+      "max": 11000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "java developer"
+      ],
+      "category": "Java Developer",
+      "min": 6000,
+      "median": 9000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "programmer"
+      ],
+      "category": "Programmer",
+      "min": 4500,
+      "median": 5750,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "billing systems specialist"
+      ],
+      "category": "Billing Systems Specialist",
+      "min": 5500,
+      "median": 6500,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "implementation & technical support manager"
+      ],
+      "category": "Implementation & Technical Support Manager",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "information security manager"
+      ],
+      "category": "Information Security Manager",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "unix specialist"
+      ],
+      "category": "Unix Specialist",
+      "min": 5500,
+      "median": 6500,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "service delivery manager"
+      ],
+      "category": "Service Delivery Manager",
+      "min": 9000,
+      "median": 11500,
+      "max": 14000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "senior systems engineer"
+      ],
+      "category": "Senior Systems Engineer",
+      "min": 8000,
+      "median": 11000,
+      "max": 14000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it manager"
+      ],
+      "category": "IT Manager",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "problem & change management specialist"
+      ],
+      "category": "Problem & Change Management Specialist",
+      "min": 5500,
+      "median": 6750,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "security analyst"
+      ],
+      "category": "Security Analyst",
+      "min": 8000,
+      "median": 9000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "technical writer"
+      ],
+      "category": "Technical Writer",
+      "min": 6500,
+      "median": 8250,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "unix linux os engineer"
+      ],
+      "category": "Unix/Linux OS Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "pre-sales engineer"
+      ],
+      "category": "Pre-sales Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "billing systems engineer"
+      ],
+      "category": "Billing Systems Engineer",
+      "min": 4500,
+      "median": 5750,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "database administrator"
+      ],
+      "category": "Database Administrator",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "systems engineer"
+      ],
+      "category": "Systems Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "technical consultant"
+      ],
+      "category": "Technical Consultant",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "network administrator"
+      ],
+      "category": "Network Administrator",
+      "min": 7000,
+      "median": 9000,
+      "max": 11000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "helpdesk tech support (foreign language expertise"
+      ],
+      "category": "Helpdesk Tech Support (Foreign Language Expertise",
+      "min": 6000,
+      "median": 9000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "help desk analyst"
+      ],
+      "category": "Help Desk Analyst",
+      "min": 4500,
+      "median": 5750,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it executive"
+      ],
+      "category": "IT Executive",
+      "min": 5500,
+      "median": 6500,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "automation support engineer"
+      ],
+      "category": "Automation Support Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "system technician"
+      ],
+      "category": "System Technician",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it administrator"
+      ],
+      "category": "IT Administrator",
+      "min": 5500,
+      "median": 6500,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank propositions manager"
+      ],
+      "category": "Bank Propositions Manager",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-13 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "aml analyst"
+      ],
+      "category": "AML Analyst",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "atm manager"
+      ],
+      "category": "ATM Manager",
+      "min": 6000,
+      "median": 9000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "financial banking systems manager"
+      ],
+      "category": "Financial Banking Systems Manager",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "foreign exchange manager"
+      ],
+      "category": "Foreign Exchange Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "financial banking analysis manager"
+      ],
+      "category": "Financial Banking Analysis Manager",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank relationship manager"
+      ],
+      "category": "Bank Relationship Manager",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank project manager"
+      ],
+      "category": "Bank Project Manager",
+      "min": 10000,
+      "median": 12500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank branch manager"
+      ],
+      "category": "Bank Branch Manager",
+      "min": 11500,
+      "median": 15750,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "fraud detection manager"
+      ],
+      "category": "Fraud Detection Manager",
+      "min": 11500,
+      "median": 15750,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-17 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "assistant bank manager"
+      ],
+      "category": "Assistant Bank Manager",
+      "min": 11000,
+      "median": 13000,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage operations manager"
+      ],
+      "category": "Mortgage Operations Manager",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "online banking manager"
+      ],
+      "category": "Online Banking Manager",
+      "min": 12500,
+      "median": 18750,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-17 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "cash management manager"
+      ],
+      "category": "Cash Management Manager",
+      "min": 13000,
+      "median": 14000,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "internal bank audit manager"
+      ],
+      "category": "Internal Bank Audit Manager",
+      "min": 13000,
+      "median": 19000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "credit portfolio manager"
+      ],
+      "category": "Credit Portfolio Manager",
+      "min": 13000,
+      "median": 19000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank operational risk manager"
+      ],
+      "category": "Bank Operational Risk Manager",
+      "min": 13000,
+      "median": 19000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank operations head"
+      ],
+      "category": "Bank Operations Head",
+      "min": 13000,
+      "median": 19000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank regional manager"
+      ],
+      "category": "Bank Regional Manager",
+      "min": 14000,
+      "median": 22000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "12-17 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank manager"
+      ],
+      "category": "Bank Manager",
+      "min": 14000,
+      "median": 17000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "international banking manager"
+      ],
+      "category": "International Banking Manager",
+      "min": 14000,
+      "median": 17000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-13 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank clerk"
+      ],
+      "category": "Bank Clerk",
+      "min": 2500,
+      "median": 3750,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage collector"
+      ],
+      "category": "Mortgage Collector",
+      "min": 2500,
+      "median": 3750,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan clerk"
+      ],
+      "category": "Loan Clerk",
+      "min": 2600,
+      "median": 3800,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan collector"
+      ],
+      "category": "Loan Collector",
+      "min": 2500,
+      "median": 3750,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage servicing clerk"
+      ],
+      "category": "Mortgage Servicing Clerk",
+      "min": 2500,
+      "median": 3750,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking technical analyst"
+      ],
+      "category": "Banking Technical Analyst",
+      "min": 3000,
+      "median": 5500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "atm service technician"
+      ],
+      "category": "ATM Service Technician",
+      "min": 2500,
+      "median": 3250,
+      "max": 4000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "payment processing clerk"
+      ],
+      "category": "Payment Processing Clerk",
+      "min": 2500,
+      "median": 4250,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage payment processing clerk"
+      ],
+      "category": "Mortgage Payment Processing Clerk",
+      "min": 2800,
+      "median": 4400,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking business development officer"
+      ],
+      "category": "Banking Business Development Officer",
+      "min": 4500,
+      "median": 5250,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank relationship officer"
+      ],
+      "category": "Bank Relationship Officer",
+      "min": 5000,
+      "median": 7500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank accounts controller"
+      ],
+      "category": "Bank Accounts Controller",
+      "min": 5000,
+      "median": 7500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage document reviewer"
+      ],
+      "category": "Mortgage Document Reviewer",
+      "min": 3000,
+      "median": 5500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage processor"
+      ],
+      "category": "Mortgage Processor",
+      "min": 3000,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan processor"
+      ],
+      "category": "Loan Processor",
+      "min": 3000,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan business development officer"
+      ],
+      "category": "Loan Business Development Officer",
+      "min": 4500,
+      "median": 6750,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "customer service"
+      ],
+      "category": "Customer Service",
+      "min": 3000,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "financial banking assistant"
+      ],
+      "category": "Financial Banking Assistant",
+      "min": 3500,
+      "median": 4750,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank accounts analyst"
+      ],
+      "category": "Bank Accounts Analyst",
+      "min": 3800,
+      "median": 4900,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage credit analyst"
+      ],
+      "category": "Mortgage Credit Analyst",
+      "min": 3800,
+      "median": 5900,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bankruptcy coordinator"
+      ],
+      "category": "Bankruptcy Coordinator",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage advisor"
+      ],
+      "category": "Mortgage Advisor",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "direct bank sales representative"
+      ],
+      "category": "Direct Bank Sales Representative",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "fraud detection associate"
+      ],
+      "category": "Fraud Detection Associate",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "personal banker"
+      ],
+      "category": "Personal Banker",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "personal banking advisor"
+      ],
+      "category": "Personal Banking Advisor",
+      "min": 5500,
+      "median": 6750,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "private banker"
+      ],
+      "category": "Private Banker",
+      "min": 5500,
+      "median": 6750,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank operations officer"
+      ],
+      "category": "Bank Operations Officer",
+      "min": 5500,
+      "median": 6750,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan quality assurance representative"
+      ],
+      "category": "Loan Quality Assurance Representative",
+      "min": 5600,
+      "median": 7300,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "credit analyst"
+      ],
+      "category": "Credit Analyst",
+      "min": 5800,
+      "median": 7400,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "reconciliation and investigation specialist"
+      ],
+      "category": "Reconciliation and Investigation Specialist",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank compliance specialist"
+      ],
+      "category": "Bank Compliance Specialist",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "treasury operations officer"
+      ],
+      "category": "Treasury Operations Officer",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "fraud detection supervisor"
+      ],
+      "category": "Fraud Detection Supervisor",
+      "min": 6500,
+      "median": 9250,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking risk analyst"
+      ],
+      "category": "Banking Risk Analyst",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "commercial vault associate"
+      ],
+      "category": "Commercial Vault Associate",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank accounts executive"
+      ],
+      "category": "Bank Accounts Executive",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan quality assurance auditor"
+      ],
+      "category": "Loan Quality Assurance Auditor",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan analyst"
+      ],
+      "category": "Loan Analyst",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank quantitative analyst"
+      ],
+      "category": "Bank Quantitative Analyst",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "internal bank auditor"
+      ],
+      "category": "Internal Bank Auditor",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "budget analyst"
+      ],
+      "category": "Budget Analyst",
+      "min": 7500,
+      "median": 11250,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking business analyst"
+      ],
+      "category": "Banking Business Analyst",
+      "min": 7500,
+      "median": 11250,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage quality assurance auditor"
+      ],
+      "category": "Mortgage Quality Assurance Auditor",
+      "min": 7500,
+      "median": 11250,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "credit card fraud investigator"
+      ],
+      "category": "Credit Card Fraud Investigator",
+      "min": 7500,
+      "median": 11250,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank regional risk officer"
+      ],
+      "category": "Bank Regional Risk Officer",
+      "min": 7600,
+      "median": 11300,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "fraud analyst"
+      ],
+      "category": "Fraud Analyst",
+      "min": 7800,
+      "median": 11400,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan review manager"
+      ],
+      "category": "Loan Review Manager",
+      "min": 7800,
+      "median": 12900,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank process manager"
+      ],
+      "category": "Bank Process Manager",
+      "min": 7900,
+      "median": 12950,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "corporate dealer"
+      ],
+      "category": "Corporate Dealer",
+      "min": 7900,
+      "median": 12950,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan processing manager"
+      ],
+      "category": "Loan Processing Manager",
+      "min": 7900,
+      "median": 12950,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage quality assurance manager"
+      ],
+      "category": "Mortgage Quality Assurance Manager",
+      "min": 8000,
+      "median": 13000,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage processing manager"
+      ],
+      "category": "Mortgage Processing Manager",
+      "min": 8000,
+      "median": 13000,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan audit team leader"
+      ],
+      "category": "Loan Audit Team Leader",
+      "min": 8000,
+      "median": 13000,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "credit risk associate"
+      ],
+      "category": "Credit Risk Associate",
+      "min": 8000,
+      "median": 13000,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "credit risk analyst"
+      ],
+      "category": "Credit Risk Analyst",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan branch manager"
+      ],
+      "category": "Loan Branch Manager",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan quality assurance manager"
+      ],
+      "category": "Loan Quality Assurance Manager",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank operations specialist"
+      ],
+      "category": "Bank Operations Specialist",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking reference data manager"
+      ],
+      "category": "Banking Reference Data Manager",
+      "min": 8000,
+      "median": 14000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage servicing manager"
+      ],
+      "category": "Mortgage Servicing Manager",
+      "min": 8500,
+      "median": 14250,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank accounts manager"
+      ],
+      "category": "Bank Accounts Manager",
+      "min": 8500,
+      "median": 14250,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage credit manager"
+      ],
+      "category": "Mortgage Credit Manager",
+      "min": 8500,
+      "median": 11750,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan area manager"
+      ],
+      "category": "Loan Area Manager",
+      "min": 8500,
+      "median": 11750,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "loan collection manager"
+      ],
+      "category": "Loan Collection Manager",
+      "min": 8600,
+      "median": 11800,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank auditing manager"
+      ],
+      "category": "Bank Auditing Manager",
+      "min": 8700,
+      "median": 11850,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "assistant bank branch manager"
+      ],
+      "category": "Assistant Bank Branch Manager",
+      "min": 8700,
+      "median": 11850,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "trade product manager"
+      ],
+      "category": "Trade Product Manager",
+      "min": 8800,
+      "median": 11900,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking product manager"
+      ],
+      "category": "Banking Product Manager",
+      "min": 8900,
+      "median": 13450,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage collection manager"
+      ],
+      "category": "Mortgage Collection Manager",
+      "min": 8900,
+      "median": 13450,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank product manager"
+      ],
+      "category": "Bank Product Manager",
+      "min": 9000,
+      "median": 13500,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage development manager"
+      ],
+      "category": "Mortgage Development Manager",
+      "min": 9000,
+      "median": 13500,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "cards marketing manager"
+      ],
+      "category": "Cards Marketing Manager",
+      "min": 9000,
+      "median": 13500,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "bank programme manager"
+      ],
+      "category": "Bank Programme Manager",
+      "min": 9500,
+      "median": 13750,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "credit and collections manager"
+      ],
+      "category": "Credit and Collections Manager",
+      "min": 9500,
+      "median": 13750,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "financial bank planning consultant"
+      ],
+      "category": "Financial Bank Planning Consultant",
+      "min": 9600,
+      "median": 13800,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "mortgage funding manager"
+      ],
+      "category": "Mortgage Funding Manager",
+      "min": 9700,
+      "median": 14850,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "check processing manager"
+      ],
+      "category": "Check Processing Manager",
+      "min": 9800,
+      "median": 14900,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Banking & financial services",
+      "match": [
+        "banking business planning executive"
+      ],
+      "category": "Banking Business Planning Executive",
+      "min": 9900,
+      "median": 14950,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "chief executive officer managing director"
+      ],
+      "category": "Chief Executive Officer / Managing Director",
+      "min": 30000,
+      "median": 40000,
+      "max": 50000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "20-25 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "general manager operations director"
+      ],
+      "category": "General Manager / Operations Director",
+      "min": 20000,
+      "median": 30000,
+      "max": 40000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "18-25 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "operations manager"
+      ],
+      "category": "Operations Manager",
+      "min": 9500,
+      "median": 14750,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-20 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "head of engineering maintenance"
+      ],
+      "category": "Head of Engineering / Maintenance",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "planning manager"
+      ],
+      "category": "Planning Manager (Demand / Supply)",
+      "min": 12000,
+      "median": 14000,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "procurement manager"
+      ],
+      "category": "Procurement Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "quality manager"
+      ],
+      "category": "Quality Manager",
+      "min": 8000,
+      "median": 12500,
+      "max": 17000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "warehouse & logistics manager"
+      ],
+      "category": "Warehouse & Logistics Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "hse manager"
+      ],
+      "category": "HSE Manager (Health, Safety & Environment)",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "continuous improvement manager"
+      ],
+      "category": "Continuous Improvement Manager",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "design engineer"
+      ],
+      "category": "Design Engineer",
+      "min": 5000,
+      "median": 7500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "packaging engineer"
+      ],
+      "category": "Packaging Engineer",
+      "min": 4000,
+      "median": 6000,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "sourcing analyst"
+      ],
+      "category": "Sourcing Analyst",
+      "min": 5000,
+      "median": 7500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "automation electrical engineer"
+      ],
+      "category": "Automation / Electrical Engineer",
+      "min": 4000,
+      "median": 6000,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "engineering manager"
+      ],
+      "category": "Engineering Manager",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "utilities manager"
+      ],
+      "category": "Utilities Manager",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "head of quality"
+      ],
+      "category": "Head of Quality",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "senior project manager"
+      ],
+      "category": "Senior Project Manager",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "construction manager"
+      ],
+      "category": "Construction Manager",
+      "min": 9000,
+      "median": 13000,
+      "max": 17000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "program managers"
+      ],
+      "category": "Program Managers (Electronics/Semicon)",
+      "min": 9000,
+      "median": 12500,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "automation manager"
+      ],
+      "category": "Automation Manager",
+      "min": 10000,
+      "median": 13000,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "piping engineer"
+      ],
+      "category": "Piping Engineer",
+      "min": 6500,
+      "median": 8000,
+      "max": 9500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "process engineer"
+      ],
+      "category": "Process Engineer",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "project sales manager"
+      ],
+      "category": "Project Sales Manager",
+      "min": 10000,
+      "median": 13000,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "production supervisor"
+      ],
+      "category": "Production Supervisor",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "firmware engineer"
+      ],
+      "category": "Firmware Engineer",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "supplier quality engineer"
+      ],
+      "category": "Supplier Quality Engineer",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "product engineer"
+      ],
+      "category": "Product Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "operations engineer"
+      ],
+      "category": "Operations Engineer",
+      "min": 5600,
+      "median": 7800,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "order management coordinator"
+      ],
+      "category": "Order Management Coordinator",
+      "min": 4600,
+      "median": 5700,
+      "max": 6800,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "order processing manager"
+      ],
+      "category": "Order Processing Manager",
+      "min": 7500,
+      "median": 11250,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "order selector"
+      ],
+      "category": "Order Selector",
+      "min": 2300,
+      "median": 3150,
+      "max": 4000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "packaging manager"
+      ],
+      "category": "Packaging Manager",
+      "min": 7000,
+      "median": 13500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "lead electrical engineer"
+      ],
+      "category": "Lead Electrical Engineer",
+      "min": 10000,
+      "median": 12500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "electrical & instrument engineer"
+      ],
+      "category": "Electrical & Instrument Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "quality engineer"
+      ],
+      "category": "Quality Engineer",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "associate engineer"
+      ],
+      "category": "Associate Engineer",
+      "min": 4000,
+      "median": 4750,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "qa inspector"
+      ],
+      "category": "QA Inspector",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "technical manager"
+      ],
+      "category": "Technical Manager",
+      "min": 9000,
+      "median": 10000,
+      "max": 11000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "charge man"
+      ],
+      "category": "Charge Man",
+      "min": 5000,
+      "median": 6250,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "welding engineer"
+      ],
+      "category": "Welding Engineer",
+      "min": 5000,
+      "median": 6000,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "senior design engineer"
+      ],
+      "category": "Senior Design Engineer",
+      "min": 6500,
+      "median": 7750,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "service engineer"
+      ],
+      "category": "Service Engineer",
+      "min": 3500,
+      "median": 4500,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "chemical engineer"
+      ],
+      "category": "Chemical Engineer",
+      "min": 4000,
+      "median": 5250,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "civil engineer"
+      ],
+      "category": "Civil Engineer",
+      "min": 4000,
+      "median": 5250,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "sales engineer"
+      ],
+      "category": "Sales Engineer",
+      "min": 4000,
+      "median": 5250,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Manufacturing / production",
+      "match": [
+        "quantity surveyor"
+      ],
+      "category": "Quantity Surveyor",
+      "min": 4500,
+      "median": 6000,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "maintenance engineer"
+      ],
+      "category": "Maintenance Engineer",
+      "min": 4000,
+      "median": 5250,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "r&d engineer"
+      ],
+      "category": "R&D Engineer",
+      "min": 4000,
+      "median": 5250,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Engineering",
+      "match": [
+        "assembly engineer"
+      ],
+      "category": "Assembly Engineer",
+      "min": 4000,
+      "median": 5250,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "chief financial officer"
+      ],
+      "category": "Chief Financial Officer (MNC)",
+      "min": 40000,
+      "median": 50000,
+      "max": 60000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "15-20 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "finance director"
+      ],
+      "category": "Finance Director",
+      "min": 30000,
+      "median": 35000,
+      "max": 40000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "15-20 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "financial controller"
+      ],
+      "category": "Financial Controller (MNC/LC)",
+      "min": 20000,
+      "median": 25000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "finance head"
+      ],
+      "category": "Finance Head",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "tax manager"
+      ],
+      "category": "Tax Manager",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "finance corporate planning manager"
+      ],
+      "category": "Finance/Corporate Planning Manager",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "finance manager"
+      ],
+      "category": "Finance Manager",
+      "min": 10000,
+      "median": 12500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "internal audit manager"
+      ],
+      "category": "Internal Audit Manager",
+      "min": 10000,
+      "median": 12500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "senior accountant"
+      ],
+      "category": "Senior Accountant",
+      "min": 7500,
+      "median": 8500,
+      "max": 9500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "finance and administrative manager"
+      ],
+      "category": "Finance and Administrative Manager",
+      "min": 8000,
+      "median": 9000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "credit control manager"
+      ],
+      "category": "Credit Control Manager",
+      "min": 6800,
+      "median": 7300,
+      "max": 7800,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "financial analyst"
+      ],
+      "category": "Financial Analyst",
+      "min": 4500,
+      "median": 5650,
+      "max": 6800,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "accounts payable manager"
+      ],
+      "category": "Accounts Payable Manager",
+      "min": 8000,
+      "median": 8750,
+      "max": 9500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "cost accountant"
+      ],
+      "category": "Cost Accountant",
+      "min": 6500,
+      "median": 7250,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "team leader accounts"
+      ],
+      "category": "Team Leader, Accounts",
+      "min": 6500,
+      "median": 7000,
+      "max": 7500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "senior accounts executive"
+      ],
+      "category": "Senior Accounts Executive",
+      "min": 5500,
+      "median": 6000,
+      "max": 6500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "finance executive"
+      ],
+      "category": "Finance Executive",
+      "min": 3200,
+      "median": 4350,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "accounts executive"
+      ],
+      "category": "Accounts Executive",
+      "min": 3200,
+      "median": 4350,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "accounts specialist"
+      ],
+      "category": "Accounts Specialist (AP/AR)",
+      "min": 3200,
+      "median": 4100,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "credit control officer"
+      ],
+      "category": "Credit Control Officer",
+      "min": 3200,
+      "median": 4100,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "assistant pharmacist"
+      ],
+      "category": "Assistant Pharmacist",
+      "min": 5500,
+      "median": 6750,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "assistant pharmacy director"
+      ],
+      "category": "Assistant Pharmacy Director",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "associate medical affairs director"
+      ],
+      "category": "Associate Medical Affairs Director",
+      "min": 15000,
+      "median": 22500,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "bioinformatics scientist"
+      ],
+      "category": "Bioinformatics Scientist",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "bioinformatics technician"
+      ],
+      "category": "Bioinformatics Technician",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biological scientist"
+      ],
+      "category": "Biological Scientist",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biological technician"
+      ],
+      "category": "Biological Technician",
+      "min": 5000,
+      "median": 7500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biomedical engineer"
+      ],
+      "category": "Biomedical Engineer",
+      "min": 6000,
+      "median": 10500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biomedical engineering director"
+      ],
+      "category": "Biomedical Engineering Director",
+      "min": 10000,
+      "median": 17500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biostatistician"
+      ],
+      "category": "Biostatistician",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biotechnologist"
+      ],
+      "category": "Biotechnologist",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "biotechnology lead data manager"
+      ],
+      "category": "Biotechnology Lead Data Manager",
+      "min": 7000,
+      "median": 13500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "chemical process technician"
+      ],
+      "category": "Chemical Process Technician",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical consultant"
+      ],
+      "category": "Clinical Consultant",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical data manager"
+      ],
+      "category": "Clinical Data Manager",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical data specialist"
+      ],
+      "category": "Clinical Data Specialist",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical operations manager"
+      ],
+      "category": "Clinical Operations Manager",
+      "min": 13000,
+      "median": 19000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical pharmacist"
+      ],
+      "category": "Clinical Pharmacist",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical pharmacy specialist"
+      ],
+      "category": "Clinical Pharmacy Specialist",
+      "min": 10000,
+      "median": 12500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical programmer"
+      ],
+      "category": "Clinical Programmer",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical project manager"
+      ],
+      "category": "Clinical Project Manager",
+      "min": 8000,
+      "median": 12000,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical research associate"
+      ],
+      "category": "Clinical Research Associate",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical research manager"
+      ],
+      "category": "Clinical Research Manager",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "clinical study manager"
+      ],
+      "category": "Clinical Study Manager",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "compliance specialist"
+      ],
+      "category": "Compliance Specialist",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "cytology laboratory technologist"
+      ],
+      "category": "Cytology Laboratory Technologist",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "cytotechnologist"
+      ],
+      "category": "Cytotechnologist",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "gcp auditor"
+      ],
+      "category": "GCP Auditor",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "hospital pharmacy technician"
+      ],
+      "category": "Hospital Pharmacy Technician",
+      "min": 4000,
+      "median": 6000,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "manufacturing engineer"
+      ],
+      "category": "Manufacturing Engineer",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "medical affairs director"
+      ],
+      "category": "Medical Affairs Director",
+      "min": 13500,
+      "median": 19250,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "medical representative"
+      ],
+      "category": "Medical Representative",
+      "min": 4500,
+      "median": 6250,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "medical science liaison"
+      ],
+      "category": "Medical Science Liaison",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "molecular and cellular biologist"
+      ],
+      "category": "Molecular and Cellular Biologist",
+      "min": 12000,
+      "median": 18500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "nuclear pharmacist"
+      ],
+      "category": "Nuclear Pharmacist",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical manufacturing lead"
+      ],
+      "category": "Pharmaceutical Manufacturing Lead",
+      "min": 15000,
+      "median": 20000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical operations excellence manager"
+      ],
+      "category": "Pharmaceutical Operations Excellence Manager",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-12 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical process engineer"
+      ],
+      "category": "Pharmaceutical Process Engineer",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical production assistant manager"
+      ],
+      "category": "Pharmaceutical Production Assistant Manager",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical quality auditor"
+      ],
+      "category": "Pharmaceutical Quality Auditor",
+      "min": 800,
+      "median": 6400,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical regulatory affairs assistant"
+      ],
+      "category": "Pharmaceutical Regulatory Affairs Assistant",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical regulatory affairs specialist"
+      ],
+      "category": "Pharmaceutical Regulatory Affairs Specialist",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical research associate"
+      ],
+      "category": "Pharmaceutical Research Associate",
+      "min": 8000,
+      "median": 9000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical research scientist"
+      ],
+      "category": "Pharmaceutical Research Scientist",
+      "min": 13000,
+      "median": 16500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical researcher"
+      ],
+      "category": "Pharmaceutical Researcher",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical sales and marketing manager"
+      ],
+      "category": "Pharmaceutical Sales and Marketing Manager",
+      "min": 10000,
+      "median": 12500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical sales manager"
+      ],
+      "category": "Pharmaceutical Sales Manager",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical sales representative"
+      ],
+      "category": "Pharmaceutical Sales Representative",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical supply chain manager"
+      ],
+      "category": "Pharmaceutical Supply Chain Manager",
+      "min": 12000,
+      "median": 15000,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical team leader"
+      ],
+      "category": "Pharmaceutical Team Leader",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmaceutical technologist"
+      ],
+      "category": "Pharmaceutical Technologist",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmacist"
+      ],
+      "category": "Pharmacist",
+      "min": 8000,
+      "median": 16500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmacy aide"
+      ],
+      "category": "Pharmacy Aide",
+      "min": 5000,
+      "median": 6500,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmacy manager"
+      ],
+      "category": "Pharmacy Manager",
+      "min": 10000,
+      "median": 13000,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmacy stock controller"
+      ],
+      "category": "Pharmacy Stock Controller",
+      "min": 5000,
+      "median": 7500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "pharmacy technician"
+      ],
+      "category": "Pharmacy Technician",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "records management coordinator"
+      ],
+      "category": "Records Management Coordinator",
+      "min": 4000,
+      "median": 6000,
+      "max": 8000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "shift encapsulator"
+      ],
+      "category": "Shift Encapsulator",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Pharmaceutical & biotechnology",
+      "match": [
+        "staff pharmacist"
+      ],
+      "category": "Staff Pharmacist",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "head of recruitment"
+      ],
+      "category": "Head of Recruitment",
+      "min": 15000,
+      "median": 20000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "9-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "vice president learning & development"
+      ],
+      "category": "Vice President, Learning & Development",
+      "min": 15000,
+      "median": 20000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "senior hr manager"
+      ],
+      "category": "Senior HR Manager",
+      "min": 9000,
+      "median": 14500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "regional hr manager"
+      ],
+      "category": "Regional HR Manager",
+      "min": 12000,
+      "median": 18500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "senior recruitment manager"
+      ],
+      "category": "Senior Recruitment Manager",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "head of rewards"
+      ],
+      "category": "Head of Rewards",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "head of human resources business partner"
+      ],
+      "category": "Head of Human Resources Business Partner",
+      "min": 10000,
+      "median": 17500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "head of change management"
+      ],
+      "category": "Head of Change Management",
+      "min": 12000,
+      "median": 18500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "head of talent management"
+      ],
+      "category": "Head of Talent Management",
+      "min": 12000,
+      "median": 18500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "head of organizational development"
+      ],
+      "category": "Head of Organizational Development",
+      "min": 12000,
+      "median": 18500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "head of performance management"
+      ],
+      "category": "Head of Performance Management",
+      "min": 12000,
+      "median": 18500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "talent acquisition manager"
+      ],
+      "category": "Talent Acquisition Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "training & development manager"
+      ],
+      "category": "Training & Development Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "head of industrial relations"
+      ],
+      "category": "Head of Industrial Relations",
+      "min": 10000,
+      "median": 15000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "compensation and benefits manager"
+      ],
+      "category": "Compensation and Benefits Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "hr manager"
+      ],
+      "category": "HR Manager",
+      "min": 5000,
+      "median": 8500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "recruitment manager"
+      ],
+      "category": "Recruitment Manager",
+      "min": 5000,
+      "median": 7000,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "recruitment specialist"
+      ],
+      "category": "Recruitment Specialist",
+      "min": 2800,
+      "median": 3650,
+      "max": 4500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "compensation and benefits specialist"
+      ],
+      "category": "Compensation and Benefits Specialist",
+      "min": 2800,
+      "median": 3900,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "hr generalist"
+      ],
+      "category": "HR Generalist",
+      "min": 2800,
+      "median": 3900,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "hr officer executive"
+      ],
+      "category": "HR Officer/Executive",
+      "min": 2800,
+      "median": 3650,
+      "max": 4500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "ir executive"
+      ],
+      "category": "IR Executive",
+      "min": 3000,
+      "median": 3900,
+      "max": 4800,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "training specialist"
+      ],
+      "category": "Training Specialist",
+      "min": 3000,
+      "median": 3900,
+      "max": 4800,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "recruitment executive"
+      ],
+      "category": "Recruitment Executive",
+      "min": 2800,
+      "median": 3150,
+      "max": 3500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Human resources",
+      "match": [
+        "hr assistant"
+      ],
+      "category": "HR Assistant",
+      "min": 2000,
+      "median": 2750,
+      "max": 3500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "1-2 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "personal assistant to ceo"
+      ],
+      "category": "Personal Assistant to CEO",
+      "min": 5500,
+      "median": 7250,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "office manager"
+      ],
+      "category": "Office Manager",
+      "min": 5000,
+      "median": 7000,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "safety officer"
+      ],
+      "category": "Safety Officer",
+      "min": 4000,
+      "median": 5500,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "administrator"
+      ],
+      "category": "Administrator",
+      "min": 3000,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "document controller"
+      ],
+      "category": "Document Controller",
+      "min": 2800,
+      "median": 4400,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "secretary"
+      ],
+      "category": "Secretary",
+      "min": 2800,
+      "median": 4150,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Admin & office",
+      "match": [
+        "administrative executive"
+      ],
+      "category": "Administrative Executive",
+      "min": 2500,
+      "median": 3500,
+      "max": 4500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "project director high rise"
+      ],
+      "category": "Project Director, High Rise",
+      "min": 20000,
+      "median": 25000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "project director residential"
+      ],
+      "category": "Project Director, Residential",
+      "min": 20000,
+      "median": 25000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "technical director"
+      ],
+      "category": "Technical Director",
+      "min": 20000,
+      "median": 25000,
+      "max": 30000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "commercial manager"
+      ],
+      "category": "Commercial Manager",
+      "min": 18000,
+      "median": 21500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "gm business development"
+      ],
+      "category": "GM Business Development",
+      "min": 20000,
+      "median": 22500,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "head of hsse"
+      ],
+      "category": "Head of HSSE",
+      "min": 19500,
+      "median": 25750,
+      "max": 32000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "hsse manager"
+      ],
+      "category": "HSSE Manager",
+      "min": 10500,
+      "median": 13500,
+      "max": 16500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "civil & structural manager"
+      ],
+      "category": "Civil & Structural Manager",
+      "min": 11000,
+      "median": 15500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "mechanical & electrical manager"
+      ],
+      "category": "Mechanical & Electrical Manager",
+      "min": 11000,
+      "median": 15500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "resident engineer"
+      ],
+      "category": "Resident Engineer",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "electrical engineers"
+      ],
+      "category": "Electrical Engineers",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "infrasturcture engineers"
+      ],
+      "category": "Infrasturcture Engineers",
+      "min": 6000,
+      "median": 8000,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "facilities manager"
+      ],
+      "category": "Facilities Manager",
+      "min": 9000,
+      "median": 12500,
+      "max": 16000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "qa qc managers"
+      ],
+      "category": "QA/ QC Managers",
+      "min": 11000,
+      "median": 15500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "site manager"
+      ],
+      "category": "Site Manager",
+      "min": 7000,
+      "median": 9500,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "qa qc engineers"
+      ],
+      "category": "QA/QC Engineers",
+      "min": 3500,
+      "median": 4750,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Property & construction",
+      "match": [
+        "site executive"
+      ],
+      "category": "Site Executive",
+      "min": 2500,
+      "median": 3750,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "regional vp marketingl"
+      ],
+      "category": "Regional VP Marketingl",
+      "min": 15000,
+      "median": 20000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "corporate communications director"
+      ],
+      "category": "Corporate Communications Director",
+      "min": 15000,
+      "median": 20000,
+      "max": 25000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "business development director"
+      ],
+      "category": "Business Development Director",
+      "min": 15000,
+      "median": 17500,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "vp corporate strategy & planning"
+      ],
+      "category": "VP Corporate Strategy & Planning",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "assistant country manager"
+      ],
+      "category": "Assistant Country Manager",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "7-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "head of channel management"
+      ],
+      "category": "Head of Channel Management",
+      "min": 12000,
+      "median": 15000,
+      "max": 18000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "sales manager"
+      ],
+      "category": "Sales Manager",
+      "min": 6000,
+      "median": 9500,
+      "max": 13000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "marketing communication manager"
+      ],
+      "category": "Marketing Communication Manager",
+      "min": 9000,
+      "median": 11000,
+      "max": 13000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "key account manager"
+      ],
+      "category": "Key Account Manager",
+      "min": 5000,
+      "median": 9000,
+      "max": 13000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "marketing manager"
+      ],
+      "category": "Marketing Manager",
+      "min": 6000,
+      "median": 9000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "brand manager"
+      ],
+      "category": "Brand Manager",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "area sales manager"
+      ],
+      "category": "Area Sales Manager",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "channel sales manager"
+      ],
+      "category": "Channel Sales Manager",
+      "min": 8000,
+      "median": 10000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-7 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "pr manager"
+      ],
+      "category": "PR Manager",
+      "min": 5500,
+      "median": 7750,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-6 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "channel manager"
+      ],
+      "category": "Channel Manager",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "advertising manager"
+      ],
+      "category": "Advertising Manager",
+      "min": 6000,
+      "median": 7500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "senior sales executive"
+      ],
+      "category": "Senior Sales Executive",
+      "min": 4000,
+      "median": 5500,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Sales & business development",
+      "match": [
+        "retail supervisor retail executive"
+      ],
+      "category": "Retail Supervisor/ Retail Executive",
+      "min": 2500,
+      "median": 3250,
+      "max": 4000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "brand product manager"
+      ],
+      "category": "Brand/ Product Manager",
+      "min": 4000,
+      "median": 6500,
+      "max": 9000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "marketing executive"
+      ],
+      "category": "Marketing Executive",
+      "min": 3000,
+      "median": 3500,
+      "max": 4000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "market research"
+      ],
+      "category": "Market Research",
+      "min": 3000,
+      "median": 3500,
+      "max": 4000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-4 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Customer service / BPO",
+      "match": [
+        "customer service executive"
+      ],
+      "category": "Customer Service Executive",
+      "min": 3000,
+      "median": 3500,
+      "max": 4000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "director of supply chain"
+      ],
+      "category": "Director of Supply Chain",
+      "min": 20000,
+      "median": 27500,
+      "max": 35000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "10-15 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "strategic sourcing manager"
+      ],
+      "category": "Strategic Sourcing Manager",
+      "min": 12000,
+      "median": 16000,
+      "max": 20000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "senior warehouse manager"
+      ],
+      "category": "Senior Warehouse Manager",
+      "min": 9000,
+      "median": 12000,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "purchasing manager"
+      ],
+      "category": "Purchasing Manager",
+      "min": 8000,
+      "median": 11500,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "6-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "senior buyer"
+      ],
+      "category": "Senior buyer",
+      "min": 7000,
+      "median": 8500,
+      "max": 10000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "8-10 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "logistic & planning manager"
+      ],
+      "category": "Logistic & Planning Manager",
+      "min": 7000,
+      "median": 11000,
+      "max": 15000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "5-8 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "warehouse manager"
+      ],
+      "category": "Warehouse Manager",
+      "min": 6000,
+      "median": 9000,
+      "max": 12000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "assistant distribution manager"
+      ],
+      "category": "Assistant distribution Manager",
+      "min": 5000,
+      "median": 6000,
+      "max": 7000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "purchasing executive"
+      ],
+      "category": "Purchasing Executive",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "4-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "warehouse supervisor"
+      ],
+      "category": "Warehouse Supervisor",
+      "min": 4000,
+      "median": 4750,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "logistic coordinator"
+      ],
+      "category": "Logistic Coordinator",
+      "min": 3500,
+      "median": 4500,
+      "max": 5500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "procurement executive"
+      ],
+      "category": "Procurement Executive",
+      "min": 4000,
+      "median": 5000,
+      "max": 6000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "shipping supervisor"
+      ],
+      "category": "Shipping Supervisor",
+      "min": 4000,
+      "median": 4500,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "3-5 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "buyer"
+      ],
+      "category": "Buyer",
+      "min": 3000,
+      "median": 4000,
+      "max": 5000,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "operations executive"
+      ],
+      "category": "Operations Executive",
+      "min": 3500,
+      "median": 4000,
+      "max": 4500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "warehouse executive"
+      ],
+      "category": "Warehouse Executive",
+      "min": 2500,
+      "median": 3500,
+      "max": 4500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "stock controller"
+      ],
+      "category": "Stock Controller",
+      "min": 2000,
+      "median": 2750,
+      "max": 3500,
+      "sources": [
+        "Jobstore2023"
+      ],
+      "basis": "role-level",
+      "experience_span": "2-3 yrs"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "accountant",
+        "auditor"
+      ],
+      "category": "Accountant",
+      "min": 3750,
+      "median": 5750,
+      "max": 8000,
+      "sources": [
+        "JobStreet2026",
+        "Jobstore2023"
+      ],
+      "basis": "role-level"
     }
   ]
 }
