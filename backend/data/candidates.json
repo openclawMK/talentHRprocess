@@ -209,8 +209,8 @@
           "estimated": false
         }
       ],
-      "combined_score": 91,
-      "lane": "green",
+      "combined_score": 12,
+      "lane": "red",
       "strengths": [
         "The candidate has substantial experience in the hospitality industry, totaling over four years, which aligns well with the outlet supervisor role.",
         "She possesses strong skills in guest relations and complaint handling, which are crucial for managing customer escalations.",
@@ -220,10 +220,80 @@
         "Probe in interview for specific experience in team supervision, as her previous roles did not explicitly involve managing a team.",
         "Probe in interview for her experience with cash handling and reconciliation, ensuring she can manage daily cash operations effectively."
       ],
-      "summary": "The candidate is a strong fit for the Outlet Supervisor role with over four years of relevant experience in the hospitality industry and a solid educational background in hotel management. Her skills in guest relations and complaint handling are well-suited for managing customer interactions and escalations. However, further clarification is needed regarding her experience in team supervision and cash handling to ensure she meets all the role's requirements."
+      "summary": "The candidate is a strong fit for the Outlet Supervisor role with over four years of relevant experience in the hospitality industry and a solid educational background in hotel management. Her skills in guest relations and complaint handling are well-suited for managing customer interactions and escalations. However, further clarification is needed regarding her experience in team supervision and cash handling to ensure she meets all the role's requirements.",
+      "screening_score": 12,
+      "screening_pass": false,
+      "pre_interview_max": 50,
+      "component_scores": {
+        "profile_fit": 33,
+        "ocean": null,
+        "interview": null,
+        "weights": {
+          "ocean": 0.15,
+          "profile": 0.35,
+          "interview": 0.5
+        }
+      }
     },
     "hr_notes": [],
-    "override": null
+    "override": null,
+    "score_breakdown": {
+      "cv_fit": {
+        "score": 33,
+        "label": "Weak",
+        "weight_in_total": 0.35,
+        "status": "completed",
+        "contributing_factors": [
+          {
+            "factor": "Experience",
+            "result": "4.4 years — meets benchmark of 3",
+            "impact": "positive"
+          },
+          {
+            "factor": "Required skills",
+            "result": "0 of 4 matched",
+            "impact": "negative"
+          },
+          {
+            "factor": "Education",
+            "result": "Diploma — meets minimum (SPM)",
+            "impact": "positive"
+          },
+          {
+            "factor": "Team supervision",
+            "result": "Managed 0 staff — below benchmark of 8",
+            "impact": "negative"
+          }
+        ]
+      },
+      "personality_fit": {
+        "score": null,
+        "label": "Pending",
+        "weight_in_total": 0.15,
+        "status": "pending",
+        "contributing_factors": []
+      },
+      "interview_result": {
+        "score": null,
+        "label": "Pending",
+        "weight_in_total": 0.5,
+        "status": "pending",
+        "contributing_factors": []
+      },
+      "strengths": [
+        "The candidate has substantial experience in the hospitality industry, totaling over four years, which aligns well with the outlet supervisor role.",
+        "She possesses strong skills in guest relations and complaint handling, which are crucial for managing customer escalations.",
+        "Her familiarity with the Opera PMS system and Microsoft Office indicates a solid foundation in using technology for operational tasks."
+      ],
+      "risks": [],
+      "missing_evidence": [
+        "Interview not yet completed — interview criteria unscored",
+        "OCEAN assessment not yet completed",
+        "No clear evidence of \"customer service\" in CV",
+        "No clear evidence of \"cash handling\" in CV",
+        "No clear evidence of \"team supervision\" in CV"
+      ]
+    }
   },
   {
     "candidate_id": "534540cf-a9af-46b0-bdb1-4b27ad2e0c4d",
@@ -434,8 +504,8 @@
           "estimated": false
         }
       ],
-      "combined_score": 80,
-      "lane": "green",
+      "combined_score": 18,
+      "lane": "red",
       "strengths": [
         "The candidate has over four years of experience in the hospitality industry, which aligns well with the customer service focus of the Outlet Supervisor role.",
         "Her proficiency in guest relations and complaint handling indicates strong interpersonal skills essential for handling customer escalations.",
@@ -445,7 +515,20 @@
         "Probe in interview for specific examples of team supervision experience, as her previous roles did not explicitly involve managing a team.",
         "Probe in interview for experience with cash handling and reconciliation, as this is a key responsibility of the role."
       ],
-      "summary": "The candidate brings a solid background in hospitality with relevant skills in guest relations and complaint handling, which are critical for an Outlet Supervisor. Her age and educational background are well-suited for the role's requirements. However, further exploration during the interview is needed to assess her experience in team supervision and cash handling, as these are essential components of the position."
+      "summary": "The candidate brings a solid background in hospitality with relevant skills in guest relations and complaint handling, which are critical for an Outlet Supervisor. Her age and educational background are well-suited for the role's requirements. However, further exploration during the interview is needed to assess her experience in team supervision and cash handling, as these are essential components of the position.",
+      "screening_score": 18,
+      "screening_pass": false,
+      "pre_interview_max": 50,
+      "component_scores": {
+        "profile_fit": 33,
+        "ocean": 40,
+        "interview": null,
+        "weights": {
+          "ocean": 0.15,
+          "profile": 0.35,
+          "interview": 0.5
+        }
+      }
     },
     "hr_notes": [],
     "override": null,
@@ -457,7 +540,80 @@
       "neuroticism": 50,
       "emotional_stability": 50
     },
-    "ocean_completed": true
+    "ocean_completed": true,
+    "score_breakdown": {
+      "cv_fit": {
+        "score": 33,
+        "label": "Weak",
+        "weight_in_total": 0.35,
+        "status": "completed",
+        "contributing_factors": [
+          {
+            "factor": "Experience",
+            "result": "4.4 years — meets benchmark of 3",
+            "impact": "positive"
+          },
+          {
+            "factor": "Required skills",
+            "result": "0 of 4 matched",
+            "impact": "negative"
+          },
+          {
+            "factor": "Education",
+            "result": "Diploma — meets minimum (SPM)",
+            "impact": "positive"
+          },
+          {
+            "factor": "Team supervision",
+            "result": "Managed 0 staff — below benchmark of 8",
+            "impact": "negative"
+          }
+        ]
+      },
+      "personality_fit": {
+        "score": 40,
+        "label": "Partial",
+        "weight_in_total": 0.15,
+        "status": "completed",
+        "contributing_factors": [
+          {
+            "factor": "Conscientiousness",
+            "result": "Moderate — generally dependable",
+            "impact": "neutral"
+          },
+          {
+            "factor": "Emotional stability",
+            "result": "Generally composed",
+            "impact": "neutral"
+          },
+          {
+            "factor": "Agreeableness",
+            "result": "Cooperative but assertive",
+            "impact": "positive"
+          }
+        ]
+      },
+      "interview_result": {
+        "score": null,
+        "label": "Pending",
+        "weight_in_total": 0.5,
+        "status": "pending",
+        "contributing_factors": []
+      },
+      "strengths": [
+        "The candidate has over four years of experience in the hospitality industry, which aligns well with the customer service focus of the Outlet Supervisor role.",
+        "Her proficiency in guest relations and complaint handling indicates strong interpersonal skills essential for handling customer escalations.",
+        "The candidate's age of 29 falls well within the preferred age range, suggesting a good fit for the role's demands and responsibilities."
+      ],
+      "risks": [],
+      "missing_evidence": [
+        "Interview not yet completed — interview criteria unscored",
+        "No clear evidence of \"customer service\" in CV",
+        "No clear evidence of \"cash handling\" in CV",
+        "No clear evidence of \"team supervision\" in CV",
+        "No clear evidence of \"opening closing procedures\" in CV"
+      ]
+    }
   },
   {
     "candidate_id": "a6d7dead-35eb-4f89-96fa-e7beaa6ab77f",
@@ -652,8 +808,8 @@
           "estimated": false
         }
       ],
-      "combined_score": 63,
-      "lane": "amber",
+      "combined_score": 18,
+      "lane": "red",
       "strengths": [
         "The candidate has a solid foundation in customer service and cash handling, essential for managing daily operations.",
         "Experience across multiple roles in the food and beverage industry demonstrates adaptability and a broad understanding of the sector.",
@@ -663,7 +819,20 @@
         "Probe in interview for examples of team supervision experience, as this is a key responsibility for the role.",
         "Probe in interview for knowledge and experience with inventory management and staff scheduling."
       ],
-      "summary": "The candidate has 22 months of experience in the food and beverage industry, which is slightly below the preferred experience level for the Outlet Supervisor role. Their skills in customer service, cash handling, and POS systems are strong, indicating a good fit for the operational aspects of the position. However, further exploration during the interview is needed to assess their experience in team supervision and inventory management, which are critical for the role's leadership responsibilities."
+      "summary": "The candidate has 22 months of experience in the food and beverage industry, which is slightly below the preferred experience level for the Outlet Supervisor role. Their skills in customer service, cash handling, and POS systems are strong, indicating a good fit for the operational aspects of the position. However, further exploration during the interview is needed to assess their experience in team supervision and inventory management, which are critical for the role's leadership responsibilities.",
+      "screening_score": 18,
+      "screening_pass": false,
+      "pre_interview_max": 50,
+      "component_scores": {
+        "profile_fit": 27,
+        "ocean": 60,
+        "interview": null,
+        "weights": {
+          "ocean": 0.15,
+          "profile": 0.35,
+          "interview": 0.5
+        }
+      }
     },
     "hr_notes": [],
     "override": null,
@@ -675,6 +844,77 @@
       "neuroticism": 38,
       "emotional_stability": 62
     },
-    "ocean_completed": true
+    "ocean_completed": true,
+    "score_breakdown": {
+      "cv_fit": {
+        "score": 27,
+        "label": "Weak",
+        "weight_in_total": 0.35,
+        "status": "completed",
+        "contributing_factors": [
+          {
+            "factor": "Experience",
+            "result": "1.8 years — below minimum of 2",
+            "impact": "negative"
+          },
+          {
+            "factor": "Required skills",
+            "result": "2 of 4 matched",
+            "impact": "partial"
+          },
+          {
+            "factor": "Education",
+            "result": "Sijil Pelajaran Malaysia (SPM) — meets minimum (SPM)",
+            "impact": "positive"
+          },
+          {
+            "factor": "Team supervision",
+            "result": "Managed 0 staff — below benchmark of 8",
+            "impact": "negative"
+          }
+        ]
+      },
+      "personality_fit": {
+        "score": 60,
+        "label": "Good",
+        "weight_in_total": 0.15,
+        "status": "completed",
+        "contributing_factors": [
+          {
+            "factor": "Conscientiousness",
+            "result": "Low — may need closer supervision",
+            "impact": "negative"
+          },
+          {
+            "factor": "Emotional stability",
+            "result": "Handles pressure well",
+            "impact": "positive"
+          },
+          {
+            "factor": "Agreeableness",
+            "result": "Warm and cooperative",
+            "impact": "positive"
+          }
+        ]
+      },
+      "interview_result": {
+        "score": null,
+        "label": "Pending",
+        "weight_in_total": 0.5,
+        "status": "pending",
+        "contributing_factors": []
+      },
+      "strengths": [
+        "The candidate has a solid foundation in customer service and cash handling, essential for managing daily operations.",
+        "Experience across multiple roles in the food and beverage industry demonstrates adaptability and a broad understanding of the sector.",
+        "Proficiency in using POS systems aligns well with the preferred skills for the role."
+      ],
+      "risks": [],
+      "missing_evidence": [
+        "Interview not yet completed — interview criteria unscored",
+        "No clear evidence of \"team supervision\" in CV",
+        "No clear evidence of \"opening closing procedures\" in CV"
+      ]
+    }
   }
 ]

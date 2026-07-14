@@ -4,6 +4,7 @@
  * produce a single fit score + verdict.
  */
 import { evidenceBlob, hasEvidence, evaluateSuccessProfile } from "./scorer.js";
+import { getSalaryBenchmark, salaryExperienceFit } from "./salaryBenchmark.js";
 
 const LEVEL_PCT = { low: 20, "medium-low": 40, medium: 60, "medium-high": 80, high: 100 };
 
@@ -44,6 +45,66 @@ export function computeBudgetFit(candidate, job) {
   else { status = "over"; label = "Over budget"; lane = "red"; }
 
   return { expected, expected_label: fmtRM(expected), min, max, has_budget: true, status, label, lane, range_label: rangeLabel };
+}
+
+/**
+ * Profile-fit score (0-100) for the 35% scoring component: how well the CV
+ * matches the Success Profile — must-haves, nice-to-haves, experience/team
+ * benchmarks and salary-vs-experience. Personality is deliberately EXCLUDED
+ * (it is its own 15% OCEAN component). Returns null when there is nothing to
+ * evaluate (no Success Profile), so the caller can fall back to a CV baseline.
+ */
+export function computeProfileFit(candidate, job) {
+  const sp = job.successProfile || {};
+  const blob = evidenceBlob(candidate);
+  const must = (sp.must_haves || []).map((t) => hasEvidence(blob, t));
+  const nice = (sp.nice_to_haves || []).map((t) => hasEvidence(blob, t));
+
+  const candExp = candidate.profile?.total_experience_months != null ? candidate.profile.total_experience_months / 12 : null;
+  const benchExp = sp.benchmark_experience_years || 0;
+  const benchTeam = sp.benchmark_team_size || 0;
+  const candTeam = Math.max(0, ...(candidate.profile?.work_history || []).map((w) => w.team_size_managed || 0));
+  const benchParts = [];
+  if (benchExp > 0) benchParts.push(candExp == null ? 0 : Math.min(1, candExp / benchExp));
+  if (benchTeam > 0) benchParts.push(candTeam >= benchTeam ? 1 : candTeam > 0 ? 0.5 : 0);
+
+  const market = getSalaryBenchmark(job.role_title, job.location);
+  const salFit = salaryExperienceFit(candidate.profile?.expected_salary, candExp, market);
+
+  const comps = [];
+  if (must.length) comps.push({ w: 0.45, v: must.filter(Boolean).length / must.length });
+  if (nice.length) comps.push({ w: 0.15, v: nice.filter(Boolean).length / nice.length });
+  if (benchParts.length) comps.push({ w: 0.25, v: benchParts.reduce((a, b) => a + b, 0) / benchParts.length });
+  if (salFit != null) comps.push({ w: 0.15, v: salFit / 100 });
+  if (!comps.length) return null; // no Success Profile signals — caller falls back
+
+  const wsum = comps.reduce((a, c) => a + c.w, 0);
+  let fit = Math.round((comps.reduce((a, c) => a + c.w * c.v, 0) / wsum) * 100);
+  const evalSp = evaluateSuccessProfile(candidate, job);
+  if (evalSp.dealbreakers_hit.length) fit = Math.max(0, fit - 35); // softened dealbreaker
+  return fit;
+}
+
+/**
+ * OCEAN personality score (0-100) for the 15% component. Uses alignment to the
+ * role's ideal OCEAN profile when defined, else the average of positive-direction
+ * traits. Null until the candidate completes the questionnaire.
+ */
+export function computeOceanScore(candidate, job) {
+  const t = candidate.ocean_traits;
+  if (!t) return null;
+  const ideal = job.successProfile?.ideal_ocean_profile || {};
+  const keys = Object.keys(ideal).filter((k) => traitName[k]);
+  if (keys.length) {
+    const matched = keys.filter((k) => {
+      const target = LEVEL_PCT[ideal[k]] ?? 60;
+      const actual = traitValue(t, k);
+      return actual != null && Math.abs(actual - target) <= 25;
+    }).length;
+    return Math.round((matched / keys.length) * 100);
+  }
+  const vals = [t.openness, t.conscientiousness, t.extraversion, t.agreeableness, t.emotional_stability ?? 100 - (t.neuroticism ?? 0)].filter((v) => v != null);
+  return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : null;
 }
 
 export function computeSuccessFit(candidate, job) {

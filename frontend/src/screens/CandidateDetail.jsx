@@ -39,7 +39,7 @@ const BUDGET = {
 };
 const CONF_PCT = { High: 88, Medium: 64, Low: 42 };
 const LAYER = {
-  cv_fit: { label: "CV Fit", accent: "#4F46E5", bg: "#EEF2FF", border: "#C7D2FE", bar: "#6366F1" },
+  cv_fit: { label: "Profile fit", accent: "#4F46E5", bg: "#EEF2FF", border: "#C7D2FE", bar: "#6366F1" },
   personality_fit: { label: "Personality", accent: "#059669", bg: "#ECFDF5", border: "#A7F3D0", bar: "#059669" },
   interview_result: { label: "Interview", accent: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", bar: "#7C3AED" },
 };
@@ -335,8 +335,15 @@ export default function CandidateDetail() {
 
           {/* Score breakdown */}
           <div style={cardBox}>
-            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Score breakdown</div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 18 }}>Three weighted layers — OCEAN and interview unlock as the candidate progresses</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 4 }} className="flex-wrap">
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Score breakdown</div>
+              {interviewPending && s.screening_score != null && (
+                <span style={{ fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, color: s.screening_pass ? "#047857" : "#B45309", background: s.screening_pass ? "#ECFDF5" : "#FFFBEB", border: `1px solid ${s.screening_pass ? "#A7F3D0" : "#FDE68A"}` }}>
+                  Screening {s.screening_score}/{s.pre_interview_max ?? 50} · {s.screening_pass ? "Pass → interview" : "Review before interview"}
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 18 }}>Profile fit 35% · Personality 15% · Interview 50% — interview unlocks the final score (hire bar ≥ 72)</div>
             <div className="grid grid-cols-3 gap-3">
               {["cv_fit", "personality_fit", "interview_result"].map((k) => {
                 const L = LAYER[k]; const layer = bd?.[k] || {};

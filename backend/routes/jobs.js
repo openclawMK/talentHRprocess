@@ -13,7 +13,7 @@ import {
   candidateStageKey,
 } from "../services/pipeline.js";
 import { notify, whatsappConfigured } from "../services/whatsappService.js";
-import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions } from "../services/salaryBenchmark.js";
+import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, suggestSalary } from "../services/salaryBenchmark.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -70,6 +70,22 @@ router.post("/generate-criteria", async (req, res) => {
   } catch (err) {
     console.error("generate-criteria error:", err);
     res.status(500).json({ error: "Failed to generate criteria." });
+  }
+});
+
+// GET /api/jobs/:jobId/suggest-salary?level=junior|mid|senior
+// AI/market-suggested salary budget for the role at a target experience level.
+router.get("/jobs/:jobId/suggest-salary", (req, res) => {
+  try {
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+    const level = ["junior", "mid", "senior"].includes(req.query.level) ? req.query.level : "mid";
+    const s = suggestSalary(job.role_title, job.location, level);
+    if (!s) return res.json({ available: false });
+    res.json({ available: true, ...s });
+  } catch (err) {
+    console.error("suggest-salary error:", err);
+    res.status(500).json({ error: "Failed to suggest a salary." });
   }
 });
 

@@ -71,7 +71,7 @@ export function reconcileCandidate(candidate, job) {
     ...cs,
     not_applicable: !sourceEnabled(job, cs.source),
   }));
-  recomputeCombined(score, job);
+  recomputeCombined(candidate, job);
 }
 
 /**

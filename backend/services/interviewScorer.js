@@ -33,7 +33,7 @@ export function applyInterviewScores(candidate, job, ratings) {
     };
   });
 
-  recomputeCombined(score, job);
   candidate.interview_completed = true;
+  recomputeCombined(candidate, job);
   candidate.interview_mode = ratings[0]?.source === "manual" ? "manual" : "ai";
 }

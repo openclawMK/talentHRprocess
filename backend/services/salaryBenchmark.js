@@ -73,6 +73,58 @@ export function getSalaryBenchmark(roleTitle, location) {
   };
 }
 
+// Experience tier from years: junior (0-2) / mid (3-5) / senior (6+).
+export function experienceTier(years) {
+  if (years == null) return "mid";
+  if (years <= 2) return "junior";
+  if (years <= 5) return "mid";
+  return "senior";
+}
+
+/**
+ * Expected pay band for a role at an experience tier, RELATIVE to the role's
+ * market benchmark (not fixed RM) — so it works for crew and professionals alike.
+ *   junior → market min..median · mid → median..~90% max · senior → ~85% max..max+
+ */
+export function experienceBand(benchmark, tier) {
+  if (!benchmark) return null;
+  const { min, median, max } = benchmark;
+  if (tier === "junior") return { min, max: median };
+  if (tier === "senior") return { min: Math.round(median + (max - median) * 0.6), max };
+  return { min: median, max: Math.round(max * 0.95) }; // mid
+}
+
+/**
+ * Suggest a Success-Profile salary budget from the market, for a target
+ * experience tier. Returns { min, max, median, tier, ... } or null.
+ */
+export function suggestSalary(roleTitle, location, tier = "mid") {
+  const b = getSalaryBenchmark(roleTitle, location);
+  if (!b) return null;
+  const band = experienceBand(b, tier) || { min: b.min, max: b.max };
+  return {
+    min: band.min, max: band.max, median: b.median,
+    min_label: rm(band.min), max_label: rm(band.max),
+    tier, category: b.category, region: b.region,
+    source_short: b.source_short, estimated: b.estimated,
+  };
+}
+
+/**
+ * Salary-vs-experience fit (0-100): does the candidate's expected pay match what
+ * their experience warrants for this role? Within band = well-priced; below =
+ * value/cheaper; well above = overpriced for experience. null when unknowable.
+ */
+export function salaryExperienceFit(expected, years, benchmark) {
+  if (!expected || !benchmark) return null;
+  const band = experienceBand(benchmark, experienceTier(years));
+  if (!band) return null;
+  if (expected >= band.min && expected <= band.max) return 100;   // appropriately priced
+  if (expected < band.min) return 88;                             // cheaper than expected — fine
+  if (expected <= band.max * 1.15) return 65;                     // a bit high for experience
+  return 40;                                                       // well over what experience warrants
+}
+
 /** Regions offered in the Salary Center dropdown (label + key). */
 export function benchmarkRegions() {
   const pretty = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase());

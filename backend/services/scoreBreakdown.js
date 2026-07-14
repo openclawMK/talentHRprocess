@@ -159,34 +159,36 @@ function missingEvidence(candidate, job) {
  */
 export function buildScoreBreakdown(candidate, job) {
   const score = candidate.score || {};
-  const shares = sourceShares(job); // { cv, ocean, interview } redistributed
 
-  const cvScore = score.cv_partial_score ?? sourceScore(score, "cv");
-  const oceanScore = sourceScore(score, "ocean");
-  const interviewScore = sourceScore(score, "interview");
+  // Weighting model: Success-Profile-fit (35%) / Personality (15%) / Interview (50%).
+  const comp = score.component_scores || {};
+  const W = comp.weights || { profile: 0.35, ocean: 0.15, interview: 0.5 };
+  const profileScore = comp.profile_fit ?? score.cv_partial_score ?? sourceScore(score, "cv");
+  const oceanScore = comp.ocean ?? sourceScore(score, "ocean");
+  const interviewScore = comp.interview ?? sourceScore(score, "interview");
 
   const oceanActive = sourceEnabled(job, "ocean");
   const interviewActive = sourceEnabled(job, "interview");
 
   return {
     cv_fit: {
-      score: cvScore,
-      label: labelFor(cvScore),
-      weight_in_total: shares.cv ?? 0,
+      score: profileScore,
+      label: labelFor(profileScore),
+      weight_in_total: W.profile ?? 0.35,
       status: "completed",
       contributing_factors: cvFactors(candidate, job),
     },
     personality_fit: {
       score: oceanScore,
       label: oceanActive ? labelFor(oceanScore) : "Not applicable",
-      weight_in_total: shares.ocean ?? 0,
+      weight_in_total: W.ocean ?? 0.15,
       status: !oceanActive ? "disabled" : candidate.ocean_completed ? "completed" : "pending",
       contributing_factors: personalityFactors(candidate),
     },
     interview_result: {
       score: interviewScore,
       label: interviewActive ? labelFor(interviewScore) : "Not applicable",
-      weight_in_total: shares.interview ?? 0,
+      weight_in_total: W.interview ?? 0.5,
       status: !interviewActive ? "disabled" : candidate.interview_completed ? "completed" : "pending",
       contributing_factors: interviewFactors(score),
     },

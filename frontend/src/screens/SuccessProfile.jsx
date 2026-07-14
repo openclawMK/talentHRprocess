@@ -29,6 +29,9 @@ export default function SuccessProfile() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState("");
   const [aiBanner, setAiBanner] = useState(false);
+  const [salLevel, setSalLevel] = useState("mid");
+  const [salSuggesting, setSalSuggesting] = useState(false);
+  const [salNote, setSalNote] = useState("");
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJob(r.data.find((j) => j.job_id === jobId) || null));
@@ -42,6 +45,17 @@ export default function SuccessProfile() {
     try { setProfile({ ...EMPTY, ...(await axios.post(`/api/jobs/${jobId}/success-profile/generate`)).data }); setAiBanner(true); }
     catch { flash("Couldn't generate — please try again."); }
     finally { setGenerating(false); }
+  }
+  async function suggestSalaryFromMarket() {
+    setSalSuggesting(true); setSalNote("");
+    try {
+      const r = await axios.get(`/api/jobs/${jobId}/suggest-salary?level=${salLevel}`);
+      if (r.data?.available) {
+        setProfile((p) => ({ ...p, salary_budget_min: r.data.min, salary_budget_max: r.data.max }));
+        setSalNote(`Suggested ${r.data.min_label}–${r.data.max_label} for a ${salLevel} ${r.data.category} · ${r.data.source_short}${r.data.estimated ? " (indicative)" : ""}`);
+      } else setSalNote("No market data for this role yet — set the budget manually.");
+    } catch { setSalNote("Couldn't fetch market data."); }
+    finally { setSalSuggesting(false); }
   }
   async function save() {
     setSaving(true);
@@ -86,7 +100,17 @@ export default function SuccessProfile() {
             <Bench label="Salary budget — min (RM/mo)"><input type="number" min="0" value={profile.salary_budget_min} onChange={(e) => set("salary_budget_min", Number(e.target.value))} placeholder="e.g. 1800" style={benchInput} /></Bench>
             <Bench label="Salary budget — max (RM/mo)"><input type="number" min="0" value={profile.salary_budget_max} onChange={(e) => set("salary_budget_max", Number(e.target.value))} placeholder="e.g. 2800" style={benchInput} /></Bench>
           </div>
-          <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 12 }}>Used to flag each candidate's expected salary as a budget-fit signal — it never affects the fit score.</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 12.5, color: "#6B7280" }}>Suggest from market for a</span>
+            <select value={salLevel} onChange={(e) => setSalLevel(e.target.value)} style={{ fontSize: 12.5, padding: "5px 8px", border: "1px solid #E2E4EC", borderRadius: 8 }}>
+              <option value="junior">junior (0–2 yrs)</option>
+              <option value="mid">mid (3–5 yrs)</option>
+              <option value="senior">senior (6+ yrs)</option>
+            </select>
+            <button onClick={suggestSalaryFromMarket} disabled={salSuggesting} style={{ fontSize: 12.5, fontWeight: 600, padding: "6px 12px", background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 8, cursor: "pointer" }}>✨ {salSuggesting ? "Fetching…" : "Suggest"}</button>
+          </div>
+          {salNote && <div style={{ fontSize: 12, color: "#047857", marginTop: 8 }}>{salNote}</div>}
+          <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 8 }}>Salary now feeds the Profile-fit score (does their expected pay match their experience for this role?) — and still flags budget fit.</div>
         </div>
       </div>
 

@@ -3,6 +3,7 @@
  * Scores the `ocean`-source criteria once a candidate completes the
  * questionnaire, then recomputes the combined score over all scored criteria.
  */
+import { composeScore } from "./composite.js";
 
 // BFI-10 (Rammstedt & John, 2007). Each item: "I see myself as someone who…"
 export const OCEAN_ITEMS = [
@@ -70,33 +71,38 @@ export function applyOceanScores(candidate, job, traits) {
     return { ...cs, score: scoreOceanCriterion(def, traits), scored: true, estimated: false };
   });
 
-  recomputeCombined(score, job);
+  // Traits must be set before recompute so the composite sees them.
   candidate.ocean_traits = traits;
   candidate.ocean_completed = true;
+  recomputeCombined(candidate, job);
 }
 
-// Recompute combined score over ALL currently-scored criteria (cv + ocean + interview).
-export function recomputeCombined(score, job) {
+/**
+ * Recompute the composite score after any stage completes (OCEAN or interview).
+ * Takes the candidate (not just the score) so the weighting model can read
+ * OCEAN traits + profile. Mutates candidate.score and returns it.
+ */
+export function recomputeCombined(candidate, job) {
+  const score = candidate.score;
+  if (!score) return score;
   const all = score.criteria_scores || [];
-  // Not-applicable criteria (disabled pipeline stages) never count.
-  const scored = all.filter((c) => c.scored && c.score != null && !c.not_applicable);
-  const scoredWeight = scored.reduce((a, c) => a + c.weight, 0);
-  let combined = scoredWeight
-    ? Math.round(scored.reduce((a, c) => a + c.score * c.weight, 0) / scoredWeight)
-    : 0;
-  // Carry the Role Success Profile must-have penalty through later stages.
-  if (score.must_have_penalty) combined = Math.max(0, combined - score.must_have_penalty);
+
+  const comp = composeScore(candidate, job, all);
+  score.combined_score = comp.combined_score;
+  score.screening_score = comp.screening_score;
+  score.screening_pass = comp.screening_pass;
+  score.pre_interview_max = comp.pre_interview_max;
+  score.component_scores = comp.component_scores;
+  score.lane = comp.lane;
 
   const pending = ["interview", "ocean"].filter((s) =>
     all.some((c) => c.source === s && !c.scored && !c.not_applicable)
   );
-
-  score.combined_score = combined;
-  score.scored_coverage = Math.round(scoredWeight * 100) / 100;
   score.pending_sources = pending;
   score.full_score_available = pending.length === 0;
-
-  const { green, red } = job.thresholds;
-  score.lane = combined >= green ? "green" : combined < red ? "red" : "amber";
+  const scoredWeight = all
+    .filter((c) => c.scored && c.score != null && !c.not_applicable)
+    .reduce((a, c) => a + c.weight, 0);
+  score.scored_coverage = Math.round(scoredWeight * 100) / 100;
   return score;
 }

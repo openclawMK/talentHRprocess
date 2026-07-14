@@ -7,6 +7,7 @@
  */
 
 import { sourceEnabled } from "./pipeline.js";
+import { composeScore } from "./composite.js";
 
 function clamp(n, lo = 0, hi = 100) {
   return Math.max(lo, Math.min(hi, Math.round(n)));
@@ -272,11 +273,8 @@ export function scoreCandidate(candidate, job) {
   );
   const full_score_available = pending_sources.length === 0;
 
-  const combined_score = cv_partial_score;
-  const { green, red } = job.thresholds;
-  let lane = "amber";
-  if (combined_score >= green) lane = "green";
-  else if (combined_score < red) lane = "red";
+  // Composite weighting model (OCEAN 15% / Success-Profile-fit 35% / Interview 50%).
+  const comp = composeScore(candidate, job, criteria_scores);
 
   return {
     cv_partial_score,
@@ -286,8 +284,12 @@ export function scoreCandidate(candidate, job) {
     benchmark_score: benchmarkScore(candidate, job),
     benchmark_maturity: job.benchmark?.maturity || "starter",
     criteria_scores,
-    combined_score,
-    lane,
+    combined_score: comp.combined_score,
+    screening_score: comp.screening_score,
+    screening_pass: comp.screening_pass,
+    pre_interview_max: comp.pre_interview_max,
+    component_scores: comp.component_scores,
+    lane: comp.lane,
     must_have_penalty: sp.penalty,
     missing_must_haves: sp.missing_must_haves,
     dealbreaker_triggered: sp.dealbreakers_hit.length > 0,
