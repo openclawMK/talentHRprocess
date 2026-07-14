@@ -1,1 +1,2312 @@
-[]
+[
+  {
+    "cv_partial_score": 91,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 70,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Coffee / F&B experience",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 85,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Cash handling & POS",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — reliability",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 88,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Agreeableness — customer warmth",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Communication & friendliness",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 82,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Product knowledge & learning",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 80,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Handling busy periods",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 90,
+    "screening_score": 49,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 100,
+      "interview": 82,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "2.5 years hands-on barista and F&B service",
+      "Strong customer warmth and reliability",
+      "Confident with cash handling and POS"
+    ],
+    "weaknesses": [
+      "No formal food-safety certification yet"
+    ],
+    "gaps": [
+      "Confirm availability for weekend shifts"
+    ],
+    "summary": "A warm, experienced barista who is fast, reliable and great with customers — a strong fit for Moonbucks.",
+    "scored_coverage": 1,
+    "score_id": "189f8ae4-0b0f-407d-9b99-44cb362ee5f4",
+    "candidate_id": "7d9590e7-e923-4475-8035-2517c793b20b",
+    "job_id": "job_001",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 86,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 97,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Coffee / F&B experience",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 90,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 85,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Cash handling & POS",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — reliability",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Agreeableness — customer warmth",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Communication & friendliness",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Product knowledge & learning",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Handling busy periods",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 44,
+    "screening_score": 44,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 91,
+      "ocean": 80,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Solid quick-service F&B background",
+      "Dependable and eager to learn"
+    ],
+    "weaknesses": [
+      "No dedicated barista experience yet"
+    ],
+    "gaps": [
+      "Probe coffee knowledge and speed at interview"
+    ],
+    "summary": "A dependable quick-service crew member with the right basics — worth interviewing to gauge coffee aptitude.",
+    "scored_coverage": 0.5,
+    "score_id": "17d719f4-cc50-4c21-88de-c9cb10d1b760",
+    "candidate_id": "064384ee-4f7f-492c-a498-bb4705dc9d63",
+    "job_id": "job_001",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 43,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 87,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Coffee / F&B experience",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 75,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 45,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Cash handling & POS",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — reliability",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 46,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Agreeableness — customer warmth",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 52,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Communication & friendliness",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Product knowledge & learning",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Handling busy periods",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 11,
+    "screening_score": 11,
+    "screening_pass": false,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 22,
+      "ocean": 20,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "red",
+    "must_have_penalty": 16,
+    "missing_must_haves": [
+      "Customer service experience",
+      "Cash handling"
+    ],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Enthusiastic and available immediately"
+    ],
+    "weaknesses": [
+      "No customer-service or cash-handling track record",
+      "Very limited work history"
+    ],
+    "gaps": [
+      "Below screening bar — decide whether to interview"
+    ],
+    "summary": "Entry-level with little relevant experience; screening score is below the pass mark — review before interviewing.",
+    "scored_coverage": 0.5,
+    "score_id": "22fe2324-11dd-4cb2-bc00-ec24ab0479c0",
+    "candidate_id": "a6bd1d72-5be2-4c25-97f4-fc727d4ef4f8",
+    "job_id": "job_001",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 83,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 60,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 85,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "POS systems",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — accuracy",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 88,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Numeracy & accuracy",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Customer handling",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 70,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Integrity scenarios",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 85,
+    "screening_score": 49,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 100,
+      "interview": 72,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "3 years accurate cash handling and reconciliation",
+      "Calm and courteous at the till",
+      "Trusted with daily cash-up"
+    ],
+    "weaknesses": [
+      "Limited exposure to F&B pace"
+    ],
+    "gaps": [],
+    "summary": "An accurate, honest cashier with a strong retail cash-handling record — reliable hire for the front counter.",
+    "scored_coverage": 1,
+    "score_id": "9dfdfb90-5085-4c48-abdb-3d0de624d7b0",
+    "candidate_id": "bf8d3324-ac4f-4ab2-9d4b-4a9f4f7ddd4d",
+    "job_id": "job_002",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 83,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 90,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 85,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "POS systems",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — accuracy",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Numeracy & accuracy",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Customer handling",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Integrity scenarios",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 49,
+    "screening_score": 49,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 100,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Steady convenience-store cashier experience",
+      "Comfortable with POS"
+    ],
+    "weaknesses": [
+      "Yet to complete the interview stage"
+    ],
+    "gaps": [
+      "Assess speed and integrity scenarios at interview"
+    ],
+    "summary": "A solid cashier who has passed screening — ready to move to interview.",
+    "scored_coverage": 0.5,
+    "score_id": "30f2d701-be9b-41c8-b0ec-5fcf49db63c0",
+    "candidate_id": "a00e0352-d6b7-4ac6-b542-221329f16f53",
+    "job_id": "job_002",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 31,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 90,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Cash handling & reconciliation",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Customer service",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 45,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "POS systems",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — accuracy",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 58,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Numeracy & accuracy",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Customer handling",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Integrity scenarios",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 24,
+    "screening_score": 24,
+    "screening_pass": false,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 33,
+      "ocean": 80,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "amber",
+    "must_have_penalty": 16,
+    "missing_must_haves": [
+      "Cash handling",
+      "Customer service"
+    ],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Some F&B environment exposure"
+    ],
+    "weaknesses": [
+      "No cash-handling or checkout experience",
+      "Screening score below pass mark"
+    ],
+    "gaps": [
+      "Review before interviewing — misses core cashier basics"
+    ],
+    "summary": "Kitchen-side experience only, with no cash-handling evidence; sits below the screening bar.",
+    "scored_coverage": 0.5,
+    "score_id": "7aa5769c-04c7-4c3f-b60a-afa3cafe7420",
+    "candidate_id": "4b79a6bf-b330-4498-88f5-419c3c8aef96",
+    "job_id": "job_002",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 87,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 60,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Team supervision",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 90,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Complaint resolution",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — dependability",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 88,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Extraversion — leadership",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 68,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Leadership & delegation",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 82,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Conflict & complaint resolution",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 80,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Operational decision-making",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 88,
+    "screening_score": 47,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 91,
+      "ocean": 100,
+      "interview": 82,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "7 years F&B with 3.5 years supervising a team of 8",
+      "Strong complaint resolution and cash accountability",
+      "Calm, natural leader under pressure"
+    ],
+    "weaknesses": [
+      "Salary expectation at the upper market range"
+    ],
+    "gaps": [],
+    "summary": "An experienced, level-headed outlet supervisor who ticks every must-have — the standout candidate for the role.",
+    "scored_coverage": 1,
+    "score_id": "b899e1ec-3d05-4e6c-8597-8e9cbb316dcb",
+    "candidate_id": "48de1b94-4d22-49ed-a6e3-d13dc13929e3",
+    "job_id": "job_003",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 49,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 40,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 95,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Team supervision",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 30,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Complaint resolution",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — dependability",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Extraversion — leadership",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 62,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Leadership & delegation",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 60,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Conflict & complaint resolution",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 58,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Operational decision-making",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 63,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 47,
+    "screening_score": 17,
+    "screening_pass": false,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 13,
+      "ocean": 80,
+      "interview": 60,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "amber",
+    "must_have_penalty": 16,
+    "missing_must_haves": [
+      "Experience supervising staff",
+      "Complaint resolution ability"
+    ],
+    "dealbreaker_triggered": true,
+    "dealbreakers_hit": [
+      "No supervisory experience of any kind"
+    ],
+    "strengths": [
+      "4 years solid F&B floor experience",
+      "Good product and service knowledge"
+    ],
+    "weaknesses": [
+      "No supervisory or team-lead experience — a role dealbreaker",
+      "Has not led or scheduled staff"
+    ],
+    "gaps": [
+      "Dealbreaker: never supervised a team — decide if trainable"
+    ],
+    "summary": "Strong on the floor but has never supervised — trips the role's supervisory dealbreaker, so flagged for review rather than auto-rejected.",
+    "scored_coverage": 1,
+    "score_id": "b62cea35-30d7-4a50-b19c-368cb2d5767c",
+    "candidate_id": "524c9d2c-c493-4a0d-a0d9-8b1fc862678f",
+    "job_id": "job_003",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 87,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 50,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "F&B experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Team supervision",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 90,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Complaint resolution",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — dependability",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Extraversion — leadership",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 62,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Leadership & delegation",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Conflict & complaint resolution",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 70,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Operational decision-making",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 81,
+    "screening_score": 45,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 93,
+      "ocean": 80,
+      "interview": 72,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "8 years F&B with strong supervisory track record",
+      "Handled shifts of 10 staff"
+    ],
+    "weaknesses": [
+      "Salary ask is above the role budget and market",
+      "Reference check flagged — see notes"
+    ],
+    "gaps": [
+      "Resolve the flagged previous-employer reference before any offer"
+    ],
+    "summary": "Experienced supervisor who interviews well, but the reference check came back flagged and pay expectations are high — hold pending review.",
+    "scored_coverage": 1,
+    "score_id": "31a7f8db-640c-4e0d-829b-1313fd3be74e",
+    "candidate_id": "bfe82736-c045-4749-b4ad-5a62d6668452",
+    "job_id": "job_003",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 81,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 80,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Accounting experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 93,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Accounting qualification",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 80,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "MFRS & tax knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — precision",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 88,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Technical accounting",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 82,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Attention to detail",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 80,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Deadline management",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 89,
+    "screening_score": 48,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 95,
+      "ocean": 100,
+      "interview": 82,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "5 years in audit and reporting at established firms",
+      "Strong MFRS, tax and Excel/SQL skills",
+      "Detail-oriented and calm under deadlines"
+    ],
+    "weaknesses": [
+      "Notice period may be one month"
+    ],
+    "gaps": [],
+    "summary": "A qualified, high-calibre accountant with reporting and audit depth — an excellent fit at market pay.",
+    "scored_coverage": 1,
+    "score_id": "da7e5e54-2ab3-4b03-ada0-09a3eae7fdee",
+    "candidate_id": "983ccc02-7b4f-4bdf-a28b-154e3f34e865",
+    "job_id": "job_004",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 73,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 87,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Accounting experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 75,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Accounting qualification",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 80,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "MFRS & tax knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — precision",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Technical accounting",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Attention to detail",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Deadline management",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 46,
+    "screening_score": 46,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 88,
+      "ocean": 100,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Full-set accounts experience in industry",
+      "Degree-qualified with tax exposure"
+    ],
+    "weaknesses": [
+      "Less audit-firm exposure",
+      "Interview stage still pending"
+    ],
+    "gaps": [
+      "Probe technical depth and MFRS at interview"
+    ],
+    "summary": "A solid degree-qualified accountant who passed screening — worth interviewing for the reporting role.",
+    "scored_coverage": 0.5,
+    "score_id": "718f58cd-93b3-4a7c-9e04-ed9973338d02",
+    "candidate_id": "8f4821fd-c9d3-4901-9e21-1cf24d364828",
+    "job_id": "job_004",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 43,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 70,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Accounting experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 58,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Accounting qualification",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 35,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "MFRS & tax knowledge",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — precision",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 60,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Emotional stability — composure",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 58,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Technical accounting",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Attention to detail",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Deadline management",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 36,
+    "screening_score": 36,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 69,
+      "ocean": 80,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 8,
+    "missing_must_haves": [
+      "Financial reporting"
+    ],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Hands-on bookkeeping and reconciliation"
+    ],
+    "weaknesses": [
+      "No formal accounting qualification — a must-have gap",
+      "Limited reporting/MFRS exposure"
+    ],
+    "gaps": [
+      "Misses the qualification must-have — review fit"
+    ],
+    "summary": "Practical bookkeeping experience but lacks the formal accounting qualification the role requires; profile fit is limited.",
+    "scored_coverage": 0.5,
+    "score_id": "e5bdf5d0-d353-4dde-beda-520bb7aa7a5b",
+    "candidate_id": "61206bfd-2a87-45f9-acac-31c0c049b7c5",
+    "job_id": "job_004",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 82,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 60,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Administrative experience",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "MS Office proficiency",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Organisation & documentation",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 82,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — organisation",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 88,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Agreeableness — cooperation",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Organisation & multitasking",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Communication",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 70,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Software proficiency",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 85,
+    "screening_score": 49,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 100,
+      "interview": 72,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "4 years office administration",
+      "Strong MS Office and documentation",
+      "Organised and dependable"
+    ],
+    "weaknesses": [],
+    "gaps": [],
+    "summary": "An organised, experienced admin executive who keeps the back office running — a reliable hire.",
+    "scored_coverage": 1,
+    "score_id": "d30139d9-fc93-487f-b2a7-4f953c6704a6",
+    "candidate_id": "0ba169f7-342a-4ef9-b0ac-6ba8ee4185be",
+    "job_id": "job_005",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 66,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 93,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Administrative experience",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 80,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "MS Office proficiency",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Organisation & documentation",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — organisation",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Agreeableness — cooperation",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Organisation & multitasking",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Communication",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Software proficiency",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 46,
+    "screening_score": 46,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 80,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Steady admin assistant background",
+      "Comfortable with office tools"
+    ],
+    "weaknesses": [
+      "Interview still pending"
+    ],
+    "gaps": [
+      "Assess multitasking and communication at interview"
+    ],
+    "summary": "A capable admin assistant who has passed screening — ready for interview.",
+    "scored_coverage": 0.5,
+    "score_id": "8fb0b91d-6a39-401e-8f9d-0aaa7bb717c1",
+    "candidate_id": "0718c13f-8d4d-4fb5-ade8-09dce895d83e",
+    "job_id": "job_005",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 74,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 40,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "Administrative experience",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "MS Office proficiency",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Organisation & documentation",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Conscientiousness — organisation",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Agreeableness — cooperation",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "Organisation & multitasking",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "Communication",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 70,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Software proficiency",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 75,
+    "screening_score": 39,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 76,
+      "ocean": 80,
+      "interview": 72,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "5 years senior admin with office-management scope",
+      "Degree-qualified and thorough"
+    ],
+    "weaknesses": [
+      "Salary expectation is above the role budget and market"
+    ],
+    "gaps": [
+      "Confirm whether budget can stretch or expectation can flex"
+    ],
+    "summary": "A strong senior admin candidate, but her salary expectation sits above both the role budget and market — good fit, cost is the question.",
+    "scored_coverage": 1,
+    "score_id": "3e1df9f8-fa5e-451a-8e86-bc2e21f5f4d1",
+    "candidate_id": "08befd71-191e-4ded-8cd9-5d7470ee9539",
+    "job_id": "job_005",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 74,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 50,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "HR experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Recruitment / payroll knowledge",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Employment law / HR systems",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Agreeableness — people orientation",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Conscientiousness — process",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 88,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "People handling",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 82,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "HR knowledge",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 80,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Confidentiality & judgment",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 84,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 90,
+    "screening_score": 49,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 100,
+      "interview": 82,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "5.5 years across recruitment, payroll and ER",
+      "Degree-qualified with HRDF/payroll systems",
+      "Discreet and people-oriented"
+    ],
+    "weaknesses": [],
+    "gaps": [],
+    "summary": "A well-rounded HR executive who can recruit, run payroll and handle people matters with discretion — a strong hire at market pay.",
+    "scored_coverage": 1,
+    "score_id": "1e147b37-8c47-4f4b-b588-6bbae85a007b",
+    "candidate_id": "bdfca759-c502-4ed4-b2f5-3554348b9992",
+    "job_id": "job_006",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 74,
+    "cv_coverage": 0.35,
+    "pending_sources": [],
+    "full_score_available": true,
+    "benchmark_score": 0,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "HR experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 100,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Recruitment / payroll knowledge",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Employment law / HR systems",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Agreeableness — people orientation",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Conscientiousness — process",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "People handling",
+        "source": "interview",
+        "weight": 0.2,
+        "score": 72,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "HR knowledge",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 70,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Confidentiality & judgment",
+        "source": "interview",
+        "weight": 0.15,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false,
+        "hr_notes": null,
+        "questions_asked": [],
+        "question_source": "ai"
+      }
+    ],
+    "combined_score": 80,
+    "screening_score": 44,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 91,
+      "ocean": 80,
+      "interview": 72,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "8 years HR with senior scope",
+      "Strong recruitment and policy experience"
+    ],
+    "weaknesses": [
+      "Salary expectation well above the role budget and market"
+    ],
+    "gaps": [
+      "Pay expectation exceeds budget — decide if the seniority justifies it"
+    ],
+    "summary": "An experienced senior HR candidate who interviews well, but expects pay well above budget and market for this role.",
+    "scored_coverage": 1,
+    "score_id": "6d3d78f7-6186-403f-be7b-7b4ab7673e9f",
+    "candidate_id": "08488b99-788f-443a-b49a-aecafcf91869",
+    "job_id": "job_006",
+    "scored_date": "2026-07-01"
+  },
+  {
+    "cv_partial_score": 67,
+    "cv_coverage": 0.35,
+    "pending_sources": [
+      "interview"
+    ],
+    "full_score_available": false,
+    "benchmark_score": 97,
+    "benchmark_maturity": "starter",
+    "criteria_scores": [
+      {
+        "criterion_id": "c1",
+        "criterion_name": "HR experience (years)",
+        "source": "cv",
+        "weight": 0.15,
+        "score": 83,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "c2",
+        "criterion_name": "Recruitment / payroll knowledge",
+        "source": "cv",
+        "weight": 0.12,
+        "score": 60,
+        "scored": true,
+        "estimated": true
+      },
+      {
+        "criterion_id": "c3",
+        "criterion_name": "Employment law / HR systems",
+        "source": "cv",
+        "weight": 0.08,
+        "score": 48,
+        "scored": true,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o1",
+        "criterion_name": "Agreeableness — people orientation",
+        "source": "ocean",
+        "weight": 0.08,
+        "score": 74,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "o2",
+        "criterion_name": "Conscientiousness — process",
+        "source": "ocean",
+        "weight": 0.07,
+        "score": 76,
+        "scored": true,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i1",
+        "criterion_name": "People handling",
+        "source": "interview",
+        "weight": 0.2,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i2",
+        "criterion_name": "HR knowledge",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      },
+      {
+        "criterion_id": "i3",
+        "criterion_name": "Confidentiality & judgment",
+        "source": "interview",
+        "weight": 0.15,
+        "score": null,
+        "scored": false,
+        "not_applicable": false,
+        "estimated": false
+      }
+    ],
+    "combined_score": 46,
+    "screening_score": 46,
+    "screening_pass": true,
+    "pre_interview_max": 50,
+    "component_scores": {
+      "profile_fit": 98,
+      "ocean": 80,
+      "interview": null,
+      "weights": {
+        "ocean": 0.15,
+        "profile": 0.35,
+        "interview": 0.5
+      }
+    },
+    "lane": "green",
+    "must_have_penalty": 0,
+    "missing_must_haves": [],
+    "dealbreaker_triggered": false,
+    "dealbreakers_hit": [],
+    "strengths": [
+      "Focused recruitment and payroll experience",
+      "Degree-qualified, at-market expectation"
+    ],
+    "weaknesses": [
+      "Interview stage pending"
+    ],
+    "gaps": [
+      "Probe employee-relations judgment at interview"
+    ],
+    "summary": "A solid mid-level HR executive at market pay who has passed screening — ready for interview.",
+    "scored_coverage": 0.5,
+    "score_id": "454afeaf-0865-44d6-a50e-9523af2adcad",
+    "candidate_id": "2dba8f07-b839-48f7-964d-6aa88bd81f90",
+    "job_id": "job_006",
+    "scored_date": "2026-07-01"
+  }
+]

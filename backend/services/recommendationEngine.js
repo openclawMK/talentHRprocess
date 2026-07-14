@@ -40,10 +40,15 @@ export async function generateRecommendation(candidate, job) {
   // it counts as a critical risk that blocks an automatic HIRE and defaults to
   // HOLD with the flag surfaced, so HR reviews it rather than the tool killing
   // a possibly-good candidate on a lexical miss.
+  // Pre-interview the score is capped (max 50), so it must NOT be judged against
+  // the final green/red bars — that would reject good screening candidates.
+  const interviewPending = pending.includes("interview");
   let recommendation;
-  if (combined < red || cvFit < 35 || parse < 40) {
+  if (interviewPending) {
+    recommendation = "HOLD"; // screening stage — no final hire/reject yet
+  } else if (combined < red || cvFit < 35 || parse < 40) {
     recommendation = "REJECT";
-  } else if (combined >= green && cvFit >= 65 && !hasCriticalRisk(candidate) && (full || oceanDone)) {
+  } else if (combined >= green && cvFit >= 65 && !hasCriticalRisk(candidate)) {
     recommendation = "HIRE";
   } else {
     recommendation = "HOLD";
@@ -64,6 +69,7 @@ export async function generateRecommendation(candidate, job) {
   const pendingLabel = pending.map((p) => (p === "ocean" ? "OCEAN" : "interview")).join(" + ");
   if (dealbreakers.length) next_action = `Review dealbreaker before proceeding: ${dealbreakers[0]}`;
   else if (flagged.length) next_action = `Resolve flagged ${flagged.join(" + ")} before any offer`;
+  else if (interviewPending) next_action = score.screening_pass ? "Screening passed — proceed to interview" : "Below screening bar — review before interviewing";
   else if (recommendation === "HIRE" && full) next_action = "Proceed to offer — prepare employment letter";
   else if (recommendation === "HIRE") next_action = `Complete ${pendingLabel} before making offer`;
   else if (recommendation === "HOLD" && pending.includes("ocean")) next_action = "Send OCEAN assessment link to candidate";
