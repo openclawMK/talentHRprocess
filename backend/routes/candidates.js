@@ -702,13 +702,21 @@ Return:
       (result.criteria_questions || []).map((cq) => [cq.criterion_id, cq])
     );
 
-    const criteria = interviewCriteria.map((c) => {
+    const FALLBACK_TEMPLATES = [
+      (n) => `Tell me about a time you demonstrated ${n}.`,
+      (n) => `How would you handle a situation that requires strong ${n}?`,
+      (n) => `Can you give another example that shows your ${n}?`,
+      (n) => `What's a challenge you've faced related to ${n}, and how did you handle it?`,
+      (n) => `How do you keep improving on ${n} over time?`,
+    ];
+
+    let criteria = interviewCriteria.map((c) => {
       const q = qMap[c.id] || {};
       return {
         ...c,
-        questions: q.questions || [
-          `Tell me about a time you demonstrated ${c.name.toLowerCase()}.`,
-          `How would you handle a situation that requires strong ${c.name.toLowerCase()}?`,
+        questions: q.questions?.length ? [...q.questions] : [
+          FALLBACK_TEMPLATES[0](c.name.toLowerCase()),
+          FALLBACK_TEMPLATES[1](c.name.toLowerCase()),
         ],
         rubric: q.rubric || {
           low: "No clear example given; vague or irrelevant answer.",
@@ -717,6 +725,32 @@ Return:
         },
       };
     });
+
+    // LLMs don't reliably hit an exact count from a prompt alone — enforce it
+    // deterministically here so "5" always means 5, not "around 5".
+    let total = criteria.reduce((a, c) => a + c.questions.length, 0);
+    if (total < count) {
+      // Add follow-ups starting with the highest-weight criteria, cycling
+      // through fallback templates so we never run out.
+      const byWeight = [...criteria].sort((a, b) => (b.weight || 0) - (a.weight || 0));
+      let i = 0;
+      while (total < count) {
+        const c = byWeight[i % byWeight.length];
+        const tmpl = FALLBACK_TEMPLATES[c.questions.length % FALLBACK_TEMPLATES.length];
+        c.questions.push(tmpl(c.name.toLowerCase()));
+        total++; i++;
+      }
+    } else if (total > count) {
+      // Trim from the lowest-weight criteria first, never below 1 per criterion.
+      const byWeight = [...criteria].sort((a, b) => (a.weight || 0) - (b.weight || 0));
+      let i = 0;
+      while (total > count) {
+        const c = byWeight[i % byWeight.length];
+        if (c.questions.length > 1) { c.questions.pop(); total--; }
+        i++;
+        if (i > byWeight.length * 50) break; // safety valve, should never hit
+      }
+    }
 
     res.json({ criteria });
   } catch (err) {
