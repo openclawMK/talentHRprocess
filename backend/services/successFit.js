@@ -86,10 +86,13 @@ export function computeSuccessFit(candidate, job) {
   const wsum = comps.reduce((a, c) => a + c.w, 0) || 1;
   let fit = Math.round((comps.reduce((a, c) => a + c.w * c.v, 0) / wsum) * 100);
 
+  // A dealbreaker is a strong negative, not an automatic zero — apply a heavy
+  // penalty (so it still lands red) but keep the underlying fit visible, since a
+  // lexical/parsing miss shouldn't crush an otherwise-strong candidate to nothing.
   const hasDealbreaker = dealbreakers.some((d) => d.triggered);
-  if (hasDealbreaker) fit = Math.min(fit, 25);
+  if (hasDealbreaker) fit = Math.max(0, fit - 35);
 
-  const verdict = hasDealbreaker ? "Dealbreaker" : fit >= 75 ? "Strong fit" : fit >= 50 ? "Partial fit" : "Weak fit";
+  const verdict = hasDealbreaker ? "Dealbreaker — review" : fit >= 75 ? "Strong fit" : fit >= 50 ? "Partial fit" : "Weak fit";
   const lane = hasDealbreaker || fit < 50 ? "red" : fit >= 75 ? "green" : "amber";
 
   return {

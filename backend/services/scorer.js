@@ -69,20 +69,10 @@ function stabilityScore(candidate) {
   return clamp(s);
 }
 
-function ageScore(candidate, job) {
-  const age = candidate.profile.age;
-  const band = job.age_band;
-  if (!band) return 100;
-  if (age == null) return 60;
-  const { min, ideal_min, ideal_max, max } = band;
-  if (age >= ideal_min && age <= ideal_max) return 100;
-  if (age >= min && age < ideal_min)
-    return ideal_min === min ? 100 : clamp(60 + (40 * (age - min)) / (ideal_min - min));
-  if (age > ideal_max && age <= max)
-    return max === ideal_max ? 100 : clamp(100 - (40 * (age - ideal_max)) / (max - ideal_max));
-  if (age < min) return clamp(60 - 10 * (min - age));
-  return clamp(60 - 5 * (age - max));
-}
+// Age is deliberately NOT scored (anti-discrimination). A criterion counts as an
+// age criterion if "age" appears as a whole word — it is then excluded, never scored.
+const isAgeCriterion = (c) =>
+  /\bage\b/.test(lc((c.name || "") + " " + (c.description || "")));
 
 function supervisionScore(candidate) {
   const wh = candidate.profile.work_history || [];
@@ -109,10 +99,6 @@ function multilingualScore(candidate) {
 function scoreCriterion(criterion, candidate, job) {
   const t = lc(criterion.name + " " + (criterion.description || ""));
   const has = (...words) => words.some((w) => t.includes(w));
-  // Whole-word match — avoids "age" matching "beverage"/"management" etc.
-  const hasWord = (...words) => words.some((w) => new RegExp(`\\b${w}\\b`).test(t));
-
-  if (hasWord("age")) return { score: ageScore(candidate, job), estimated: false };
   if (has("multilingual", "language")) return { score: multilingualScore(candidate), estimated: false };
   if (has("supervis", "leadership", "team ")) return { score: supervisionScore(candidate), estimated: false };
   if (has("cash", "pos", "reconcil", "till", "payment"))
@@ -232,6 +218,20 @@ export function scoreCandidate(candidate, job) {
 
   const criteria_scores = criteria.map((c) => {
     if (c.source === "cv") {
+      // Fairness: age is never scored — excluded so it can't affect the result.
+      if (isAgeCriterion(c)) {
+        return {
+          criterion_id: c.id,
+          criterion_name: c.name,
+          source: "cv",
+          weight: c.weight,
+          score: null,
+          scored: false,
+          not_applicable: true,
+          excluded_reason: "Age is excluded from scoring (fairness / anti-discrimination).",
+          estimated: false,
+        };
+      }
       const { score, estimated } = scoreCriterion(c, candidate, job);
       return {
         criterion_id: c.id,
@@ -255,7 +255,7 @@ export function scoreCandidate(candidate, job) {
     };
   });
 
-  const cvItems = criteria_scores.filter((c) => c.source === "cv");
+  const cvItems = criteria_scores.filter((c) => c.source === "cv" && !c.not_applicable);
   const cvWeight = cvItems.reduce((a, c) => a + c.weight, 0);
   const rawCv = cvWeight
     ? Math.round(cvItems.reduce((a, c) => a + c.score * c.weight, 0) / cvWeight)

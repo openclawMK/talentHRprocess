@@ -17,9 +17,10 @@ function hasCriticalRisk(candidate) {
   const gaps = candidate.profile?.employment_gaps || [];
   if (gaps.some((g) => (g.months || 0) > 12)) return true;
   if ((candidate.parse_confidence_overall ?? 100) < 50) return true;
-  // A flagged pre-hire check blocks an automatic HIRE (pushes to HOLD) — advisory,
-  // never an auto-reject; HR still decides.
+  // A flagged pre-hire check or a Success Profile dealbreaker blocks an automatic
+  // HIRE (pushes to HOLD) — advisory, never an auto-reject; HR still decides.
   if (flaggedChecks(candidate).length) return true;
+  if (candidate.score?.dealbreaker_triggered) return true;
   return false;
 }
 
@@ -34,11 +35,13 @@ export async function generateRecommendation(candidate, job) {
   const parse = candidate.parse_confidence_overall ?? 100;
   const oceanDone = !!candidate.ocean_completed;
 
-  // STEP 1 — recommendation (rule-based)
+  // STEP 1 — recommendation (rule-based).
+  // A dealbreaker no longer auto-REJECTs (that amplified CV-parsing mistakes) —
+  // it counts as a critical risk that blocks an automatic HIRE and defaults to
+  // HOLD with the flag surfaced, so HR reviews it rather than the tool killing
+  // a possibly-good candidate on a lexical miss.
   let recommendation;
-  if (score.dealbreaker_triggered) {
-    recommendation = "REJECT"; // Role Success Profile dealbreaker overrides everything
-  } else if (combined < red || cvFit < 35 || parse < 40) {
+  if (combined < red || cvFit < 35 || parse < 40) {
     recommendation = "REJECT";
   } else if (combined >= green && cvFit >= 65 && !hasCriticalRisk(candidate) && (full || oceanDone)) {
     recommendation = "HIRE";
@@ -54,11 +57,13 @@ export async function generateRecommendation(candidate, job) {
   if (pending.length > 1 || parse < 60) confidence = "Low";
 
   const flagged = flaggedChecks(candidate);
+  const dealbreakers = score.dealbreakers_hit || [];
 
   // STEP 5 — next action (rule-based)
   let next_action;
   const pendingLabel = pending.map((p) => (p === "ocean" ? "OCEAN" : "interview")).join(" + ");
-  if (flagged.length) next_action = `Resolve flagged ${flagged.join(" + ")} before any offer`;
+  if (dealbreakers.length) next_action = `Review dealbreaker before proceeding: ${dealbreakers[0]}`;
+  else if (flagged.length) next_action = `Resolve flagged ${flagged.join(" + ")} before any offer`;
   else if (recommendation === "HIRE" && full) next_action = "Proceed to offer — prepare employment letter";
   else if (recommendation === "HIRE") next_action = `Complete ${pendingLabel} before making offer`;
   else if (recommendation === "HOLD" && pending.includes("ocean")) next_action = "Send OCEAN assessment link to candidate";
@@ -83,6 +88,7 @@ Pending stages: ${pending.join(", ") || "none"}
 Strengths: ${JSON.stringify(score.strengths || [])}
 Risks: ${JSON.stringify(score.weaknesses || [])}
 Flagged pre-hire checks: ${flagged.length ? flagged.join(", ") + " (treat as a serious concern; do not disclose medical specifics)" : "none"}
+Success Profile dealbreakers triggered: ${dealbreakers.length ? dealbreakers.join(", ") + " (serious concern — name it and weigh toward Hold/Reject, but note it may need manual verification)" : "none"}
 Role: ${job.role_title} (${job.industry})
 
 Return exactly:
