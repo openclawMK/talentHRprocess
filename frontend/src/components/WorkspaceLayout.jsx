@@ -4,6 +4,7 @@ import {
   LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import AskAssistant from "./AskAssistant.jsx";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutGrid, section: "WORKSPACE", match: (p) => p === "/" },
@@ -154,6 +155,9 @@ export default function WorkspaceLayout({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Grounded hiring assistant — available on every screen */}
+      <AskAssistant />
     </div>
   );
 }

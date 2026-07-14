@@ -16,6 +16,7 @@ import { generateFinalAnalysis } from "../services/finalAnalyser.js";
 import { computeSuccessFit, computeBudgetFit } from "../services/successFit.js";
 import { buildRoleComparison } from "../services/bestMatch.js";
 import { getSalaryBenchmark, compareToMarket } from "../services/salaryBenchmark.js";
+import { askPeopleQuest } from "../services/assistant.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
@@ -394,6 +395,22 @@ router.post("/candidates/:jobId/:candidateId/pre-hire-checks", async (req, res) 
   } catch (err) {
     console.error("pre-hire-checks error:", err);
     res.status(500).json({ error: "Failed to save checks." });
+  }
+});
+
+/**
+ * POST /api/assistant/ask — "Ask PeopleQuest" grounded hiring assistant.
+ * Body: { question, history?, jobId?, candidateId? } → { answer }.
+ */
+router.post("/assistant/ask", async (req, res) => {
+  try {
+    const { question, history, jobId, candidateId } = req.body || {};
+    if (!question || !question.trim()) return res.status(400).json({ error: "Ask a question." });
+    const answer = await askPeopleQuest({ question: question.trim(), history: Array.isArray(history) ? history : [], jobId, candidateId });
+    res.json({ answer });
+  } catch (err) {
+    console.error("assistant error:", err);
+    res.status(500).json({ error: "The assistant couldn't answer that just now." });
   }
 });
 
