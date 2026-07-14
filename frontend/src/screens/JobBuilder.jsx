@@ -11,6 +11,11 @@ const ROLE_LEVELS = [
   { value: "entry", label: "Entry-level" },
   { value: "supervisory", label: "Supervisory" },
 ];
+const INTERVIEW_CRITERIA_OPTIONS = [
+  { value: 3, label: "3", hint: "Quick" },
+  { value: 5, label: "5", hint: "Standard" },
+  { value: 6, label: "6", hint: "Max detail" },
+];
 
 const input = { width: "100%", padding: "11px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 15, color: "#111827", outline: "none", background: "#fff" };
 const label = { display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 7 };
@@ -21,6 +26,7 @@ export default function JobBuilder() {
   const presetCompanyId = params.get("company") || "";
 
   const [form, setForm] = useState({ role_title: "", industry: "F&B / Retail / Hospitality", location: "Kuala Lumpur", role_level: "entry", experience_years_min: 1, education_level_min: "SPM", key_responsibilities: "" });
+  const [interviewCriteriaCount, setInterviewCriteriaCount] = useState(3);
   const [industries, setIndustries] = useState(FALLBACK_INDUSTRIES);
   const [benchmarkRoles, setBenchmarkRoles] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -73,6 +79,7 @@ export default function JobBuilder() {
         requirements: { experience_years_min: Number(form.experience_years_min) || 0, education_level_min: form.education_level_min },
         key_responsibilities: respList(),
         company_id: companyId,
+        interview_criteria_count: interviewCriteriaCount,
         // No criteria supplied — the server drafts them silently (AI-generated,
         // 15% OCEAN / 35% Profile fit / 50% Interview). HR's real work happens
         // next, on the Success Profile screen.
@@ -140,6 +147,16 @@ export default function JobBuilder() {
               ))}
             </div>
           </div>
+        </div>
+        <div style={{ marginBottom: 18 }}>
+          <label style={label}>Interview criteria</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {INTERVIEW_CRITERIA_OPTIONS.map((o) => (
+              <button key={o.value} type="button" onClick={() => setInterviewCriteriaCount(o.value)}
+                style={{ flex: 1, padding: "9px 8px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${interviewCriteriaCount === o.value ? "#7C3AED" : "#E2E4EC"}`, background: interviewCriteriaCount === o.value ? "#F5F3FF" : "#fff", color: interviewCriteriaCount === o.value ? "#6D28D9" : "#374151" }}>{o.label} <span style={{ fontWeight: 500, opacity: 0.7 }}>· {o.hint}</span></button>
+            ))}
+          </div>
+          <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 6 }}>How many distinct things you'll score in the interview — each gets its own weight inside the 50% interview score. More questions per criterion can still be chosen later when conducting the interview.</div>
         </div>
         <div><label style={label}>Key responsibilities (one per line)</label>
           <textarea style={{ ...input, minHeight: 120, lineHeight: 1.6, resize: "vertical" }} value={form.key_responsibilities} onChange={(e) => set("key_responsibilities", e.target.value)} placeholder={"Manage daily operations\nLead a team of 10 staff\nHandle customer escalations"} />

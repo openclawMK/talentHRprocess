@@ -482,6 +482,7 @@ router.post("/jobs", async (req, res) => {
       criteria: suppliedCriteria,
       score_weights: suppliedWeights,
       company_id,
+      interview_criteria_count,
     } = req.body;
 
     if (!role_title || !industry)
@@ -495,7 +496,7 @@ router.post("/jobs", async (req, res) => {
 
     let criteria = suppliedCriteria;
     if (!Array.isArray(criteria) || criteria.length === 0) {
-      criteria = await generateCriteria({ industry, role_title, key_responsibilities, role_level });
+      criteria = await generateCriteria({ industry, role_title, key_responsibilities, role_level, interview_criteria_count });
     } else if (!weightsValid(criteria)) {
       return res.status(400).json({ error: "Criteria weights must sum to 100%" });
     }
