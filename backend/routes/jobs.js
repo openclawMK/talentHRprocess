@@ -13,6 +13,7 @@ import {
   candidateStageKey,
 } from "../services/pipeline.js";
 import { notify, whatsappConfigured } from "../services/whatsappService.js";
+import { getSalaryBenchmark, compareToMarket } from "../services/salaryBenchmark.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -69,6 +70,25 @@ router.post("/generate-criteria", async (req, res) => {
   } catch (err) {
     console.error("generate-criteria error:", err);
     res.status(500).json({ error: "Failed to generate criteria." });
+  }
+});
+
+// GET /api/jobs/:jobId/salary-benchmark — indicative market band for the role
+// (DOSM 2023) and how the role's budget compares to it.
+router.get("/jobs/:jobId/salary-benchmark", (req, res) => {
+  try {
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+    const benchmark = getSalaryBenchmark(job.role_title, job.location);
+    if (!benchmark) return res.json({ available: false });
+    const sp = job.successProfile || {};
+    const budgetMax = Number(sp.salary_budget_max) || 0;
+    const budgetMin = Number(sp.salary_budget_min) || 0;
+    const budget_vs_market = budgetMax ? compareToMarket(budgetMax, benchmark) : null;
+    res.json({ available: true, benchmark, budget: { min: budgetMin, max: budgetMax }, budget_vs_market });
+  } catch (err) {
+    console.error("salary-benchmark error:", err);
+    res.status(500).json({ error: "Failed to load salary benchmark." });
   }
 });
 

@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "source": "DOSM Salaries & Wages Survey Report 2023",
+    "source_url": "https://open.dosm.gov.my/publications/salaries_wages_2023",
+    "data_year": 2023,
+    "currency": "MYR",
+    "period": "monthly",
+    "national_median": 2602,
+    "national_mean": 3441,
+    "minimum_wage": 1700,
+    "note": "Occupation medians/means are official DOSM figures by MASCO 2020 major group. Role and seniority factors are indicative adjustments layered on top of the official group figures; regional multipliers are derived from official state medians. Bands are indicative market ranges, floored at the current minimum wage."
+  },
+  "occupation_groups": {
+    "managers": { "label": "Managers", "median": 5825, "mean": 6640 },
+    "professionals": { "label": "Professionals", "median": 5741, "mean": 6139 },
+    "technicians": { "label": "Technicians & associate professionals", "median": 3472, "mean": 3854 },
+    "clerical": { "label": "Clerical support workers", "median": 2360, "mean": 2789 },
+    "service_sales": { "label": "Service & sales workers", "median": 1818, "mean": 2421 },
+    "craft": { "label": "Craft & related trades workers", "median": 1916, "mean": 2280 },
+    "plant_machine": { "label": "Plant & machine operators", "median": 1845, "mean": 2150 },
+    "elementary": { "label": "Elementary occupations", "median": 1500, "mean": 1720 }
+  },
+  "regional_multipliers": {
+    "kuala lumpur": 1.33,
+    "putrajaya": 1.25,
+    "selangor": 1.24,
+    "labuan": 1.05,
+    "penang": 1.04,
+    "pulau pinang": 1.04,
+    "johor": 1.0,
+    "melaka": 0.95,
+    "negeri sembilan": 0.95,
+    "perak": 0.9,
+    "kedah": 0.88,
+    "pahang": 0.9,
+    "terengganu": 0.9,
+    "kelantan": 0.85,
+    "perlis": 0.85,
+    "sabah": 0.88,
+    "sarawak": 0.9,
+    "default": 1.0
+  },
+  "roles": [
+    { "match": ["kitchen helper", "kitchen assistant", "dishwasher", "steward", "cleaner", "packer", "general worker"], "category": "Kitchen / general helper", "group": "elementary", "seniority_factor": 1.0 },
+    { "match": ["waiter", "waitress", "server", "service crew", "crew", "cashier", "barista", "retail assistant", "sales assistant", "shop assistant", "front desk", "receptionist", "bartender", "host", "hostess", "attendant", "runner", "rider", "delivery"], "category": "Frontline crew", "group": "service_sales", "seniority_factor": 1.0 },
+    { "match": ["cook", "chef de partie", "line cook", "senior crew", "senior barista", "baker"], "category": "Cook / senior crew", "group": "service_sales", "seniority_factor": 1.15 },
+    { "match": ["supervisor", "team lead", "team leader", "shift lead", "shift leader", "outlet supervisor", "floor supervisor", "captain", "senior supervisor", "duty manager"], "category": "Supervisor / team lead", "group": "service_sales", "seniority_factor": 1.3 },
+    { "match": ["outlet manager", "store manager", "restaurant manager", "branch manager", "assistant manager", "manager", "head chef", "executive chef"], "category": "Outlet / store manager", "group": "managers", "seniority_factor": 0.62 }
+  ]
+}

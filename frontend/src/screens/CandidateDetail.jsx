@@ -420,6 +420,13 @@ export default function CandidateDetail() {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px" }}>Budget fit <span style={{ fontWeight: 600, textTransform: "none", letterSpacing: 0, color: "#B6B9C6" }}>· not counted in fit %</span></div>
                       <div style={{ fontSize: 13.5, color: "#374151", marginTop: 4 }}>Expected {sfit.budget.expected_label || "—"} · Role budget {sfit.budget.range_label || "not set"}</div>
+                      {candidate.market?.benchmark && (
+                        <div style={{ fontSize: 12.5, color: "#6B7280", marginTop: 4 }}>
+                          💰 Market {candidate.market.benchmark.range_label} (median {candidate.market.benchmark.median_label})
+                          {candidate.market.vs && <span style={{ fontWeight: 700, color: (BUDGET[candidate.market.vs.lane] || BUDGET.neutral).color }}> · {candidate.market.vs.label} ({candidate.market.vs.pct_diff >= 0 ? "+" : ""}{candidate.market.vs.pct_diff}%)</span>}
+                          <span style={{ color: "#B6B9C6" }}> · DOSM {candidate.market.benchmark.data_year}</span>
+                        </div>
+                      )}
                     </div>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: b.color, background: b.bg, border: `1px solid ${b.border}`, padding: "6px 13px", borderRadius: 20, whiteSpace: "nowrap" }}><span style={{ fontSize: 11 }}>{b.icon}</span>{sfit.budget.label}</span>
                   </div>

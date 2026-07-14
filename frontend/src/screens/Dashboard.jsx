@@ -69,6 +69,7 @@ export default function Dashboard() {
   const [hrPhone, setHrPhone] = useState("");
   const [hrSaved, setHrSaved] = useState(false);
   const [analytics, setAnalytics] = useState(null);
+  const [salary, setSalary] = useState(null);
 
   async function saveHrAlerts(alerts = hrAlerts, phone = hrPhone) {
     try {
@@ -104,6 +105,7 @@ export default function Dashboard() {
     });
     axios.get(`/api/jobs/${jobId}/pipeline`).then((r) => setPipeline(r.data)).catch(() => setPipeline(null));
     axios.get("/api/whatsapp/status").then((r) => setWaStatus(r.data)).catch(() => setWaStatus(null));
+    axios.get(`/api/jobs/${jobId}/salary-benchmark`).then((r) => setSalary(r.data?.available ? r.data : null)).catch(() => setSalary(null));
   }, [jobId]);
   useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
@@ -216,6 +218,28 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
+
+      {/* market salary benchmark */}
+      {salary && (() => {
+        const b = salary.benchmark; const bv = salary.budget_vs_market; const bc = bv ? (BUDGET_COLORS[bv.lane] || BUDGET_COLORS.neutral) : null;
+        return (
+          <div style={{ ...cardBox, borderRadius: 14, padding: "16px 20px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }} className="flex-wrap">
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: "#ECFDF5", color: "#047857", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>💰</div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px" }}>Market rate · {b.category} · {b.region}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginTop: 3 }}>{b.range_label} <span style={{ fontSize: 13, color: "#9AA0AE", fontWeight: 600 }}>· median {b.median_label}/mo</span></div>
+              <div style={{ fontSize: 11.5, color: "#9AA0AE", marginTop: 3 }}>Indicative — Source: {b.source}</div>
+            </div>
+            {bv && (
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600, marginBottom: 4 }}>Your budget max</div>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: bc.color, background: bc.bg, border: `1px solid ${bc.border}`, padding: "5px 12px", borderRadius: 20 }}>{bv.label} ({bv.pct_diff >= 0 ? "+" : ""}{bv.pct_diff}%)</span>
+              </div>
+            )}
+            {!bv && <span onClick={() => navigate(`/jobs/${jobId}/success-profile`)} style={{ fontSize: 12.5, fontWeight: 600, color: "#6D28D9", cursor: "pointer", whiteSpace: "nowrap" }}>Set a budget →</span>}
+          </div>
+        );
+      })()}
 
       {/* pipeline funnel */}
       <div style={{ ...cardBox, borderRadius: 14, padding: "18px 22px", marginBottom: 16 }}>

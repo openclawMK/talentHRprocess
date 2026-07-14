@@ -15,6 +15,7 @@ import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
 import { computeSuccessFit, computeBudgetFit } from "../services/successFit.js";
 import { buildRoleComparison } from "../services/bestMatch.js";
+import { getSalaryBenchmark, compareToMarket } from "../services/salaryBenchmark.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
@@ -614,7 +615,12 @@ router.get("/candidates/:jobId/:candidateId", (req, res) => {
     const candidate = findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
     const job = findJob(req.params.jobId);
-    res.json({ ...candidate, budget_fit: job ? computeBudgetFit(candidate, job) : null });
+    let market = null;
+    if (job) {
+      const bm = getSalaryBenchmark(job.role_title, job.location);
+      if (bm) market = { benchmark: bm, vs: compareToMarket(candidate.profile?.expected_salary, bm) };
+    }
+    res.json({ ...candidate, budget_fit: job ? computeBudgetFit(candidate, job) : null, market });
   } catch (err) {
     res.status(500).json({ error: "Failed to load candidate." });
   }
