@@ -86,6 +86,8 @@ export default function CandidateDetail() {
   useEffect(() => { if (candidate && candidate.pre_hire_checks) setChecks(candidate.pre_hire_checks); }, [candidate]);
 
   const [recRefreshing, setRecRefreshing] = useState(false);
+  const [expandedCriteria, setExpandedCriteria] = useState(() => new Set());
+  const toggleCriterion = (id) => setExpandedCriteria((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   async function saveCheck(key, patch) {
     const next = { ...checks, [key]: { ...(checks[key] || { status: "pending", notes: "" }), ...patch } };
     setChecks(next);
@@ -445,23 +447,48 @@ export default function CandidateDetail() {
               Profile fit and Personality cards, which reflect what actually drives
               those score components; only interview criteria are shown here since
               they're the one part that isn't shown elsewhere and genuinely combine
-              (weighted) into the real Interview score. */}
+              (weighted) into the real Interview score. Each row expands to show
+              the questions asked and the notes taken during scoring. */}
           {criteria.some((m) => m.source === "interview") && (
             <div style={cardBox}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}><div style={{ fontSize: 15, fontWeight: 700 }}>Interview criteria breakdown</div><div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600 }}>score · weight</div></div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}><div style={{ fontSize: 15, fontWeight: 700 }}>Interview criteria breakdown</div><div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600 }}>score · weight</div></div>
+              <div style={{ fontSize: 12.5, color: "#9AA0AE", marginBottom: 14 }}>Click a criterion to see the questions asked and notes taken.</div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {criteria.filter((m) => m.source === "interview").map((m) => {
                   const na = m.not_applicable;
                   const dot = m.score > 70 ? "#059669" : m.score >= 40 ? "#D97706" : "#DC2626";
+                  const hasDetail = m.scored && !na && ((m.questions_asked || []).length > 0 || m.hr_notes);
+                  const open = expandedCriteria.has(m.criterion_id);
                   return (
-                    <div key={m.criterion_id} style={{ display: "grid", gridTemplateColumns: "1fr 70px 40px", gap: 12, alignItems: "center", padding: "8px 0", opacity: na ? 0.45 : 1 }}>
-                      <span style={{ fontSize: 13, color: "#374151", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
-                      {m.scored && !na ? (
-                        <div style={{ height: 9, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
-                      ) : (
-                        <div style={{ height: 9, borderRadius: 5, background: "repeating-linear-gradient(45deg,#E6E8EE,#E6E8EE 5px,#F4F5F8 5px,#F4F5F8 10px)" }} />
+                    <div key={m.criterion_id} style={{ borderBottom: "1px solid #F4F5F8" }}>
+                      <div onClick={() => hasDetail && toggleCriterion(m.criterion_id)} style={{ display: "grid", gridTemplateColumns: "1fr 70px 40px 18px", gap: 12, alignItems: "center", padding: "10px 0", opacity: na ? 0.45 : 1, cursor: hasDetail ? "pointer" : "default" }}>
+                        <span style={{ fontSize: 13, color: "#374151", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
+                        {m.scored && !na ? (
+                          <div style={{ height: 9, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
+                        ) : (
+                          <div style={{ height: 9, borderRadius: 5, background: "repeating-linear-gradient(45deg,#E6E8EE,#E6E8EE 5px,#F4F5F8 5px,#F4F5F8 10px)" }} />
+                        )}
+                        <span style={{ fontSize: 12, color: "#B6B9C6", textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
+                        <span style={{ fontSize: 11, color: hasDetail ? "#9AA0AE" : "transparent", textAlign: "center" }}>{hasDetail ? (open ? "▴" : "▾") : ""}</span>
+                      </div>
+                      {open && hasDetail && (
+                        <div style={{ background: "#FAFAFC", borderRadius: 10, padding: "12px 14px", marginBottom: 12 }}>
+                          {(m.questions_asked || []).length > 0 && (
+                            <div style={{ marginBottom: m.hr_notes ? 10 : 0 }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#9AA0AE", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 5 }}>{m.question_source === "manual" ? "Questions asked" : "AI-suggested questions"}</div>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                                {m.questions_asked.map((q, i) => <div key={i} style={{ fontSize: 13, color: "#44485A", lineHeight: 1.5 }}>• {q}</div>)}
+                              </div>
+                            </div>
+                          )}
+                          {m.hr_notes && (
+                            <div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: "#9AA0AE", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 5 }}>Notes on the answer</div>
+                              <div style={{ fontSize: 13, color: "#44485A", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{m.hr_notes}</div>
+                            </div>
+                          )}
+                        </div>
                       )}
-                      <span style={{ fontSize: 12, color: "#B6B9C6", textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
                     </div>
                   );
                 })}
