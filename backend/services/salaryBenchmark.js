@@ -18,6 +18,9 @@ const SRC = Object.fromEntries((DATA.meta.sources || []).map((s) => [s.id, s]));
 const norm = (s) => (s || "").toLowerCase().trim();
 const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
 const shortSource = (id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : "Market");
+// Industry label for a role (explicit tag, or a sector-based fallback for the
+// original F&B/professional roles that predate industry tagging).
+const industryOf = (rule) => rule.industry || (rule.sector === "frontline" ? "F&B / Retail / Hospitality" : "Professional / Office");
 
 // Longest keyword match wins, so "outlet supervisor" beats a bare "manager".
 function matchRole(roleTitle) {
@@ -64,6 +67,7 @@ export function getSalaryBenchmark(roleTitle, location) {
     median_label: rm(median),
     category: rule.category,
     sector: rule.sector || null,
+    industry: industryOf(rule),
     basis: rule.basis || "role-level",
     estimated: (rule.basis || "role-level") === "estimate",
     region: region ? region.replace(/\b\w/g, (c) => c.toUpperCase()) : "Malaysia (national)",
@@ -125,6 +129,11 @@ export function salaryExperienceFit(expected, years, benchmark) {
   return 40;                                                       // well over what experience warrants
 }
 
+/** Distinct industries covered (for the Salary Center filter). */
+export function benchmarkIndustries() {
+  return [...new Set(DATA.roles.map(industryOf))].sort();
+}
+
 /** Regions offered in the Salary Center dropdown (label + key). */
 export function benchmarkRegions() {
   const pretty = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase());
@@ -150,6 +159,7 @@ export function listBenchmarks(location) {
     return {
       category: r.category,
       sector: r.sector || "other",
+      industry: industryOf(r),
       min: Math.min(median, adj(r.min)),
       median,
       max: Math.max(median, adj(r.max)),

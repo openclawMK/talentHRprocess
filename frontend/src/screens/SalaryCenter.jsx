@@ -23,6 +23,7 @@ export default function SalaryCenter() {
   const [data, setData] = useState(null);
   const [region, setRegion] = useState("");
   const [sector, setSector] = useState("all");
+  const [industry, setIndustry] = useState("all");
   const [q, setQ] = useState("");
 
   useEffect(() => {
@@ -31,8 +32,12 @@ export default function SalaryCenter() {
 
   const rows = useMemo(() => {
     if (!data?.roles) return [];
-    return data.roles.filter((r) => (sector === "all" || r.sector === sector) && (!q || r.category.toLowerCase().includes(q.toLowerCase())));
-  }, [data, sector, q]);
+    return data.roles.filter((r) =>
+      (sector === "all" || r.sector === sector) &&
+      (industry === "all" || r.industry === industry) &&
+      (!q || r.category.toLowerCase().includes(q.toLowerCase()))
+    );
+  }, [data, sector, industry, q]);
   const scaleMax = useMemo(() => Math.max(1, ...rows.map((r) => r.max)), [rows]);
 
   if (data === false) return <div className="text-gray-500">Couldn't load the salary center.</div>;
@@ -60,7 +65,15 @@ export default function SalaryCenter() {
             return <span key={s.key} onClick={() => setSector(s.key)} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "8px 14px", borderRadius: 8, color: on ? "#fff" : "#374151", background: on ? "linear-gradient(135deg,#6366F1,#7C3AED)" : "#F3F4F8" }}>{s.label}</span>;
           })}
         </div>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search a role…" style={{ marginLeft: "auto", padding: "9px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 14, minWidth: 200, outline: "none" }} />
+        <div style={{ marginLeft: "auto", display: "flex", gap: 10, alignItems: "center" }} className="flex-wrap">
+          {data?.industries?.length > 0 && (
+            <select value={industry} onChange={(e) => setIndustry(e.target.value)} style={{ padding: "9px 12px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 13.5, fontWeight: 600, color: "#374151", background: "#fff", cursor: "pointer" }}>
+              <option value="all">All industries</option>
+              {data.industries.map((i) => <option key={i} value={i}>{i}</option>)}
+            </select>
+          )}
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search a role…" style={{ padding: "9px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 14, minWidth: 180, outline: "none" }} />
+        </div>
       </div>
 
       {/* Table */}
@@ -79,8 +92,9 @@ export default function SalaryCenter() {
             <div key={i} className="grid items-center md:!grid-cols-[1.4fr_2fr_150px]" style={{ gridTemplateColumns: "1fr", gap: 16, padding: "15px 22px", borderBottom: "1px solid #F1F2F6" }}>
               <div>
                 <div style={{ fontSize: 14.5, fontWeight: 700, color: "#1F2430" }}>{r.category}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: sb.color, background: sb.bg, border: `1px solid ${sb.border}`, padding: "2px 8px", borderRadius: 6, textTransform: "capitalize" }}>{r.sector}</span>
+                  {r.industry && <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", background: "#F3F4F6", padding: "2px 8px", borderRadius: 6 }}>{r.industry}</span>}
                   {r.estimated && <span style={{ fontSize: 11, fontWeight: 600, color: "#B45309" }}>indicative estimate</span>}
                 </div>
               </div>

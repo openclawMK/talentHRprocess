@@ -13,7 +13,7 @@ import {
   candidateStageKey,
 } from "../services/pipeline.js";
 import { notify, whatsappConfigured } from "../services/whatsappService.js";
-import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, suggestSalary } from "../services/salaryBenchmark.js";
+import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary } from "../services/salaryBenchmark.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -92,7 +92,7 @@ router.get("/jobs/:jobId/suggest-salary", (req, res) => {
 // GET /api/salary-center?region= — full benchmark catalogue for the Salary Center.
 router.get("/salary-center", (req, res) => {
   try {
-    res.json({ ...listBenchmarks(req.query.region || ""), regions: benchmarkRegions() });
+    res.json({ ...listBenchmarks(req.query.region || ""), regions: benchmarkRegions(), industries: benchmarkIndustries() });
   } catch (err) {
     console.error("salary-center error:", err);
     res.status(500).json({ error: "Failed to load salary center." });
