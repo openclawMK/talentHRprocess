@@ -337,6 +337,7 @@ router.get("/jobs/:jobId/best-match", async (req, res) => {
         candidate_id: r.candidate_id, name: r.name, ai_score: r.score,
         success_profile_fit_pct: r.fit, fit_verdict: r.fit_verdict, dealbreaker: r.dealbreaker,
         expected_salary_rm: r.expected_salary, budget_status: r.budget_status,
+        vs_market: r.market_status !== "unknown" ? `${r.market_label} (${r.market_pct >= 0 ? "+" : ""}${r.market_pct}%)` : null,
         experience_years: r.experience_years, pending_stages: r.pending,
       })))}`;
       ai = await chatJSON({ system, user, temperature: 0.3 });

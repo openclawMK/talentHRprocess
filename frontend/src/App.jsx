@@ -12,6 +12,7 @@ import CandidateDetail from "./screens/CandidateDetail.jsx";
 import InterviewScoring from "./screens/InterviewScoring.jsx";
 import SuccessProfile from "./screens/SuccessProfile.jsx";
 import CompareView from "./screens/CompareView.jsx";
+import SalaryCenter from "./screens/SalaryCenter.jsx";
 import CandidatePortal from "./screens/CandidatePortal.jsx";
 import CandidateAssessment from "./screens/CandidateAssessment.jsx";
 
@@ -41,6 +42,7 @@ function HRApp() {
           element={<InterviewScoring />}
         />
         <Route path="/jobs/:jobId/compare" element={<CompareView />} />
+        <Route path="/salary-center" element={<SalaryCenter />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </WorkspaceLayout>

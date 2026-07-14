@@ -17,6 +17,7 @@ const SRC = Object.fromEntries((DATA.meta.sources || []).map((s) => [s.id, s]));
 
 const norm = (s) => (s || "").toLowerCase().trim();
 const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
+const shortSource = (id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : "Market");
 
 // Longest keyword match wins, so "outlet supervisor" beats a bare "manager".
 function matchRole(roleTitle) {
@@ -67,8 +68,56 @@ export function getSalaryBenchmark(roleTitle, location) {
     estimated: (rule.basis || "role-level") === "estimate",
     region: region ? region.replace(/\b\w/g, (c) => c.toUpperCase()) : "Malaysia (national)",
     sources,
-    source_short: (rule.sources || []).map((id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : "Market")).join(" + "),
+    source_short: (rule.sources || []).map(shortSource).join(" + "),
     indicative: true,
+  };
+}
+
+/** Regions offered in the Salary Center dropdown (label + key). */
+export function benchmarkRegions() {
+  const pretty = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase());
+  return [{ key: "", label: "Malaysia (national)" }].concat(
+    Object.keys(DATA.regional_multipliers)
+      .filter((k) => k !== "default")
+      .map((k) => ({ key: k, label: pretty(k) }))
+  );
+}
+
+/**
+ * Full benchmark catalogue for the Salary Center screen, adjusted to an optional
+ * location. Returns every role band with its sector, sources and estimate flag.
+ */
+export function listBenchmarks(location) {
+  const floor = DATA.meta.minimum_wage;
+  const { mult, region } = location ? regionMultiplier(location) : { mult: 1, region: null };
+  const eff = 1 + (mult - 1) * (DATA.meta.regional_damping ?? 0.6);
+  const adj = (n) => Math.max(floor, Math.round((n * eff) / 10) * 10);
+
+  const roles = DATA.roles.map((r) => {
+    const median = adj(r.median);
+    return {
+      category: r.category,
+      sector: r.sector || "other",
+      min: Math.min(median, adj(r.min)),
+      median,
+      max: Math.max(median, adj(r.max)),
+      min_label: rm(Math.min(median, adj(r.min))),
+      median_label: rm(median),
+      max_label: rm(Math.max(median, adj(r.max))),
+      sources: (r.sources || []).map(shortSource),
+      basis: r.basis || "role-level",
+      estimated: (r.basis || "role-level") === "estimate",
+    };
+  });
+  return {
+    meta: {
+      sources: DATA.meta.sources,
+      minimum_wage: floor,
+      currency: DATA.meta.currency,
+      note: DATA.meta.note,
+    },
+    region: region ? region.replace(/\b\w/g, (c) => c.toUpperCase()) : "Malaysia (national)",
+    roles,
   };
 }
 

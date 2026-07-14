@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
-  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X,
+  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -10,6 +10,7 @@ const NAV = [
   { to: "/jobs", label: "Job roles", icon: Briefcase, match: (p) => p.startsWith("/jobs") && p !== "/jobs/new" },
   { to: "/upload", label: "Upload CV", icon: UploadCloud, match: (p) => p.startsWith("/upload") },
   { to: "/jobs/new", label: "Create job", icon: Plus, match: (p) => p === "/jobs/new" },
+  { to: "/salary-center", label: "Salary Center", icon: Wallet, match: (p) => p.startsWith("/salary-center") },
 ];
 
 export default function WorkspaceLayout({ children }) {

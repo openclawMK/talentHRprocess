@@ -332,7 +332,7 @@ export default function Dashboard() {
       {/* AI best match panel */}
       {showBm && (
         <div style={{ background: "#F8F6FE", border: "1px solid #ECE7FB", borderRadius: 16, padding: "20px 22px", marginBottom: 14 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1px", color: "#7C3AED", marginBottom: 12 }}>✦ AI BEST MATCH — vs Success Profile &amp; budget</div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1px", color: "#7C3AED", marginBottom: 12 }}>✦ AI BEST MATCH — vs Success Profile, budget &amp; market</div>
           {bmLoading ? (
             <div style={{ fontSize: 14, color: "#6D5D9E" }}>Comparing all candidates against your Success Profile…</div>
           ) : !bm || bm.error ? (
@@ -365,6 +365,7 @@ export default function Dashboard() {
                         <span style={{ fontSize: 14, fontWeight: 700, minWidth: 120 }}>{r.name}</span>
                         <span style={{ fontSize: 12.5, color: "#6B7280" }}>Score {round(r.score)} · Fit {r.fit != null ? `${r.fit}%` : "—"} · {r.experience_years != null ? `${r.experience_years} yrs` : "—"}{r.expected_salary ? ` · RM${r.expected_salary.toLocaleString()}` : ""}</span>
                         {r.budget_label && r.budget_status !== "unknown" && <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, color: bc.color, background: bc.bg, border: `1px solid ${bc.border}` }}>{r.budget_label}</span>}
+                        {r.market_label && r.market_status !== "unknown" && (() => { const mc = BUDGET_COLORS[{ within: "green", below: "blue", above: "amber" }[r.market_status]] || BUDGET_COLORS.neutral; return <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, color: mc.color, background: mc.bg, border: `1px solid ${mc.border}` }}>{r.market_label}</span>; })()}
                         {r.dealbreaker && <span style={{ fontSize: 11, fontWeight: 700, color: "#B91C1C" }}>⛔ dealbreaker</span>}
                         {reasons[r.candidate_id] && <span style={{ fontSize: 12.5, color: "#8A85A6", fontStyle: "italic", flexBasis: "100%" }}>{reasons[r.candidate_id]}</span>}
                       </div>
