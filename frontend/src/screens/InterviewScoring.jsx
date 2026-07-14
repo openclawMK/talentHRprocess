@@ -24,6 +24,7 @@ export default function InterviewScoring() {
   const [manualQ, setManualQ] = useState({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [questionCount, setQuestionCount] = useState(5);
 
   useEffect(() => {
     axios.get(`/api/candidates/${jobId}/${candidateId}`).then((r) => setCandidate(r.data)).catch(() => setCandidate(false));
@@ -35,7 +36,7 @@ export default function InterviewScoring() {
 
   async function chooseAi() {
     setMode("ai"); setLoadingAi(true); setError(null);
-    try { const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep`); setCriteria(r.data.criteria); seedRatings(r.data.criteria); }
+    try { const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep?count=${questionCount}`); setCriteria(r.data.criteria); seedRatings(r.data.criteria); }
     catch { setError("Couldn't generate AI questions. Switch to Manual instead."); setCriteria([]); }
     finally { setLoadingAi(false); }
   }
@@ -99,17 +100,26 @@ export default function InterviewScoring() {
 
         {/* mode cards */}
         <div className="grid gap-[18px] md:grid-cols-2" style={{ marginBottom: 24 }}>
-          <div onClick={chooseAi} style={{ position: "relative", background: "linear-gradient(180deg,#FBFAFF,#fff)", border: "1.5px solid #E7DEFB", borderRadius: 18, padding: 26, cursor: "pointer", display: "flex", flexDirection: "column" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
+          <div style={{ position: "relative", background: "linear-gradient(180deg,#FBFAFF,#fff)", border: "1.5px solid #E7DEFB", borderRadius: 18, padding: 26, display: "flex", flexDirection: "column" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
             <span style={{ position: "absolute", top: 18, right: 18, fontSize: 11, fontWeight: 700, color: "#6D28D9", background: "#F3EEFE", border: "1px solid #E0D2FA", padding: "4px 10px", borderRadius: 20 }}>★ Recommended</span>
             <div style={{ width: 46, height: 46, borderRadius: 13, background: "linear-gradient(135deg,#8B5CF6,#7C3AED)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 18, boxShadow: "0 6px 16px rgba(124,58,237,.3)" }}>✨</div>
             <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.2px", marginBottom: 8 }}>AI-generated questions</div>
             <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.55, marginBottom: 18 }}>AI writes tailored questions and a scoring rubric for each criterion, based on this role and the candidate's CV. You rate each one.</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 22 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 18 }}>
               {["Tailored to the candidate's CV & gaps", "Scoring rubric for consistent rating", "Probes the areas flagged on the CV"].map((t) => <div key={t} style={{ display: "flex", gap: 9, fontSize: 13.5, color: "#44485A" }}><span style={{ color: "#7C3AED" }}>✓</span> {t}</div>)}
+            </div>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>How many questions?</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[3, 5, 10].map((n) => (
+                  <button key={n} type="button" onClick={(e) => { e.stopPropagation(); setQuestionCount(n); }}
+                    style={{ flex: 1, padding: "9px 0", borderRadius: 9, fontSize: 13.5, fontWeight: 700, cursor: "pointer", border: `1.5px solid ${questionCount === n ? "#7C3AED" : "#E2E4EC"}`, background: questionCount === n ? "#7C3AED" : "#fff", color: questionCount === n ? "#fff" : "#374151" }}>{n}</button>
+                ))}
+              </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto" }}>
               <span style={{ fontSize: 13, color: "#9AA0AE" }}>🕑 ~30 sec to generate</span>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: GRAD, padding: "10px 18px", borderRadius: 10, boxShadow: "0 6px 16px rgba(99,102,241,.28)" }}>Generate &amp; start →</span>
+              <button type="button" onClick={chooseAi} style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: GRAD, padding: "10px 18px", borderRadius: 10, boxShadow: "0 6px 16px rgba(99,102,241,.28)", border: "none", cursor: "pointer" }}>Generate &amp; start →</button>
             </div>
           </div>
 

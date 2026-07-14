@@ -645,8 +645,10 @@ router.get("/candidates/:jobId/:candidateId", (req, res) => {
 });
 
 /**
- * GET /api/candidates/:jobId/:candidateId/interview-prep
- * Returns interview-source criteria with 2 AI-generated probe questions each.
+ * GET /api/candidates/:jobId/:candidateId/interview-prep?count=3|5|10
+ * Returns interview-source criteria with AI-generated probe questions, totalling
+ * `count` questions distributed across criteria (weighted toward higher-weight
+ * criteria; every criterion gets at least 1). Defaults to 2 per criterion.
  */
 router.get("/candidates/:jobId/:candidateId/interview-prep", async (req, res) => {
   try {
@@ -658,6 +660,11 @@ router.get("/candidates/:jobId/:candidateId/interview-prep", async (req, res) =>
     const interviewCriteria = (job.criteria || []).filter((c) => c.source === "interview");
     if (interviewCriteria.length === 0) return res.json({ criteria: [] });
 
+    const requested = Number(req.query.count);
+    const count = Number.isFinite(requested)
+      ? Math.max(interviewCriteria.length, Math.min(20, requested))
+      : interviewCriteria.length * 2;
+
     const system =
       "You are an expert interviewer and HR consultant. Generate targeted interview questions and scoring rubrics for each criterion. " +
       "Never ask about family, health, religion, race, gender, or marital status. Return valid JSON only.";
@@ -668,19 +675,19 @@ Candidate experience: ${JSON.stringify(
       (candidate.profile?.work_history || []).map((w) => `${w.title} at ${w.employer}`)
     )}
 
-For EACH criterion below, generate:
-- 2 targeted interview questions specific to this candidate
-- A scoring rubric with what a LOW (0-40), MID (41-70), and HIGH (71-100) score looks like for this criterion
+Generate EXACTLY ${count} interview questions in TOTAL across all criteria combined — count them before responding, the sum of every criterion's "questions" array length MUST equal ${count}, no more and no less. Distribute them across the criteria below: every criterion must get at least 1 question, and higher-weight criteria should get more.
 
-Criteria:
-${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}"${c.description ? " — " + c.description : ""}`).join("\n")}
+For EACH criterion, also generate a scoring rubric with what a LOW (0-40), MID (41-70), and HIGH (71-100) score looks like.
+
+Criteria (with weight):
+${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}" weight=${Math.round((c.weight || 0) * 100)}%${c.description ? " — " + c.description : ""}`).join("\n")}
 
 Return:
 {
   "criteria_questions": [
     {
       "criterion_id": "<id from above>",
-      "questions": ["question 1", "question 2"],
+      "questions": ["question 1", "question 2", ...],
       "rubric": {
         "low": "<what a 0-40 answer looks like — 1 sentence>",
         "mid": "<what a 41-70 answer looks like — 1 sentence>",
