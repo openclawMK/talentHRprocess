@@ -147,11 +147,11 @@ export default function CandidateDetail() {
   }
   async function saveNote() {
     if (!note.trim()) return;
-    setNoteSaving(true); setNoteResult(null);
+    setNoteSaving(true); setNoteResult(null); setRecRefreshing(true);
     try {
       const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/hr-notes`, { notes: note.trim() });
       setCandidate(res.data.candidate); setNoteResult({ saved: true, date: res.data.date }); setNote("");
-    } catch { /* ignore */ } finally { setNoteSaving(false); }
+    } catch { /* ignore */ } finally { setNoteSaving(false); setRecRefreshing(false); }
   }
   async function exportPdf() {
     try {
@@ -557,7 +557,7 @@ export default function CandidateDetail() {
           {/* HR notes */}
           <div style={cardBox}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><span style={{ fontSize: 16 }}>💬</span><span style={{ fontSize: 15, fontWeight: 700 }}>HR notes</span></div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 14 }}>Saved and used in the final AI analysis once all three scoring stages are complete.</div>
+            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 14 }}>Saved immediately and factored into the AI recommendation — a serious concern here can hold back an automatic Hire for your review.</div>
             {(candidate.hr_notes_list || []).map((n, i) => <div key={i} style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 10, padding: "8px 12px", marginBottom: 8, fontSize: 13, color: "#374151" }}><span style={{ color: "#9AA0AE" }}>{n.date} · </span>{n.text}</div>)}
             {noteResult?.saved && <div style={{ background: "#ECFDF5", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 13, color: "#047857" }}>Saved {noteResult.date}.</div>}
             <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add context — interview impressions, attitude, red flags, anything the AI missed…" style={{ width: "100%", minHeight: 96, padding: "13px 15px", border: "1px solid #E2E4EC", borderRadius: 11, fontSize: 14, color: "#374151", lineHeight: 1.6, resize: "vertical", outline: "none" }} />

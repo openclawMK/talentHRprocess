@@ -24,6 +24,10 @@ function hasCriticalRisk(candidate) {
   return false;
 }
 
+function recentHrNotes(candidate) {
+  return (candidate.hr_notes_list || []).slice(-5).map((n) => `[${n.date}] ${n.text}`).join("\n");
+}
+
 export async function generateRecommendation(candidate, job) {
   const score = candidate.score || {};
   const combined = score.combined_score ?? 0;
@@ -77,9 +81,15 @@ export async function generateRecommendation(candidate, job) {
   else if (recommendation === "HOLD") next_action = "Consider a second interview to clarify concerns";
   else next_action = "Send polite rejection — candidate does not meet minimum requirements";
 
-  // STEP 3 + 4 — reasons + concerns (AI, combined into one call)
+  // STEP 3 + 4 — reasons + concerns (AI, combined into one call). HR notes are
+  // free text, so unlike structured dealbreakers/flagged checks they can't be
+  // rule-evaluated before the AI call — instead the AI itself judges whether the
+  // notes raise a serious concern (notes_concern), which can downgrade an
+  // automatic HIRE to HOLD but never force a REJECT on unverified text.
+  const hrNotes = recentHrNotes(candidate);
   let reasons = [];
   let concerns = [];
+  let notesConcern = false;
   try {
     const result = await chatJSON({
       system:
@@ -95,20 +105,30 @@ Strengths: ${JSON.stringify(score.strengths || [])}
 Risks: ${JSON.stringify(score.weaknesses || [])}
 Flagged pre-hire checks: ${flagged.length ? flagged.join(", ") + " (treat as a serious concern; do not disclose medical specifics)" : "none"}
 Success Profile dealbreakers triggered: ${dealbreakers.length ? dealbreakers.join(", ") + " (serious concern — name it and weigh toward Hold/Reject, but note it may need manual verification)" : "none"}
+HR interviewer notes: ${hrNotes || "none recorded"}
 Role: ${job.role_title} (${job.industry})
 
 Return exactly:
 {
   "reasons": [exactly 3 one-sentence justifications for this recommendation],
-  "concerns": [0 to 2 specific concerns the HR manager should weigh; empty array if none]
+  "concerns": [0 to 2 specific concerns the HR manager should weigh; empty array if none — fold in anything genuinely concerning from the HR notes],
+  "notes_concern": true or false — true only if the HR notes raise a serious concern (e.g. attitude, integrity, red flag) serious enough that an automatic Hire should be held for human review first
 }`,
       temperature: 0.3,
     });
     reasons = Array.isArray(result.reasons) ? result.reasons.slice(0, 3) : [];
     concerns = Array.isArray(result.concerns) ? result.concerns.slice(0, 2) : [];
+    notesConcern = !!result.notes_concern;
   } catch {
     reasons = [`${recommendation} based on a combined score of ${combined}% against this role's thresholds.`];
     concerns = pending.length ? [`${pendingLabel} still pending — assessment is incomplete.`] : [];
+  }
+
+  // A serious note can hold back an automatic HIRE (never auto-reject on
+  // unverified free text) — HR reviews and decides.
+  if (notesConcern && recommendation === "HIRE") {
+    recommendation = "HOLD";
+    next_action = "Review HR notes before making an offer";
   }
 
   return {
@@ -117,6 +137,7 @@ Return exactly:
     reasons,
     concerns,
     next_action,
+    notes_concern: notesConcern,
     generated_at: new Date().toISOString(),
   };
 }

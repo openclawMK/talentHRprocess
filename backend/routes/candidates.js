@@ -798,7 +798,9 @@ router.post("/candidates/:jobId/:candidateId/final-analysis", async (req, res) =
 /**
  * POST /api/candidates/:jobId/:candidateId/hr-notes
  * Body: { notes: "free text" }
- * Saves notes + runs AI analysis → HR Assessment criterion in combined score.
+ * Saves the note, then refreshes the AI recommendation with it as context —
+ * the AI judges whether the note raises a serious concern; if so it can hold
+ * back an automatic HIRE (never auto-reject on unverified free text).
  */
 router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
   try {
@@ -812,8 +814,10 @@ router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const result = await applyHrNotes(candidates[idx], notes.trim());
+    try { candidates[idx].recommendation = await generateRecommendation(candidates[idx], job); }
+    catch (e) { console.error("recommendation refresh failed:", e.message); }
     writeJSON(CANDIDATES_PATH, candidates);
-    res.json({ candidate: candidates[idx], saved: result.saved, date: result.date });
+    res.json({ candidate: candidates[idx], saved: result.saved, date: result.date, recommendation: candidates[idx].recommendation });
   } catch (err) {
     console.error("hr-notes error:", err);
     res.status(500).json({ error: "Failed to save HR notes." });
