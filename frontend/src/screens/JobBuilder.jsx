@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
@@ -22,6 +22,7 @@ export default function JobBuilder() {
 
   const [form, setForm] = useState({ role_title: "", industry: "F&B / Retail / Hospitality", location: "Kuala Lumpur", role_level: "entry", experience_years_min: 1, education_level_min: "SPM", key_responsibilities: "" });
   const [industries, setIndustries] = useState(FALLBACK_INDUSTRIES);
+  const [benchmarkRoles, setBenchmarkRoles] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [companyId, setCompanyId] = useState(presetCompanyId);
   const [newCompanyMode, setNewCompanyMode] = useState(false);
@@ -34,9 +35,17 @@ export default function JobBuilder() {
     axios.get("/api/salary-center").then((r) => {
       const list = [...(r.data?.industries || []), "Other"];
       if (list.length > 1) setIndustries(list);
+      setBenchmarkRoles(r.data?.roles || []);
     }).catch(() => {});
     axios.get("/api/companies").then((r) => setCompanies(r.data || [])).catch(() => {});
   }, []);
+
+  // Role title suggestions for the selected industry — from the same real,
+  // cited role dataset behind the Salary Center. Still a free-text field.
+  const titleSuggestions = useMemo(
+    () => [...new Set(benchmarkRoles.filter((r) => r.industry === form.industry).map((r) => r.category))].sort(),
+    [benchmarkRoles, form.industry]
+  );
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const respList = () => form.key_responsibilities.split("\n").map((s) => s.trim()).filter(Boolean);
@@ -106,7 +115,11 @@ export default function JobBuilder() {
       {/* Role form */}
       <div style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 26, boxShadow: "0 1px 2px rgba(16,24,40,.04)", marginBottom: 16 }}>
         <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
-          <div><label style={label}>Job title</label><input style={input} value={form.role_title} onChange={(e) => set("role_title", e.target.value)} placeholder="e.g. Restaurant Manager" /></div>
+          <div>
+            <label style={label}>Job title</label>
+            <input style={input} list="role-title-suggestions" value={form.role_title} onChange={(e) => set("role_title", e.target.value)} placeholder="e.g. Restaurant Manager — pick a suggestion or type your own" />
+            <datalist id="role-title-suggestions">{titleSuggestions.map((t) => <option key={t} value={t} />)}</datalist>
+          </div>
           <div><label style={label}>Industry</label>
             <select style={input} value={form.industry} onChange={(e) => set("industry", e.target.value)}>{industries.map((i) => <option key={i}>{i}</option>)}</select>
           </div>
