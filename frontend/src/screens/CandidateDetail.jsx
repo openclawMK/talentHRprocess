@@ -43,7 +43,6 @@ const LAYER = {
   personality_fit: { label: "Personality", accent: "#059669", bg: "#ECFDF5", border: "#A7F3D0", bar: "#059669" },
   interview_result: { label: "Interview", accent: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", bar: "#7C3AED" },
 };
-const SRC_TAG = { cv: { bg: "#EEF2FF", color: "#4338CA" }, ocean: { bg: "#ECFDF5", color: "#047857" }, interview: { bg: "#F5F3FF", color: "#6D28D9" }, hr_notes: { bg: "#FFF7ED", color: "#C2410C" } };
 
 // Per-trait descriptive phrases: [high, moderate, low]
 const OCEAN_DESC = {
@@ -442,29 +441,33 @@ export default function CandidateDetail() {
             );
           })()}
 
-          {/* Criteria breakdown */}
-          <div style={cardBox}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}><div style={{ fontSize: 15, fontWeight: 700 }}>Criteria breakdown</div><div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600 }}>score · weight</div></div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {criteria.map((m) => {
-                const tag = SRC_TAG[m.source] || SRC_TAG.cv;
-                const na = m.not_applicable;
-                const dot = m.score > 70 ? "#059669" : m.score >= 40 ? "#D97706" : "#DC2626";
-                return (
-                  <div key={m.criterion_id} style={{ display: "grid", gridTemplateColumns: "56px 1fr 70px 40px", gap: 12, alignItems: "center", padding: "8px 0", opacity: na ? 0.45 : 1 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: ".4px", textAlign: "center", color: tag.color, background: tag.bg, padding: "4px 0", borderRadius: 6, textTransform: "uppercase" }}>{m.source === "hr_notes" ? "HR" : m.source}</span>
-                    <span style={{ fontSize: 13, color: "#374151", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
-                    {m.scored && !na ? (
-                      <div style={{ height: 9, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
-                    ) : (
-                      <div style={{ height: 9, borderRadius: 5, background: "repeating-linear-gradient(45deg,#E6E8EE,#E6E8EE 5px,#F4F5F8 5px,#F4F5F8 10px)" }} />
-                    )}
-                    <span style={{ fontSize: 12, color: "#B6B9C6", textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
-                  </div>
-                );
-              })}
+          {/* Interview criteria breakdown — CV and OCEAN are covered by the Success
+              Profile fit and Personality cards, which reflect what actually drives
+              those score components; only interview criteria are shown here since
+              they're the one part that isn't shown elsewhere and genuinely combine
+              (weighted) into the real Interview score. */}
+          {criteria.some((m) => m.source === "interview") && (
+            <div style={cardBox}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}><div style={{ fontSize: 15, fontWeight: 700 }}>Interview criteria breakdown</div><div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600 }}>score · weight</div></div>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {criteria.filter((m) => m.source === "interview").map((m) => {
+                  const na = m.not_applicable;
+                  const dot = m.score > 70 ? "#059669" : m.score >= 40 ? "#D97706" : "#DC2626";
+                  return (
+                    <div key={m.criterion_id} style={{ display: "grid", gridTemplateColumns: "1fr 70px 40px", gap: 12, alignItems: "center", padding: "8px 0", opacity: na ? 0.45 : 1 }}>
+                      <span style={{ fontSize: 13, color: "#374151", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
+                      {m.scored && !na ? (
+                        <div style={{ height: 9, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
+                      ) : (
+                        <div style={{ height: 9, borderRadius: 5, background: "repeating-linear-gradient(45deg,#E6E8EE,#E6E8EE 5px,#F4F5F8 5px,#F4F5F8 10px)" }} />
+                      )}
+                      <span style={{ fontSize: 12, color: "#B6B9C6", textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Summary */}
           {s.summary && <div style={{ background: "#F7F8FB", border: "1px solid #EEF0F4", borderRadius: 16, padding: "20px 22px" }}><div style={{ fontSize: 14.5, color: "#44485A", lineHeight: 1.65 }}>{s.summary}</div></div>}
