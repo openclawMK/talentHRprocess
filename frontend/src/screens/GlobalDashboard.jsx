@@ -227,7 +227,7 @@ export default function GlobalDashboard() {
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, padding: 16, background: D.copilotGrad }}>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>AI Assistant</div>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "rgba(10,12,18,0.6)", borderRadius: 14, padding: "10px 14px", fontSize: 12, color: D.text2, lineHeight: 1.5, marginTop: 16 }}>
-                  <span style={{ width: 11, height: 11, marginTop: 2, borderRadius: "50%", border: `2px solid ${D.blue}`, borderTopColor: "transparent", flexShrink: 0 }} />
+                  <span style={{ width: 11, height: 11, marginTop: 2, borderRadius: "50%", borderStyle: "solid", borderWidth: 2, borderColor: D.blue, borderTopColor: "transparent", flexShrink: 0 }} />
                   <span style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{insightBusy ? "Thinking…" : insight}</span>
                 </div>
               </div>

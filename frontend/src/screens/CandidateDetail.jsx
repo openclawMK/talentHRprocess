@@ -4,45 +4,16 @@ import axios from "axios";
 import Modal from "../components/Modal.jsx";
 import { monthsToDuration, round, candidateStatus, screeningScore, screeningVerdict } from "../lib/format.js";
 import { candidateStages } from "../lib/pipeline.js";
+import { usePalette } from "../context/ThemeContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
-const cardBox = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 22, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
 const AVATARS = ["linear-gradient(135deg,#6366F1,#7C3AED)", "linear-gradient(135deg,#0EA5E9,#6366F1)", "linear-gradient(135deg,#059669,#0EA5E9)", "linear-gradient(135deg,#F59E0B,#EF4444)", "linear-gradient(135deg,#EC4899,#7C3AED)"];
-const LANE = {
-  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0", dot: "#059669", label: "Green" },
-  amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A", dot: "#D97706", label: "Amber" },
-  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA", dot: "#DC2626", label: "Red" },
-  in_progress: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB", dot: "#9CA3AF", label: "In progress" },
-};
-const REC = {
-  HIRE: { color: "#059669", bg: "#ECFDF5", border: "#A7F3D0", icon: "✓" },
-  HOLD: { color: "#D97706", bg: "#FFFBEB", border: "#FDE68A", icon: "⏸" },
-  REJECT: { color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", icon: "✕" },
-};
 const CHECKS = [
   { key: "background", icon: "🛡", label: "Background check", hint: "Identity, criminal record, employment history" },
   { key: "health", icon: "🩺", label: "Health report", hint: "Pre-employment medical screening" },
   { key: "references", icon: "📞", label: "Previous employer review", hint: "Reference call with recent employer(s)" },
 ];
-const CHECK_STATUS = {
-  pending: { label: "Pending", color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
-  clear: { label: "Clear ✓", color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" },
-  flagged: { label: "Flagged ⚠", color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" },
-  skipped: { label: "Skipped", color: "#9AA0AE", bg: "#FAFAFC", border: "#ECEDF2" },
-};
-const BUDGET = {
-  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0", icon: "✓" },
-  amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A", icon: "≈" },
-  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA", icon: "↑" },
-  blue: { color: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE", icon: "↓" },
-  neutral: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB", icon: "RM" },
-};
 const CONF_PCT = { High: 88, Medium: 64, Low: 42 };
-const LAYER = {
-  cv_fit: { label: "Profile fit", accent: "#4F46E5", bg: "#EEF2FF", border: "#C7D2FE", bar: "#6366F1" },
-  personality_fit: { label: "Personality", accent: "#059669", bg: "#ECFDF5", border: "#A7F3D0", bar: "#059669" },
-  interview_result: { label: "Interview", accent: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", bar: "#7C3AED" },
-};
 
 // Per-trait descriptive phrases: [high, moderate, low]
 const OCEAN_DESC = {
@@ -59,6 +30,38 @@ function avatarFor(n) { let h = 0; for (const ch of n || "") h = (h * 31 + ch.ch
 export default function CandidateDetail() {
   const { jobId, candidateId } = useParams();
   const navigate = useNavigate();
+  const D = usePalette();
+  const cardBox = { background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 22 };
+  const LANE = {
+    green: { color: D.green, bg: D.greenBg, border: D.greenBorder, dot: D.green, label: "Green" },
+    amber: { color: D.amber, bg: D.amberBg, border: D.amberBorder, dot: D.amber, label: "Amber" },
+    red: { color: D.red, bg: D.redBg, border: D.redBorder, dot: D.red, label: "Red" },
+    in_progress: { color: D.text3, bg: D.pillBg, border: D.border, dot: D.text4, label: "In progress" },
+  };
+  const REC = {
+    HIRE: { color: D.green, bg: D.greenBg, border: D.greenBorder, icon: "✓" },
+    HOLD: { color: D.amber, bg: D.amberBg, border: D.amberBorder, icon: "⏸" },
+    REJECT: { color: D.red, bg: D.redBg, border: D.redBorder, icon: "✕" },
+  };
+  const CHECK_STATUS = {
+    pending: { label: "Pending", color: D.text3, bg: D.pillBg, border: D.border },
+    clear: { label: "Clear ✓", color: D.green, bg: D.greenBg, border: D.greenBorder },
+    flagged: { label: "Flagged ⚠", color: D.red, bg: D.redBg, border: D.redBorder },
+    skipped: { label: "Skipped", color: D.text4, bg: D.inset, border: D.border },
+  };
+  const BUDGET = {
+    green: { color: D.green, bg: D.greenBg, border: D.greenBorder, icon: "✓" },
+    amber: { color: D.amber, bg: D.amberBg, border: D.amberBorder, icon: "≈" },
+    red: { color: D.red, bg: D.redBg, border: D.redBorder, icon: "↑" },
+    blue: { color: D.blue, bg: "#EFF6FF", border: "#BFDBFE", icon: "↓" },
+    neutral: { color: D.text3, bg: D.pillBg, border: D.border, icon: "RM" },
+  };
+  const LAYER = {
+    cv_fit: { label: "Profile fit", accent: "#4F46E5", bg: "#EEF2FF", border: "#C7D2FE", bar: "#6366F1" },
+    personality_fit: { label: "Personality", accent: "#059669", bg: "#ECFDF5", border: "#A7F3D0", bar: "#059669" },
+    interview_result: { label: "Interview", accent: "#7C3AED", bg: "#F5F3FF", border: "#DDD6FE", bar: "#7C3AED" },
+  };
+
   const [candidate, setCandidate] = useState(null);
   const [job, setJob] = useState(null);
   const [note, setNote] = useState("");
@@ -179,7 +182,7 @@ export default function CandidateDetail() {
     navigate(`/jobs/${jobId}/dashboard`);
   }
 
-  if (candidate === false) return <div className="text-gray-500">Candidate not found.</div>;
+  if (candidate === false) return <div style={{ color: D.text3 }}>Candidate not found.</div>;
   if (!candidate || !job) return <div style={{ ...cardBox, height: 300 }} className="animate-pulse" />;
 
   const p = candidate.profile || {};
@@ -206,7 +209,7 @@ export default function CandidateDetail() {
 
   return (
     <div className="pb-8">
-      <div onClick={() => navigate(`/jobs/${jobId}/dashboard`)} style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to candidates</div>
+      <div onClick={() => navigate(`/jobs/${jobId}/dashboard`)} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to candidates</div>
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, marginBottom: 22 }} className="flex-wrap">
@@ -214,7 +217,7 @@ export default function CandidateDetail() {
           <div style={{ width: 56, height: 56, borderRadius: 15, background: avatarFor(p.name), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 19 }}>{initials(p.name)}</div>
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 11 }} className="flex-wrap">
-              <h1 className="font-display" style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.5px", margin: 0 }}>{p.name || "Unnamed"}</h1>
+              <h1 className="font-display" style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.5px", margin: 0, color: D.text }}>{p.name || "Unnamed"}</h1>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: lane.color, background: lane.bg, border: `1px solid ${lane.border}`, padding: "4px 10px", borderRadius: 20 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: lane.dot }} />{lane.label} lane
               </span>
@@ -224,22 +227,22 @@ export default function CandidateDetail() {
                 </span>
               ); })()}
             </div>
-            <div style={{ fontSize: 14, color: "#6B7280", marginTop: 5 }}>
-              Submitted {candidate.submitted_date} · <span style={{ fontWeight: 600, color: "#4B5563", textTransform: "capitalize" }}>{candidate.source}</span>{p.age != null ? ` · Age ${p.age}` : ""} · {job.role_title} · {years} yrs{p.contact?.location ? ` · ${p.contact.location.split(",")[0]}` : ""}
+            <div style={{ fontSize: 14, color: D.text3, marginTop: 5 }}>
+              Submitted {candidate.submitted_date} · <span style={{ fontWeight: 600, color: D.text2, textTransform: "capitalize" }}>{candidate.source}</span>{p.age != null ? ` · Age ${p.age}` : ""} · {job.role_title} · {years} yrs{p.contact?.location ? ` · ${p.contact.location.split(",")[0]}` : ""}
             </div>
-            {p.languages?.length > 0 && <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 4 }}>🗣 {p.languages.join(", ")}</div>}
+            {p.languages?.length > 0 && <div style={{ fontSize: 13, color: D.text4, marginTop: 4 }}>🗣 {p.languages.join(", ")}</div>}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }} className="flex-wrap">
           {status !== "complete" && (
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: "#6B7280", background: "#F3F4F8", padding: "4px 11px", borderRadius: 20 }}>{status === "screening" ? "Screening" : "In progress"}</span>
-              <span style={{ fontSize: 20, fontWeight: 800, color: "#111827" }}>{combined}</span><span style={{ fontSize: 12, color: "#9AA0AE" }}>so far</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: D.text3, background: D.inset, padding: "4px 11px", borderRadius: 20 }}>{status === "screening" ? "Screening" : "In progress"}</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: D.text }}>{combined}</span><span style={{ fontSize: 12, color: D.text4 }}>so far</span>
             </div>
           )}
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => { setInviteResult(null); setInviteModal(true); }} style={{ padding: "11px 16px", background: "#fff", color: "#374151", border: "1px solid #E2E4EC", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>🧭 Send invite</button>
-            <button onClick={exportPdf} style={{ padding: "11px 16px", background: "#111827", color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>⤓ Export PDF</button>
+            <button onClick={() => { setInviteResult(null); setInviteModal(true); }} style={{ padding: "11px 16px", background: D.cardBg, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>🧭 Send invite</button>
+            <button onClick={exportPdf} style={{ padding: "11px 16px", background: D.text, color: D.page, border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>⤓ Export PDF</button>
           </div>
         </div>
       </div>
@@ -263,10 +266,10 @@ export default function CandidateDetail() {
             return (
               <div key={st.key} style={{ display: "flex", alignItems: "flex-start", flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: done ? "#6366F1" : cur ? "#EEF2FF" : "#F3F4F8", border: `2px solid ${done || cur ? "#6366F1" : "#E2E4EC"}`, color: done ? "#fff" : cur ? "#6366F1" : "#9AA0AE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>{done ? "✓" : st.icon}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: done || cur ? "#374151" : "#9AA0AE" }}>{st.label}</div>
+                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: done ? "#6366F1" : cur ? "#EEF2FF" : D.inset, border: `2px solid ${done || cur ? "#6366F1" : D.border}`, color: done ? "#fff" : cur ? "#6366F1" : D.text4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>{done ? "✓" : st.icon}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: done || cur ? D.text2 : D.text4 }}>{st.label}</div>
                 </div>
-                {i < stages.length - 1 && <div style={{ flex: 1, height: 2, background: done ? "#6366F1" : "#ECEDF2", margin: "15px 8px 0" }} />}
+                {i < stages.length - 1 && <div style={{ flex: 1, height: 2, background: done ? "#6366F1" : D.border, margin: "15px 8px 0" }} />}
               </div>
             );
           })}
@@ -357,14 +360,14 @@ export default function CandidateDetail() {
           {/* Score breakdown */}
           <div style={cardBox}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 4 }} className="flex-wrap">
-              <div style={{ fontSize: 15, fontWeight: 700 }}>Score breakdown</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Score breakdown</div>
               {interviewPending && s.screening_score != null && (
-                <span style={{ fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, color: s.screening_pass ? "#047857" : "#B45309", background: s.screening_pass ? "#ECFDF5" : "#FFFBEB", border: `1px solid ${s.screening_pass ? "#A7F3D0" : "#FDE68A"}` }}>
+                <span style={{ fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, color: s.screening_pass ? D.green : D.amber, background: s.screening_pass ? D.greenBg : D.amberBg, border: `1px solid ${s.screening_pass ? D.greenBorder : D.amberBorder}` }}>
                   Screening {s.screening_score}/{s.pre_interview_max ?? 50} · {s.screening_pass ? "Pass → interview" : "Review before interview"}
                 </span>
               )}
             </div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 18 }}>Profile fit 35% · Personality 15% · Interview 50% — interview unlocks the final score (hire bar ≥ 72)</div>
+            <div style={{ fontSize: 13, color: D.text4, marginBottom: 18 }}>Profile fit 35% · Personality 15% · Interview 50% — interview unlocks the final score (hire bar ≥ 72)</div>
             <div className="grid grid-cols-3 gap-3">
               {["cv_fit", "personality_fit", "interview_result"].map((k) => {
                 const L = LAYER[k]; const layer = bd?.[k] || {};
@@ -388,8 +391,8 @@ export default function CandidateDetail() {
           {sfit?.configured && (() => {
             const fl = LANE[sfit.lane] || LANE.in_progress;
             const Row = ({ ok, text, neutral }) => (
-              <div style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, color: "#374151", lineHeight: 1.45, padding: "5px 0" }}>
-                <span style={{ flexShrink: 0, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, marginTop: 1, color: ok ? "#047857" : neutral ? "#6B7280" : "#B91C1C", background: ok ? "#ECFDF5" : neutral ? "#F3F4F6" : "#FEF2F2" }}>{ok ? "✓" : neutral ? "•" : "✕"}</span>
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, color: D.text2, lineHeight: 1.45, padding: "5px 0" }}>
+                <span style={{ flexShrink: 0, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, marginTop: 1, color: ok ? D.green : neutral ? D.text3 : D.red, background: ok ? D.greenBg : neutral ? D.inset : D.redBg }}>{ok ? "✓" : neutral ? "•" : "✕"}</span>
                 <span>{text}</span>
               </div>
             );
@@ -397,17 +400,17 @@ export default function CandidateDetail() {
               <div style={cardBox}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 6 }} className="flex-wrap">
                   <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700 }}>◎ Success Profile fit</div>
-                    <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 3 }}>How well this candidate matches the ideal hire defined for the role</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700, color: D.text }}>◎ Success Profile fit</div>
+                    <div style={{ fontSize: 13, color: D.text4, marginTop: 3 }}>How well this candidate matches the ideal hire defined for the role</div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: fl.color, background: fl.bg, border: `1px solid ${fl.border}`, padding: "5px 12px", borderRadius: 20 }}>{sfit.verdict}</span>
                     <div style={{ textAlign: "right" }}>
-                      <div className="font-display" style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1, color: fl.color }}>{sfit.fit}<span style={{ fontSize: 16, color: "#9AA0AE", fontWeight: 700 }}>%</span></div>
+                      <div className="font-display" style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-1.5px", lineHeight: 1, color: fl.color }}>{sfit.fit}<span style={{ fontSize: 16, color: D.text4, fontWeight: 700 }}>%</span></div>
                     </div>
                   </div>
                 </div>
-                <div style={{ height: 8, background: "#F1F2F6", borderRadius: 5, overflow: "hidden", margin: "10px 0 18px" }}><div style={{ height: "100%", width: `${sfit.fit}%`, background: fl.dot, borderRadius: 5 }} /></div>
+                <div style={{ height: 8, background: D.inset, borderRadius: 5, overflow: "hidden", margin: "10px 0 18px" }}><div style={{ height: "100%", width: `${sfit.fit}%`, background: fl.dot, borderRadius: 5 }} /></div>
 
                 {sfit.dealbreakers.some((d) => d.triggered) && (
                   <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 11, padding: "12px 15px", marginBottom: 16 }}>
@@ -419,40 +422,40 @@ export default function CandidateDetail() {
                 <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
                   {sfit.must_haves.length > 0 && (
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Must-haves · {sfit.must_haves.filter((m) => m.met).length}/{sfit.must_haves.length}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Must-haves · {sfit.must_haves.filter((m) => m.met).length}/{sfit.must_haves.length}</div>
                       {sfit.must_haves.map((m, i) => <Row key={i} ok={m.met} text={m.text} />)}
                     </div>
                   )}
                   {sfit.nice_to_haves.length > 0 && (
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Nice-to-haves · {sfit.nice_to_haves.filter((m) => m.met).length}/{sfit.nice_to_haves.length}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Nice-to-haves · {sfit.nice_to_haves.filter((m) => m.met).length}/{sfit.nice_to_haves.length}</div>
                       {sfit.nice_to_haves.map((m, i) => <Row key={i} ok={m.met} neutral={!m.met} text={m.text} />)}
                     </div>
                   )}
                   {sfit.benchmarks.length > 0 && (
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Benchmarks</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Benchmarks</div>
                       {sfit.benchmarks.map((b, i) => <Row key={i} ok={b.met} text={`${b.label}: ${b.actual} vs target ${b.target}`} />)}
                     </div>
                   )}
                   {sfit.has_ocean && sfit.ocean?.length > 0 && (
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Personality alignment · {sfit.ocean.filter((o) => o.match).length}/{sfit.ocean.length}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Personality alignment · {sfit.ocean.filter((o) => o.match).length}/{sfit.ocean.length}</div>
                       {sfit.ocean.map((o, i) => <Row key={i} ok={o.match} text={`${o.trait}: ${o.actual} (ideal ${o.ideal})`} />)}
                     </div>
                   )}
                 </div>
 
                 {sfit.budget && (() => { const b = BUDGET[sfit.budget.lane] || BUDGET.neutral; return (
-                  <div style={{ marginTop: 18, paddingTop: 16, borderTop: "1px solid #F1F2F6", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }} className="flex-wrap">
+                  <div style={{ marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${D.hair}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }} className="flex-wrap">
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px" }}>Budget fit <span style={{ fontWeight: 600, textTransform: "none", letterSpacing: 0, color: "#B6B9C6" }}>· not counted in fit %</span></div>
-                      <div style={{ fontSize: 13.5, color: "#374151", marginTop: 4 }}>Expected {sfit.budget.expected_label || "—"} · Role budget {sfit.budget.range_label || "not set"}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px" }}>Budget fit <span style={{ fontWeight: 600, textTransform: "none", letterSpacing: 0, color: D.text5 }}>· not counted in fit %</span></div>
+                      <div style={{ fontSize: 13.5, color: D.text2, marginTop: 4 }}>Expected {sfit.budget.expected_label || "—"} · Role budget {sfit.budget.range_label || "not set"}</div>
                       {candidate.market?.benchmark && (
-                        <div style={{ fontSize: 12.5, color: "#6B7280", marginTop: 4 }}>
+                        <div style={{ fontSize: 12.5, color: D.text3, marginTop: 4 }}>
                           💰 Market {candidate.market.benchmark.range_label} (median {candidate.market.benchmark.median_label})
                           {candidate.market.vs && <span style={{ fontWeight: 700, color: (BUDGET[candidate.market.vs.lane] || BUDGET.neutral).color }}> · {candidate.market.vs.label} ({candidate.market.vs.pct_diff >= 0 ? "+" : ""}{candidate.market.vs.pct_diff}%)</span>}
-                          <span style={{ color: "#B6B9C6" }}> · {candidate.market.benchmark.source_short}</span>
+                          <span style={{ color: D.text5 }}> · {candidate.market.benchmark.source_short}</span>
                         </div>
                       )}
                     </div>
@@ -471,40 +474,40 @@ export default function CandidateDetail() {
               the questions asked and the notes taken during scoring. */}
           {criteria.some((m) => m.source === "interview") && (
             <div style={cardBox}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}><div style={{ fontSize: 15, fontWeight: 700 }}>Interview criteria breakdown</div><div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600 }}>score · weight</div></div>
-              <div style={{ fontSize: 12.5, color: "#9AA0AE", marginBottom: 14 }}>Click a criterion to see the questions asked and notes taken.</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}><div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Interview criteria breakdown</div><div style={{ fontSize: 12, color: D.text4, fontWeight: 600 }}>score · weight</div></div>
+              <div style={{ fontSize: 12.5, color: D.text4, marginBottom: 14 }}>Click a criterion to see the questions asked and notes taken.</div>
               <div style={{ display: "flex", flexDirection: "column" }}>
                 {criteria.filter((m) => m.source === "interview").map((m) => {
                   const na = m.not_applicable;
-                  const dot = m.score > 70 ? "#059669" : m.score >= 40 ? "#D97706" : "#DC2626";
+                  const dot = m.score > 70 ? D.green : m.score >= 40 ? D.amber : D.red;
                   const hasDetail = m.scored && !na && ((m.questions_asked || []).length > 0 || m.hr_notes);
                   const open = expandedCriteria.has(m.criterion_id);
                   return (
-                    <div key={m.criterion_id} style={{ borderBottom: "1px solid #F4F5F8" }}>
+                    <div key={m.criterion_id} style={{ borderBottom: `0.5px solid ${D.hair}` }}>
                       <div onClick={() => hasDetail && toggleCriterion(m.criterion_id)} style={{ display: "grid", gridTemplateColumns: "1fr 70px 40px 18px", gap: 12, alignItems: "center", padding: "10px 0", opacity: na ? 0.45 : 1, cursor: hasDetail ? "pointer" : "default" }}>
-                        <span style={{ fontSize: 13, color: "#374151", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
+                        <span style={{ fontSize: 13, color: D.text2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
                         {m.scored && !na ? (
-                          <div style={{ height: 9, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
+                          <div style={{ height: 9, background: D.inset, borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
                         ) : (
                           <div style={{ height: 9, borderRadius: 5, background: "repeating-linear-gradient(45deg,#E6E8EE,#E6E8EE 5px,#F4F5F8 5px,#F4F5F8 10px)" }} />
                         )}
-                        <span style={{ fontSize: 12, color: "#B6B9C6", textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
-                        <span style={{ fontSize: 11, color: hasDetail ? "#9AA0AE" : "transparent", textAlign: "center" }}>{hasDetail ? (open ? "▴" : "▾") : ""}</span>
+                        <span style={{ fontSize: 12, color: D.text5, textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
+                        <span style={{ fontSize: 11, color: hasDetail ? D.text4 : "transparent", textAlign: "center" }}>{hasDetail ? (open ? "▴" : "▾") : ""}</span>
                       </div>
                       {open && hasDetail && (
-                        <div style={{ background: "#FAFAFC", borderRadius: 10, padding: "12px 14px", marginBottom: 12 }}>
+                        <div style={{ background: D.inset, borderRadius: 10, padding: "12px 14px", marginBottom: 12 }}>
                           {(m.questions_asked || []).length > 0 && (
                             <div style={{ marginBottom: m.hr_notes ? 10 : 0 }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: "#9AA0AE", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 5 }}>{m.question_source === "manual" ? "Questions asked" : "AI-suggested questions"}</div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 5 }}>{m.question_source === "manual" ? "Questions asked" : "AI-suggested questions"}</div>
                               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                                {m.questions_asked.map((q, i) => <div key={i} style={{ fontSize: 13, color: "#44485A", lineHeight: 1.5 }}>• {q}</div>)}
+                                {m.questions_asked.map((q, i) => <div key={i} style={{ fontSize: 13, color: D.text2, lineHeight: 1.5 }}>• {q}</div>)}
                               </div>
                             </div>
                           )}
                           {m.hr_notes && (
                             <div>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: "#9AA0AE", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 5 }}>Notes on the answer</div>
-                              <div style={{ fontSize: 13, color: "#44485A", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{m.hr_notes}</div>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 5 }}>Notes on the answer</div>
+                              <div style={{ fontSize: 13, color: D.text2, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{m.hr_notes}</div>
                             </div>
                           )}
                         </div>
@@ -532,24 +535,24 @@ export default function CandidateDetail() {
           {/* Areas to probe */}
           {(s.gaps || []).length > 0 && (
             <div style={cardBox}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16 }}>Areas to probe in interview</div>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: D.text }}>Areas to probe in interview</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {s.gaps.map((g, i) => <div key={i} style={{ display: "flex", gap: 11, alignItems: "flex-start", fontSize: 14, color: "#374151", lineHeight: 1.5 }}><span style={{ color: "#7C3AED", fontWeight: 700, flexShrink: 0 }}>→</span>{g}</div>)}
+                {s.gaps.map((g, i) => <div key={i} style={{ display: "flex", gap: 11, alignItems: "flex-start", fontSize: 14, color: D.text2, lineHeight: 1.5 }}><span style={{ color: "#7C3AED", fontWeight: 700, flexShrink: 0 }}>→</span>{g}</div>)}
               </div>
             </div>
           )}
 
           {/* Work history */}
           <div style={cardBox}>
-            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Work history</div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 20 }}>Extracted from the uploaded CV</div>
+            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: D.text }}>Work history</div>
+            <div style={{ fontSize: 13, color: D.text4, marginBottom: 20 }}>Extracted from the uploaded CV</div>
             <div style={{ display: "flex", flexDirection: "column" }}>
               {(p.work_history || []).map((h, i) => (
                 <div key={i} style={{ display: "flex", gap: 16, paddingBottom: 18 }}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}><span style={{ width: 12, height: 12, borderRadius: "50%", background: "#6366F1", marginTop: 4 }} /><span style={{ flex: 1, width: 2, background: "#ECEDF2", marginTop: 4 }} /></div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}><span style={{ width: 12, height: 12, borderRadius: "50%", background: "#6366F1", marginTop: 4 }} /><span style={{ flex: 1, width: 2, background: D.border, marginTop: 4 }} /></div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}><div style={{ fontSize: 15, fontWeight: 700 }}>{h.title}</div></div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "3px 0 6px" }} className="flex-wrap"><span style={{ fontSize: 13, color: "#6366F1", fontWeight: 600 }}>{h.employer}</span>{h.industry && <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", background: "#F3F4F8", padding: "2px 8px", borderRadius: 6 }}>{h.industry}</span>}<span style={{ fontSize: 12, color: "#9AA0AE" }}>{monthsToDuration(h.duration_months)}</span></div>
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}><div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>{h.title}</div></div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 9, margin: "3px 0 6px" }} className="flex-wrap"><span style={{ fontSize: 13, color: "#6366F1", fontWeight: 600 }}>{h.employer}</span>{h.industry && <span style={{ fontSize: 11, fontWeight: 600, color: D.text3, background: D.inset, padding: "2px 8px", borderRadius: 6 }}>{h.industry}</span>}<span style={{ fontSize: 12, color: D.text4 }}>{monthsToDuration(h.duration_months)}</span></div>
                   </div>
                 </div>
               ))}
@@ -558,72 +561,72 @@ export default function CandidateDetail() {
 
           {/* Required skills (missing) */}
           <div style={cardBox}>
-            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Required skills</div>
+            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 14, color: D.text }}>Required skills</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
-              {missingSkills.length === 0 ? <span style={{ fontSize: 13, color: "#047857" }}>✓ All required skills evidenced in the CV.</span> :
+              {missingSkills.length === 0 ? <span style={{ fontSize: 13, color: D.green }}>✓ All required skills evidenced in the CV.</span> :
                 missingSkills.map((sk) => <span key={sk} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500, color: "#B91C1C", background: "#FEF2F2", border: "1px solid #FECACA", padding: "7px 13px", borderRadius: 9 }}><span style={{ fontSize: 11 }}>✕</span>{sk}</span>)}
             </div>
-            {missingSkills.length > 0 && <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 12 }}>Required by the role but not yet evidenced — confirm during screening or interview.</div>}
+            {missingSkills.length > 0 && <div style={{ fontSize: 12, color: D.text4, marginTop: 12 }}>Required by the role but not yet evidenced — confirm during screening or interview.</div>}
           </div>
 
           {/* Pre-hire checks — post-interview due diligence */}
           {interviewDone && (
             <div style={cardBox}>
-              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Pre-hire checks</div>
-              <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 16 }}>Post-interview due diligence — complete these before sending an offer.</div>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: D.text }}>Pre-hire checks</div>
+              <div style={{ fontSize: 13, color: D.text4, marginBottom: 16 }}>Post-interview due diligence — complete these before sending an offer.</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {CHECKS.map((c) => {
                   const cur = checks[c.key] || { status: "pending", notes: "" };
                   return (
-                    <div key={c.key} style={{ background: "#FAFAFC", borderRadius: 12, padding: "13px 15px" }}>
+                    <div key={c.key} style={{ background: D.inset, borderRadius: 12, padding: "13px 15px" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }} className="flex-wrap">
                         <span style={{ fontSize: 17 }}>{c.icon}</span>
                         <div style={{ flex: 1, minWidth: 160 }}>
-                          <div style={{ fontSize: 14, fontWeight: 700 }}>{c.label}</div>
-                          <div style={{ fontSize: 12, color: "#9AA0AE" }}>{c.hint}</div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: D.text }}>{c.label}</div>
+                          <div style={{ fontSize: 12, color: D.text4 }}>{c.hint}</div>
                         </div>
                         <div style={{ display: "flex", gap: 6 }} className="flex-wrap">
-                          {Object.entries(CHECK_STATUS).map(([k, s]) => {
+                          {Object.entries(CHECK_STATUS).map(([k, cs]) => {
                             const active = cur.status === k;
-                            return <span key={k} onClick={() => saveCheck(c.key, { status: k })} style={{ fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, cursor: "pointer", color: active ? s.color : "#9AA0AE", background: active ? s.bg : "#fff", border: `1px solid ${active ? s.border : "#E5E7EB"}` }}>{s.label}</span>;
+                            return <span key={k} onClick={() => saveCheck(c.key, { status: k })} style={{ fontSize: 12, fontWeight: 700, padding: "5px 11px", borderRadius: 20, cursor: "pointer", color: active ? cs.color : D.text4, background: active ? cs.bg : D.cardBg, border: `1px solid ${active ? cs.border : D.border}` }}>{cs.label}</span>;
                           })}
                         </div>
                       </div>
-                      <input value={cur.notes || ""} onChange={(e) => setChecks({ ...checks, [c.key]: { ...cur, notes: e.target.value } })} onBlur={(e) => saveCheck(c.key, { notes: e.target.value })} placeholder="Notes — referee name, outcome, follow-ups…" style={{ width: "100%", marginTop: 10, fontSize: 13, padding: "8px 12px", border: "1px solid #ECEDF2", borderRadius: 9, outline: "none", background: "#fff", color: "#374151" }} />
-                      {cur.updated && <div style={{ fontSize: 11, color: "#C4C7D2", marginTop: 5 }}>Updated {cur.updated}</div>}
+                      <input value={cur.notes || ""} onChange={(e) => setChecks({ ...checks, [c.key]: { ...cur, notes: e.target.value } })} onBlur={(e) => saveCheck(c.key, { notes: e.target.value })} placeholder="Notes — referee name, outcome, follow-ups…" style={{ width: "100%", marginTop: 10, fontSize: 13, padding: "8px 12px", border: `0.5px solid ${D.border}`, borderRadius: 9, outline: "none", background: D.cardBg, color: D.text2 }} />
+                      {cur.updated && <div style={{ fontSize: 11, color: D.text5, marginTop: 5 }}>Updated {cur.updated}</div>}
                     </div>
                   );
                 })}
               </div>
               {Object.values(checks).some((c) => c?.status === "flagged") && (
-                <div style={{ marginTop: 12, fontSize: 13, color: "#B91C1C", fontWeight: 600 }}>⚠ A check is flagged — review it before proceeding to an offer.</div>
+                <div style={{ marginTop: 12, fontSize: 13, color: D.red, fontWeight: 600 }}>⚠ A check is flagged — review it before proceeding to an offer.</div>
               )}
             </div>
           )}
 
           {/* HR notes */}
           <div style={cardBox}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><span style={{ fontSize: 16 }}>💬</span><span style={{ fontSize: 15, fontWeight: 700 }}>HR notes</span></div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 14 }}>Saved immediately and factored into the AI recommendation — a serious concern here can hold back an automatic Hire for your review.</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}><span style={{ fontSize: 16 }}>💬</span><span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>HR notes</span></div>
+            <div style={{ fontSize: 13, color: D.text4, marginBottom: 14 }}>Saved immediately and factored into the AI recommendation — a serious concern here can hold back an automatic Hire for your review.</div>
             {(candidate.hr_notes_list || []).map((n, i) => <div key={i} style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 10, padding: "8px 12px", marginBottom: 8, fontSize: 13, color: "#374151" }}><span style={{ color: "#9AA0AE" }}>{n.date} · </span>{n.text}</div>)}
             {noteResult?.saved && <div style={{ background: "#ECFDF5", borderRadius: 8, padding: "8px 12px", marginBottom: 8, fontSize: 13, color: "#047857" }}>Saved {noteResult.date}.</div>}
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add context — interview impressions, attitude, red flags, anything the AI missed…" style={{ width: "100%", minHeight: 96, padding: "13px 15px", border: "1px solid #E2E4EC", borderRadius: 11, fontSize: 14, color: "#374151", lineHeight: 1.6, resize: "vertical", outline: "none" }} />
-            <button onClick={saveNote} disabled={noteSaving || !note.trim()} style={{ marginTop: 12, padding: "9px 16px", background: "#fff", color: "#6B7280", border: "1px solid #E2E4EC", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer", opacity: noteSaving || !note.trim() ? 0.5 : 1 }}>{noteSaving ? "Saving…" : "Save note"}</button>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add context — interview impressions, attitude, red flags, anything the AI missed…" style={{ width: "100%", minHeight: 96, padding: "13px 15px", border: `0.5px solid ${D.border}`, borderRadius: 11, fontSize: 14, color: D.text2, lineHeight: 1.6, resize: "vertical", outline: "none", background: D.cardBg }} />
+            <button onClick={saveNote} disabled={noteSaving || !note.trim()} style={{ marginTop: 12, padding: "9px 16px", background: D.cardBg, color: D.text3, border: `0.5px solid ${D.border}`, borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer", opacity: noteSaving || !note.trim() ? 0.5 : 1 }}>{noteSaving ? "Saving…" : "Save note"}</button>
           </div>
 
           {/* WhatsApp conversation */}
           <div style={{ ...cardBox, padding: showChat ? 22 : "18px 22px" }}>
             <div onClick={loadChat} style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-              <span style={{ width: 34, height: 34, borderRadius: 10, background: "#ECFDF5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💬</span>
-              <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 700 }}>WhatsApp conversation</div><div style={{ fontSize: 12, color: "#9AA0AE" }}>{chat ? `${chat.thread.length} message${chat.thread.length === 1 ? "" : "s"}` : "View thread"}</div></div>
-              <span style={{ color: "#C4C7D2", fontSize: 14 }}>{showChat ? "▴" : "▾"}</span>
+              <span style={{ width: 34, height: 34, borderRadius: 10, background: D.greenBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>💬</span>
+              <div style={{ flex: 1 }}><div style={{ fontSize: 14, fontWeight: 700, color: D.text }}>WhatsApp conversation</div><div style={{ fontSize: 12, color: D.text4 }}>{chat ? `${chat.thread.length} message${chat.thread.length === 1 ? "" : "s"}` : "View thread"}</div></div>
+              <span style={{ color: D.text5, fontSize: 14 }}>{showChat ? "▴" : "▾"}</span>
             </div>
             {showChat && chat && (
               <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
-                {chat.thread.length === 0 ? <div style={{ fontSize: 13, color: "#9AA0AE" }}>No messages yet.{!chat.configured && " (WhatsApp not configured.)"}</div> :
+                {chat.thread.length === 0 ? <div style={{ fontSize: 13, color: D.text4 }}>No messages yet.{!chat.configured && " (WhatsApp not configured.)"}</div> :
                   chat.thread.map((m, i) => (
                     <div key={i} style={{ display: "flex", justifyContent: m.direction === "outbound" ? "flex-end" : "flex-start" }}>
-                      <div style={{ maxWidth: "80%", whiteSpace: "pre-wrap", borderRadius: 10, padding: "8px 12px", fontSize: 13, background: m.direction === "outbound" ? "#DCFCE7" : "#F3F4F8", color: "#374151" }}>{m.body}<div style={{ fontSize: 10, color: "#9AA0AE", marginTop: 2 }}>{new Date(m.at).toLocaleString()}</div></div>
+                      <div style={{ maxWidth: "80%", whiteSpace: "pre-wrap", borderRadius: 10, padding: "8px 12px", fontSize: 13, background: m.direction === "outbound" ? "#DCFCE7" : D.inset, color: m.direction === "outbound" ? "#374151" : D.text2 }}>{m.body}<div style={{ fontSize: 10, color: D.text4, marginTop: 2 }}>{new Date(m.at).toLocaleString()}</div></div>
                     </div>
                   ))}
               </div>
@@ -632,7 +635,7 @@ export default function CandidateDetail() {
 
           {/* outcome banner */}
           {candidate.outcome && (
-            <div style={{ borderRadius: 12, padding: "10px 14px", fontSize: 13, fontWeight: 600, background: candidate.outcome === "offer" ? "#ECFDF5" : "#FEF2F2", color: candidate.outcome === "offer" ? "#047857" : "#B91C1C" }}>
+            <div style={{ borderRadius: 12, padding: "10px 14px", fontSize: 13, fontWeight: 600, background: candidate.outcome === "offer" ? D.greenBg : D.redBg, color: candidate.outcome === "offer" ? D.green : D.red }}>
               Marked as {candidate.outcome === "offer" ? "OFFER" : "REJECTED"}{candidate.outcome_date ? ` on ${candidate.outcome_date}` : ""} — candidate notified via WhatsApp.
             </div>
           )}
@@ -640,29 +643,29 @@ export default function CandidateDetail() {
           {/* Actions */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 4 }}>
             {interviewPending && <button onClick={() => navigate(`/jobs/${jobId}/candidate/${candidateId}/interview`)} style={{ padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)" }}>🗓 Conduct interview scoring →</button>}
-            <button onClick={() => { setInviteResult(null); setInviteModal(true); }} style={{ padding: "12px 18px", background: "#ECFDF5", color: "#047857", border: "1px solid #A7F3D0", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>✉ Send interview invite</button>
+            <button onClick={() => { setInviteResult(null); setInviteModal(true); }} style={{ padding: "12px 18px", background: D.greenBg, color: D.green, border: `1px solid ${D.greenBorder}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>✉ Send interview invite</button>
             {status === "complete" && !candidate.outcome && (
               <>
                 <button onClick={() => setOutcome("offer")} disabled={outcomeSaving} style={{ padding: "12px 18px", background: "#16A34A", color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Mark offer</button>
-                <button onClick={() => setOutcome("rejected")} disabled={outcomeSaving} style={{ padding: "12px 18px", background: "#fff", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Mark rejected</button>
+                <button onClick={() => setOutcome("rejected")} disabled={outcomeSaving} style={{ padding: "12px 18px", background: D.cardBg, color: D.red, border: `1px solid ${D.redBorder}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Mark rejected</button>
               </>
             )}
-            <button onClick={del} style={{ marginLeft: "auto", padding: "12px 18px", background: "#fff", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>🗑 Delete</button>
+            <button onClick={del} style={{ marginLeft: "auto", padding: "12px 18px", background: D.cardBg, color: D.red, border: `1px solid ${D.redBorder}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>🗑 Delete</button>
           </div>
         </div>
 
         {/* SIDEBAR */}
         <div className="flex flex-col gap-4" style={{ position: "sticky", top: 16 }}>
           <div style={{ ...cardBox, textAlign: "center" }}>
-            <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 600, marginBottom: 14 }}>{status === "complete" ? "Overall fit score" : "Score so far"}</div>
+            <div style={{ fontSize: 13, color: D.text3, fontWeight: 600, marginBottom: 14 }}>{status === "complete" ? "Overall fit score" : "Score so far"}</div>
             <div className="font-display" style={{ fontSize: 52, fontWeight: 800, letterSpacing: "-2px", lineHeight: 1, color: lane.color }}>{combined}</div>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 6 }}>out of 100</div>
-            <div style={{ height: 8, background: "#F1F2F6", borderRadius: 5, overflow: "hidden", marginTop: 16 }}><div style={{ height: "100%", width: `${combined}%`, background: lane.dot, borderRadius: 5 }} /></div>
+            <div style={{ fontSize: 13, color: D.text4, marginTop: 6 }}>out of 100</div>
+            <div style={{ height: 8, background: D.inset, borderRadius: 5, overflow: "hidden", marginTop: 16 }}><div style={{ height: "100%", width: `${combined}%`, background: lane.dot, borderRadius: 5 }} /></div>
           </div>
 
           {traits && (
             <div style={cardBox}>
-              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>Personality · OCEAN</div>
+              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16, color: D.text }}>Personality · OCEAN</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
                 {[
                   ["Openness", traits.openness, OCEAN_DESC.O],
@@ -672,9 +675,9 @@ export default function CandidateDetail() {
                   ["Emotional stability", traits.emotional_stability ?? 100 - (traits.neuroticism ?? 0), OCEAN_DESC.ES],
                 ].map(([label, v, descs]) => (
                   <div key={label}>
-                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 5 }}><span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{label}</span><span style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED" }}>{v}</span></div>
-                    <div style={{ height: 7, background: "#F1F2F6", borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${v}%`, background: "linear-gradient(90deg,#A78BFA,#7C3AED)", borderRadius: 5 }} /></div>
-                    <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 4 }}>{v >= 60 ? descs[0] : v >= 40 ? descs[1] : descs[2]}</div>
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 5 }}><span style={{ fontSize: 13, fontWeight: 600, color: D.text2 }}>{label}</span><span style={{ fontSize: 13, fontWeight: 700, color: "#7C3AED" }}>{v}</span></div>
+                    <div style={{ height: 7, background: D.inset, borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${v}%`, background: "linear-gradient(90deg,#A78BFA,#7C3AED)", borderRadius: 5 }} /></div>
+                    <div style={{ fontSize: 12, color: D.text4, marginTop: 4 }}>{v >= 60 ? descs[0] : v >= 40 ? descs[1] : descs[2]}</div>
                   </div>
                 ))}
               </div>
@@ -683,12 +686,12 @@ export default function CandidateDetail() {
 
           {bd && (
             <div style={cardBox}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#047857", marginBottom: 10 }}>✓ Strengths</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 18 }}>{(bd.strengths || []).map((x, i) => <div key={i} style={{ fontSize: 13, color: "#4B5563", lineHeight: 1.45 }}>• {x}</div>)}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#B45309", marginBottom: 10 }}>⚠ Risks</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 18 }}>{(bd.risks || []).length ? bd.risks.map((x, i) => <div key={i} style={{ fontSize: 13, color: "#4B5563", lineHeight: 1.45 }}>• {x}</div>) : <div style={{ fontSize: 13, color: "#9AA0AE" }}>None flagged.</div>}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#6B7280", marginBottom: 10 }}>? Missing evidence</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>{(bd.missing_evidence || []).length ? bd.missing_evidence.map((x, i) => <div key={i} style={{ fontSize: 13, color: "#4B5563", lineHeight: 1.45 }}>• {x}</div>) : <div style={{ fontSize: 13, color: "#9AA0AE" }}>Nothing outstanding.</div>}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: D.green, marginBottom: 10 }}>✓ Strengths</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 18 }}>{(bd.strengths || []).map((x, i) => <div key={i} style={{ fontSize: 13, color: D.text2, lineHeight: 1.45 }}>• {x}</div>)}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: D.amber, marginBottom: 10 }}>⚠ Risks</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 18 }}>{(bd.risks || []).length ? bd.risks.map((x, i) => <div key={i} style={{ fontSize: 13, color: D.text2, lineHeight: 1.45 }}>• {x}</div>) : <div style={{ fontSize: 13, color: D.text4 }}>None flagged.</div>}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: D.text3, marginBottom: 10 }}>? Missing evidence</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>{(bd.missing_evidence || []).length ? bd.missing_evidence.map((x, i) => <div key={i} style={{ fontSize: 13, color: D.text2, lineHeight: 1.45 }}>• {x}</div>) : <div style={{ fontSize: 13, color: D.text4 }}>Nothing outstanding.</div>}</div>
             </div>
           )}
         </div>

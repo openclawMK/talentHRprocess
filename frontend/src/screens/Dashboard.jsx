@@ -4,26 +4,15 @@ import axios from "axios";
 import Modal from "../components/Modal.jsx";
 import { displayLane, round } from "../lib/format.js";
 import { candidateStages } from "../lib/pipeline.js";
+import { usePalette } from "../context/ThemeContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
-const cardBox = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
 const AVATARS = [
   "linear-gradient(135deg,#6366F1,#7C3AED)", "linear-gradient(135deg,#0EA5E9,#6366F1)",
   "linear-gradient(135deg,#059669,#0EA5E9)", "linear-gradient(135deg,#F59E0B,#EF4444)",
   "linear-gradient(135deg,#EC4899,#7C3AED)", "linear-gradient(135deg,#14B8A6,#059669)",
 ];
-const LANE = {
-  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0", dot: "#059669", label: "Strong" },
-  amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A", dot: "#D97706", label: "Review" },
-  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA", dot: "#DC2626", label: "Likely no" },
-  in_progress: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB", dot: "#9CA3AF", label: "In progress" },
-};
 const STAGE_LABEL = { cv_submission: "CV review", ocean_assessment: "OCEAN", interview: "Interview", offer: "Ready / offer" };
-const BUDGET_COLORS = {
-  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" }, amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A" },
-  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" }, blue: { color: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE" },
-  neutral: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
-};
 const FUNNEL = [
   { key: "cv_submission", label: "CV review" },
   { key: "ocean_assessment", label: "OCEAN" },
@@ -50,6 +39,19 @@ function shortStage(candidate, job) {
 export default function Dashboard() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const D = usePalette();
+  const cardBox = { background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16 };
+  const LANE = {
+    green: { color: D.green, bg: D.greenBg, border: D.greenBorder, dot: D.green, label: "Strong" },
+    amber: { color: D.amber, bg: D.amberBg, border: D.amberBorder, dot: D.amber, label: "Review" },
+    red: { color: D.red, bg: D.redBg, border: D.redBorder, dot: D.red, label: "Likely no" },
+    in_progress: { color: D.text3, bg: D.pillBg, border: D.border, dot: D.text4, label: "In progress" },
+  };
+  const BUDGET_COLORS = {
+    green: { color: D.green, bg: D.greenBg, border: D.greenBorder }, amber: { color: D.amber, bg: D.amberBg, border: D.amberBorder },
+    red: { color: D.red, bg: D.redBg, border: D.redBorder }, blue: { color: D.blue, bg: "#EFF6FF", border: "#BFDBFE" },
+    neutral: { color: D.text3, bg: D.pillBg, border: D.border },
+  };
   const [candidates, setCandidates] = useState(null);
   const [job, setJob] = useState(null);
   const [filter, setFilter] = useState("all");
@@ -199,31 +201,31 @@ export default function Dashboard() {
   const visible = merged.filter((c) => filter === "all" || displayLane(c.score) === filter);
 
   const stats = [
-    { label: "Applicants", value: analytics?.total_applicants ?? merged.length, color: "#111827" },
-    { label: "Green", value: counts.green, color: "#059669" },
-    { label: "Amber", value: counts.amber, color: "#D97706" },
-    { label: "Red", value: counts.red, color: "#DC2626" },
-    { label: "Avg score", value: analytics?.avg_score ?? 0, color: "#4F46E5" },
+    { label: "Applicants", value: analytics?.total_applicants ?? merged.length, color: D.text },
+    { label: "Green", value: counts.green, color: D.green },
+    { label: "Amber", value: counts.amber, color: D.amber },
+    { label: "Red", value: counts.red, color: D.red },
+    { label: "Avg score", value: analytics?.avg_score ?? 0, color: D.blue },
   ];
   const funMax = Math.max(1, ...FUNNEL.map((f) => analytics?.by_stage?.[f.key] ?? 0));
 
   return (
     <div className="pb-8">
-      <div onClick={() => navigate("/")} style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to dashboard</div>
+      <div onClick={() => navigate("/")} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to dashboard</div>
 
       {/* header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 22 }} className="flex-wrap">
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-            <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: 0 }}>{job?.role_title || "Role"}</h1>
-            <span style={{ fontSize: 15, color: "#9AA0AE", fontWeight: 500 }}>{merged.length} candidate{merged.length === 1 ? "" : "s"}</span>
+            <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: 0, color: D.text }}>{job?.role_title || "Role"}</h1>
+            <span style={{ fontSize: 15, color: D.text4, fontWeight: 500 }}>{merged.length} candidate{merged.length === 1 ? "" : "s"}</span>
           </div>
-          <div style={{ fontSize: 14, color: "#6B7280", marginTop: 6 }}>{job?.industry} · {job?.location}</div>
+          <div style={{ fontSize: 14, color: D.text3, marginTop: 6 }}>{job?.industry} · {job?.location}</div>
         </div>
         <div style={{ display: "flex", gap: 10 }} className="flex-wrap">
           <button onClick={() => navigate(`/jobs/${jobId}/success-profile`)} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: "linear-gradient(135deg,#F5F3FF,#EDE9FE)", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>◎ Success Profile</button>
           <button onClick={() => { setWaResult(null); setWaModal(true); }} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: "#16A34A", color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(22,163,74,.25)" }}>💬 Send via WhatsApp</button>
-          <button onClick={copyLink} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: copied ? "#ECFDF5" : "#fff", color: copied ? "#047857" : "#374151", border: `1px solid ${copied ? "#A7F3D0" : "#E2E4EC"}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{copied ? "✓ Link copied" : "🔗 Copy link"}</button>
+          <button onClick={copyLink} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 16px", background: copied ? D.greenBg : D.cardBg, color: copied ? D.green : D.text2, border: `0.5px solid ${copied ? D.greenBorder : D.border}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>{copied ? "✓ Link copied" : "🔗 Copy link"}</button>
         </div>
       </div>
 
@@ -274,7 +276,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-5" style={{ marginBottom: 16 }}>
         {stats.map((s) => (
           <div key={s.label} style={{ ...cardBox, borderRadius: 14, padding: "16px 18px" }}>
-            <div style={{ fontSize: 13, color: "#6B7280", fontWeight: 500, marginBottom: 8 }}>{s.label}</div>
+            <div style={{ fontSize: 13, color: D.text3, fontWeight: 500, marginBottom: 8 }}>{s.label}</div>
             <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-1px", lineHeight: 1, color: s.color }}>{s.value}</div>
           </div>
         ))}
@@ -285,15 +287,15 @@ export default function Dashboard() {
         const b = salary.benchmark; const bv = salary.budget_vs_market; const bc = bv ? (BUDGET_COLORS[bv.lane] || BUDGET_COLORS.neutral) : null;
         return (
           <div style={{ ...cardBox, borderRadius: 14, padding: "16px 20px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }} className="flex-wrap">
-            <div style={{ width: 42, height: 42, borderRadius: 12, background: "#ECFDF5", color: "#047857", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>💰</div>
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: D.greenBg, color: D.green, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>💰</div>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".4px" }}>Market rate · {b.category} · {b.region}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#111827", marginTop: 3 }}>{b.range_label} <span style={{ fontSize: 13, color: "#9AA0AE", fontWeight: 600 }}>· median {b.median_label}/mo</span></div>
-              <div style={{ fontSize: 11.5, color: "#9AA0AE", marginTop: 3 }}>{b.estimated ? "Indicative estimate" : "Market data"} — Sources: {b.source_short}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: D.text3, textTransform: "uppercase", letterSpacing: ".4px" }}>Market rate · {b.category} · {b.region}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: D.text, marginTop: 3 }}>{b.range_label} <span style={{ fontSize: 13, color: D.text4, fontWeight: 600 }}>· median {b.median_label}/mo</span></div>
+              <div style={{ fontSize: 11.5, color: D.text4, marginTop: 3 }}>{b.estimated ? "Indicative estimate" : "Market data"} — Sources: {b.source_short}</div>
             </div>
             {bv && (
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 12, color: "#9AA0AE", fontWeight: 600, marginBottom: 4 }}>Your budget max</div>
+                <div style={{ fontSize: 12, color: D.text4, fontWeight: 600, marginBottom: 4 }}>Your budget max</div>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: bc.color, background: bc.bg, border: `1px solid ${bc.border}`, padding: "5px 12px", borderRadius: 20 }}>{bv.label} ({bv.pct_diff >= 0 ? "+" : ""}{bv.pct_diff}%)</span>
               </div>
             )}
@@ -310,11 +312,11 @@ export default function Dashboard() {
             const bottleneck = n === funMax && funMax > 0;
             return (
               <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 120 }}>
-                <div style={{ flex: 1, borderRadius: 11, padding: "12px 14px", textAlign: "center", background: bottleneck ? "#FFFBEB" : "#FAFAFC", border: bottleneck ? "1px solid #FDE68A" : "1px solid transparent" }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1, color: bottleneck ? "#B45309" : "#4F46E5" }}>{n}</div>
-                  <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600, marginTop: 5 }}>{f.label}</div>
+                <div style={{ flex: 1, borderRadius: 11, padding: "12px 14px", textAlign: "center", background: bottleneck ? D.amberBg : D.inset, border: bottleneck ? `1px solid ${D.amberBorder}` : "1px solid transparent" }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1, color: bottleneck ? D.amber : D.blue }}>{n}</div>
+                  <div style={{ fontSize: 12, color: D.text3, fontWeight: 600, marginTop: 5 }}>{f.label}</div>
                 </div>
-                {i < FUNNEL.length - 1 && <span style={{ color: "#C4C7D2", fontSize: 15 }}>→</span>}
+                {i < FUNNEL.length - 1 && <span style={{ color: D.text5, fontSize: 15 }}>→</span>}
               </div>
             );
           })}
@@ -325,33 +327,33 @@ export default function Dashboard() {
       {pipeline && (
         <div style={{ ...cardBox, borderRadius: 14, padding: 22, marginBottom: 20 }}>
           <div onClick={() => setShowPipeline((v) => !v)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ color: "#7C3AED", fontSize: 16 }}>≡</span><span style={{ fontSize: 15, fontWeight: 700 }}>Pipeline setup</span></div>
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ color: "#7C3AED", fontSize: 16 }}>≡</span><span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Pipeline setup</span></div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 12.5, fontWeight: 600, color: "#9AA0AE" }}>{Object.entries(pipeline.source_shares || {}).map(([k, v]) => `${k.toUpperCase()} ${Math.round(v * 100)}%`).join(" · ")}</span>
-              <span style={{ fontSize: 12, color: "#B6B9C6" }}>{showPipeline ? "▲" : "▼"}</span>
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: D.text4 }}>{Object.entries(pipeline.source_shares || {}).map(([k, v]) => `${k.toUpperCase()} ${Math.round(v * 100)}%`).join(" · ")}</span>
+              <span style={{ fontSize: 12, color: D.text5 }}>{showPipeline ? "▲" : "▼"}</span>
             </div>
           </div>
           {showPipeline && (
             <div style={{ marginTop: 14 }}>
-              <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 14 }}>Turn stages on or off. Disabled stages drop out of scoring and their weight is redistributed.</div>
+              <div style={{ fontSize: 13, color: D.text4, marginBottom: 14 }}>Turn stages on or off. Disabled stages drop out of scoring and their weight is redistributed.</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {pipeline.stages.map((s) => {
                   const meta = { cv_submission: "CV submission", ocean_assessment: "OCEAN assessment", interview: "Interview", offer: "Offer" }[s.key];
                   return (
-                    <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "13px 14px", background: "#FAFAFC", borderRadius: 11 }}>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: "#374151" }}>{meta}</span>
-                      {s.locked && <span style={{ fontSize: 13, color: "#B6B9C6" }}>always on</span>}
-                      <button onClick={() => toggleStage(s.key)} disabled={s.locked || savingStage === s.key} style={{ marginLeft: "auto", position: "relative", height: 22, width: 40, borderRadius: 999, background: s.enabled ? "#7C3AED" : "#D6D8E3", opacity: s.locked ? 0.5 : 1, border: "none", cursor: s.locked ? "default" : "pointer" }}>
+                    <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 10, padding: "13px 14px", background: D.inset, borderRadius: 11 }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: D.text2 }}>{meta}</span>
+                      {s.locked && <span style={{ fontSize: 13, color: D.text5 }}>always on</span>}
+                      <button onClick={() => toggleStage(s.key)} disabled={s.locked || savingStage === s.key} style={{ marginLeft: "auto", position: "relative", height: 22, width: 40, borderRadius: 999, background: s.enabled ? "#7C3AED" : D.border, opacity: s.locked ? 0.5 : 1, border: "none", cursor: s.locked ? "default" : "pointer" }}>
                         <span style={{ position: "absolute", top: 3, left: s.enabled ? 21 : 3, height: 16, width: 16, borderRadius: "50%", background: "#fff", transition: "left .15s" }} />
                       </button>
                     </div>
                   );
                 })}
               </div>
-              <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "16px 14px 2px", borderTop: "1px solid #F1F2F6", marginTop: 14 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "16px 14px 2px", borderTop: `0.5px solid ${D.hair}`, marginTop: 14 }}>
                 <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ color: "#16A34A", fontSize: 15 }}>💬</span><span style={{ fontSize: 15, fontWeight: 700 }}>WhatsApp HR alerts</span></div>
-                  <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: 4 }}>Get a WhatsApp ping when a strong candidate (score ≥ green) applies.</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ color: "#16A34A", fontSize: 15 }}>💬</span><span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>WhatsApp HR alerts</span></div>
+                  <div style={{ fontSize: 13, color: D.text4, marginTop: 4 }}>Get a WhatsApp ping when a strong candidate (score ≥ green) applies.</div>
                   {hrAlerts && (
                     <div className="mt-2 flex items-center gap-2">
                       <input value={hrPhone} onChange={(e) => setHrPhone(e.target.value)} placeholder="Your phone e.g. 012-345 6789" className="flex-1 rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:outline-none" />
@@ -359,7 +361,7 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
-                <button onClick={() => { const v = !hrAlerts; setHrAlerts(v); saveHrAlerts(v, hrPhone); }} style={{ position: "relative", height: 22, width: 40, borderRadius: 999, background: hrAlerts ? "#16A34A" : "#D6D8E3", border: "none", cursor: "pointer" }}>
+                <button onClick={() => { const v = !hrAlerts; setHrAlerts(v); saveHrAlerts(v, hrPhone); }} style={{ position: "relative", height: 22, width: 40, borderRadius: 999, background: hrAlerts ? "#16A34A" : D.border, border: "none", cursor: "pointer" }}>
                   <span style={{ position: "absolute", top: 3, left: hrAlerts ? 21 : 3, height: 16, width: 16, borderRadius: "50%", background: "#fff", transition: "left .15s" }} />
                 </button>
               </div>
@@ -371,15 +373,15 @@ export default function Dashboard() {
       {/* interview slots */}
       <div style={{ ...cardBox, borderRadius: 14, padding: 22, marginBottom: 20 }}>
         <div onClick={() => setShowSlots((v) => !v)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ color: "#7C3AED", fontSize: 16 }}>🗓</span><span style={{ fontSize: 15, fontWeight: 700 }}>Interview slots</span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ color: "#7C3AED", fontSize: 16 }}>🗓</span><span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Interview slots</span></div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {slots && <span style={{ fontSize: 12.5, fontWeight: 600, color: "#9AA0AE" }}>{slots.filter((s) => !s.candidate_id).length} open · {slots.filter((s) => s.candidate_id).length} booked</span>}
-            <span style={{ fontSize: 12, color: "#B6B9C6" }}>{showSlots ? "▲" : "▼"}</span>
+            {slots && <span style={{ fontSize: 12.5, fontWeight: 600, color: D.text4 }}>{slots.filter((s) => !s.candidate_id).length} open · {slots.filter((s) => s.candidate_id).length} booked</span>}
+            <span style={{ fontSize: 12, color: D.text5 }}>{showSlots ? "▲" : "▼"}</span>
           </div>
         </div>
         {showSlots && (
           <div style={{ marginTop: 14 }}>
-            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 14 }}>Add open interview times, then send a candidate a booking link from their profile so they can pick one themselves.</div>
+            <div style={{ fontSize: 13, color: D.text4, marginBottom: 14 }}>Add open interview times, then send a candidate a booking link from their profile so they can pick one themselves.</div>
             <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 16 }}>
               <label className="block"><span className="mb-1 block text-xs font-medium text-gray-600">Date</span><input type="date" value={newSlotDate} onChange={(e) => setNewSlotDate(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm" /></label>
               <label className="block"><span className="mb-1 block text-xs font-medium text-gray-600">Time</span><input type="time" value={newSlotTime} onChange={(e) => setNewSlotTime(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm" /></label>
@@ -391,26 +393,26 @@ export default function Dashboard() {
             </div>
             {slotError && <p className="mb-3 text-sm text-red-600">{slotError}</p>}
             {slots === null ? (
-              <div style={{ fontSize: 13, color: "#9AA0AE" }}>Loading…</div>
+              <div style={{ fontSize: 13, color: D.text4 }}>Loading…</div>
             ) : slots.length === 0 ? (
-              <div style={{ fontSize: 13, color: "#9AA0AE" }}>No interview slots yet — add one above.</div>
+              <div style={{ fontSize: 13, color: D.text4 }}>No interview slots yet — add one above.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 {slots.map((s) => {
                   const d = new Date(s.start);
                   const label = d.toLocaleString("en-MY", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" });
                   return (
-                    <div key={s.slot_id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#FAFAFC", borderRadius: 11 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 600, color: "#374151", minWidth: 190 }}>{label} · {s.duration_minutes}min</span>
+                    <div key={s.slot_id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: D.inset, borderRadius: 11 }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 600, color: D.text2, minWidth: 190 }}>{label} · {s.duration_minutes}min</span>
                       {s.candidate_id ? (
                         <>
-                          <span style={{ fontSize: 12, fontWeight: 700, color: "#047857", background: "#ECFDF5", border: "1px solid #A7F3D0", padding: "3px 10px", borderRadius: 20 }}>Booked · {s.candidate_name}</span>
-                          <button onClick={() => cancelSlot(s.slot_id)} style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 600, color: "#B91C1C", background: "none", border: "none", cursor: "pointer" }}>Cancel booking</button>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: D.green, background: D.greenBg, border: `1px solid ${D.greenBorder}`, padding: "3px 10px", borderRadius: 20 }}>Booked · {s.candidate_name}</span>
+                          <button onClick={() => cancelSlot(s.slot_id)} style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 600, color: D.red, background: "none", border: "none", cursor: "pointer" }}>Cancel booking</button>
                         </>
                       ) : (
                         <>
                           <span style={{ fontSize: 12, fontWeight: 700, color: "#6D28D9", background: "#F5F3FF", border: "1px solid #E9E5FF", padding: "3px 10px", borderRadius: 20 }}>Open</span>
-                          <button onClick={() => deleteSlot(s.slot_id)} style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 600, color: "#9AA0AE", background: "none", border: "none", cursor: "pointer" }}>Remove</button>
+                          <button onClick={() => deleteSlot(s.slot_id)} style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 600, color: D.text4, background: "none", border: "none", cursor: "pointer" }}>Remove</button>
                         </>
                       )}
                     </div>
@@ -426,22 +428,22 @@ export default function Dashboard() {
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }} className="flex-wrap">
         <div style={{ display: "flex", gap: 6 }}>
           {[
-            { k: "all", label: `All ${counts.all}`, on: "#111827", onText: "#fff", bg: "#111827", text: "#fff", border: "transparent" },
-            { k: "green", label: `🟢 Green ${counts.green}`, bg: "#ECFDF5", text: "#047857", border: "#A7F3D0" },
-            { k: "amber", label: `🟡 Amber ${counts.amber}`, bg: "#FFFBEB", text: "#B45309", border: "#FDE68A" },
-            { k: "red", label: `🔴 Red ${counts.red}`, bg: "#FEF2F2", text: "#B91C1C", border: "#FECACA" },
+            { k: "all", label: `All ${counts.all}`, bg: D.text, text: D.page, border: "transparent" },
+            { k: "green", label: `🟢 Green ${counts.green}`, bg: D.greenBg, text: D.green, border: D.greenBorder },
+            { k: "amber", label: `🟡 Amber ${counts.amber}`, bg: D.amberBg, text: D.amber, border: D.amberBorder },
+            { k: "red", label: `🔴 Red ${counts.red}`, bg: D.redBg, text: D.red, border: D.redBorder },
           ].map((p) => {
             const active = filter === p.k;
             return (
-              <span key={p.k} onClick={() => setFilter(p.k)} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: active && p.k === "all" ? "#fff" : p.text || "#374151", background: active ? (p.k === "all" ? "#111827" : p.bg) : (p.k === "all" ? "#F3F4F8" : p.bg), border: `1px solid ${active ? (p.border || "#111827") : (p.k === "all" ? "transparent" : p.border)}`, opacity: active || p.k !== "all" ? 1 : 0.85 }}>{p.label}</span>
+              <span key={p.k} onClick={() => setFilter(p.k)} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: active && p.k === "all" ? p.text : p.text, background: active ? p.bg : (p.k === "all" ? D.inset : p.bg), border: `1px solid ${active ? p.border : (p.k === "all" ? "transparent" : p.border)}`, opacity: active || p.k !== "all" ? 1 : 0.85 }}>{p.label}</span>
             );
           })}
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           <span onClick={loadBestMatch} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: showBm ? "#fff" : "#6D28D9", background: showBm ? "linear-gradient(135deg,#8B5CF6,#7C3AED)" : "#F5F3FF", border: "1px solid #E9E5FF" }}>✨ Best match</span>
           <span onClick={() => { setCompareMode((v) => !v); setSelected([]); }} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: compareMode ? "#fff" : "#4338CA", background: compareMode ? GRAD : "#EEF2FF" }}>{compareMode ? "Cancel compare" : "⇄ Compare"}</span>
-          <span onClick={() => { setBulkMode((v) => !v); setBulkSelected([]); setBulkResult(null); }} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: bulkMode ? "#fff" : "#374151", background: bulkMode ? "#111827" : "#F3F4F8" }}>{bulkMode ? "Cancel bulk actions" : "☑ Bulk actions"}</span>
-          <span style={{ fontSize: 13, color: "#6B7280" }}>Sorted by <b style={{ color: "#374151" }}>Score ↓</b></span>
+          <span onClick={() => { setBulkMode((v) => !v); setBulkSelected([]); setBulkResult(null); }} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: bulkMode ? D.page : D.text2, background: bulkMode ? D.text : D.inset }}>{bulkMode ? "Cancel bulk actions" : "☑ Bulk actions"}</span>
+          <span style={{ fontSize: 13, color: D.text3 }}>Sorted by <b style={{ color: D.text2 }}>Score ↓</b></span>
         </div>
       </div>
 
@@ -466,7 +468,7 @@ export default function Dashboard() {
                 <div style={{ display: "flex", alignItems: "center", gap: 14, background: "#fff", border: "1px solid #E4DBFB", borderRadius: 13, padding: "14px 16px", marginBottom: 12 }} className="flex-wrap">
                   <span style={{ fontSize: 22 }}>🏆</span>
                   <div style={{ flex: 1, minWidth: 180 }}>
-                    <div style={{ fontSize: 15, fontWeight: 800 }}>{top.name}</div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "#1F2430" }}>{top.name}</div>
                     <div style={{ fontSize: 12.5, color: "#6B7280" }}>Score {round(top.score)} · Fit {top.fit != null ? `${top.fit}%` : "—"}{top.expected_salary ? ` · asks RM${top.expected_salary.toLocaleString()}` : ""}</div>
                   </div>
                   <button onClick={() => navigate(`/jobs/${jobId}/candidate/${top.candidate_id}`)} style={{ padding: "9px 14px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Open profile →</button>
@@ -478,7 +480,7 @@ export default function Dashboard() {
                     return (
                       <div key={r.candidate_id} onClick={() => navigate(`/jobs/${jobId}/candidate/${r.candidate_id}`)} style={{ display: "flex", alignItems: "center", gap: 12, background: "#fff", borderRadius: 11, padding: "10px 14px", cursor: "pointer", border: "1px solid #F0EDFA" }} className="flex-wrap">
                         <span style={{ width: 22, height: 22, borderRadius: "50%", background: i === 0 ? "#7C3AED" : "#EDE9FE", color: i === 0 ? "#fff" : "#6D28D9", fontSize: 12, fontWeight: 800, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{i + 1}</span>
-                        <span style={{ fontSize: 14, fontWeight: 700, minWidth: 120 }}>{r.name}</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, minWidth: 120, color: "#1F2430" }}>{r.name}</span>
                         <span style={{ fontSize: 12.5, color: "#6B7280" }}>Score {round(r.score)} · Fit {r.fit != null ? `${r.fit}%` : "—"} · {r.experience_years != null ? `${r.experience_years} yrs` : "—"}{r.expected_salary ? ` · RM${r.expected_salary.toLocaleString()}` : ""}</span>
                         {r.budget_label && r.budget_status !== "unknown" && <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, color: bc.color, background: bc.bg, border: `1px solid ${bc.border}` }}>{r.budget_label}</span>}
                         {r.market_label && r.market_status !== "unknown" && (() => { const mc = BUDGET_COLORS[{ within: "green", below: "blue", above: "amber" }[r.market_status]] || BUDGET_COLORS.neutral; return <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 9px", borderRadius: 20, color: mc.color, background: mc.bg, border: `1px solid ${mc.border}` }}>{r.market_label}</span>; })()}
@@ -496,17 +498,17 @@ export default function Dashboard() {
 
       {/* bulk actions bar */}
       {bulkMode && (
-        <div style={{ display: "flex", alignItems: "center", gap: 14, background: "#F3F4F8", border: "1px solid #E2E4EC", borderRadius: 12, padding: "12px 18px", marginBottom: 14 }} className="flex-wrap">
-          <span style={{ fontSize: 14, color: "#111827", fontWeight: 700 }}>{bulkSelected.length} selected</span>
-          <span style={{ fontSize: 13, color: "#6B7280" }}>Tick candidates, then advance or reject them all at once.</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 12, padding: "12px 18px", marginBottom: 14 }} className="flex-wrap">
+          <span style={{ fontSize: 14, color: D.text, fontWeight: 700 }}>{bulkSelected.length} selected</span>
+          <span style={{ fontSize: 13, color: D.text3 }}>Tick candidates, then advance or reject them all at once.</span>
           <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
-            <button onClick={() => runBulkOutcome("rejected")} disabled={bulkSelected.length === 0 || bulkBusy} style={{ padding: "9px 16px", background: "#fff", color: "#B91C1C", border: "1px solid #FECACA", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: bulkSelected.length ? "pointer" : "default", opacity: bulkSelected.length ? 1 : 0.5 }}>{bulkBusy ? "Working…" : "Reject selected"}</button>
+            <button onClick={() => runBulkOutcome("rejected")} disabled={bulkSelected.length === 0 || bulkBusy} style={{ padding: "9px 16px", background: D.cardBg, color: D.red, border: `1px solid ${D.redBorder}`, borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: bulkSelected.length ? "pointer" : "default", opacity: bulkSelected.length ? 1 : 0.5 }}>{bulkBusy ? "Working…" : "Reject selected"}</button>
             <button onClick={() => runBulkOutcome("offer")} disabled={bulkSelected.length === 0 || bulkBusy} style={{ padding: "9px 16px", background: "#16A34A", color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: bulkSelected.length ? "pointer" : "default", opacity: bulkSelected.length ? 1 : 0.5 }}>{bulkBusy ? "Working…" : "Advance to offer"}</button>
           </div>
         </div>
       )}
       {bulkResult && (
-        <div style={{ background: bulkResult.error ? "#FEF2F2" : "#ECFDF5", border: `1px solid ${bulkResult.error ? "#FECACA" : "#A7F3D0"}`, color: bulkResult.error ? "#B91C1C" : "#047857", borderRadius: 12, padding: "12px 16px", marginBottom: 14, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ background: bulkResult.error ? D.redBg : D.greenBg, border: `1px solid ${bulkResult.error ? D.redBorder : D.greenBorder}`, color: bulkResult.error ? D.red : D.green, borderRadius: 12, padding: "12px 16px", marginBottom: 14, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span>
             {bulkResult.error
               ? bulkResult.error
@@ -529,12 +531,12 @@ export default function Dashboard() {
       {candidates === null ? (
         <div style={{ ...cardBox, height: 240 }} className="animate-pulse" />
       ) : visible.length === 0 ? (
-        <div style={{ ...cardBox, padding: 40, textAlign: "center", color: "#9AA0AE" }}>
-          {merged.length === 0 ? <>No candidates yet. <span onClick={copyLink} style={{ color: "#6366F1", fontWeight: 600, cursor: "pointer" }}>Copy the application link →</span></> : "No candidates in this lane."}
+        <div style={{ ...cardBox, padding: 40, textAlign: "center", color: D.text4 }}>
+          {merged.length === 0 ? <>No candidates yet. <span onClick={copyLink} style={{ color: D.blue, fontWeight: 600, cursor: "pointer" }}>Copy the application link →</span></> : "No candidates in this lane."}
         </div>
       ) : (
         <div style={{ ...cardBox, overflow: "hidden" }}>
-          <div className="hidden md:grid" style={{ gridTemplateColumns: "1fr 150px 130px 140px 36px", gap: 16, padding: "13px 22px", background: "#FAFAFC", borderBottom: "1px solid #ECEDF2", fontSize: 12, fontWeight: 700, color: "#9AA0AE", letterSpacing: ".4px", textTransform: "uppercase" }}>
+          <div className="hidden md:grid" style={{ gridTemplateColumns: "1fr 150px 130px 140px 36px", gap: 16, padding: "13px 22px", background: D.inset, borderBottom: `0.5px solid ${D.border}`, fontSize: 12, fontWeight: 700, color: D.text4, letterSpacing: ".4px", textTransform: "uppercase" }}>
             <div>Candidate</div><div>AI score</div><div>Lane</div><div>Stage</div><div></div>
           </div>
           {visible.map((c) => {
@@ -546,14 +548,14 @@ export default function Dashboard() {
             const loc = c.profile?.contact?.location?.split(",")[0] || "—";
             return (
               <div key={c.candidate_id} onClick={() => bulkMode ? toggleBulkSel(c.candidate_id) : compareMode ? toggleSel(c.candidate_id) : navigate(`/jobs/${jobId}/candidate/${c.candidate_id}`)}
-                className="grid items-center md:!grid-cols-[1fr_150px_130px_140px_36px]" style={{ gridTemplateColumns: "1fr auto", gap: 16, padding: "15px 22px", borderBottom: "1px solid #F1F2F6", cursor: "pointer", background: bulkSel ? "#F3F4F8" : sel ? "#F5F3FF" : "#fff" }}>
+                className="grid items-center md:!grid-cols-[1fr_150px_130px_140px_36px]" style={{ gridTemplateColumns: "1fr auto", gap: 16, padding: "15px 22px", borderBottom: `0.5px solid ${D.hair}`, cursor: "pointer", background: bulkSel ? D.inset : sel ? "#F5F3FF" : "transparent" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 13, minWidth: 0 }}>
-                  {compareMode && <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${sel ? "#7C3AED" : "#D6D8E3"}`, background: sel ? "#7C3AED" : "#fff", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{sel ? "✓" : ""}</div>}
-                  {bulkMode && <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${bulkSel ? "#111827" : "#D6D8E3"}`, background: bulkSel ? "#111827" : "#fff", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{bulkSel ? "✓" : ""}</div>}
+                  {compareMode && <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${sel ? "#7C3AED" : D.border}`, background: sel ? "#7C3AED" : "transparent", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{sel ? "✓" : ""}</div>}
+                  {bulkMode && <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${bulkSel ? D.text : D.border}`, background: bulkSel ? D.text : "transparent", color: D.page, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{bulkSel ? "✓" : ""}</div>}
                   <div style={{ width: 40, height: 40, borderRadius: 11, background: avatarFor(c.profile?.name), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{initials(c.profile?.name)}</div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.profile?.name || "Unnamed"}</div>
-                    <div style={{ fontSize: 13, color: "#9AA0AE" }}>{years} yrs · {loc}</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: D.text }}>{c.profile?.name || "Unnamed"}</div>
+                    <div style={{ fontSize: 13, color: D.text4 }}>{years} yrs · {loc}</div>
                   </div>
                 </div>
                 {/* mobile-only compact score + lane (hidden from md up) */}
@@ -565,15 +567,15 @@ export default function Dashboard() {
                 </div>
                 <div className="hidden items-center gap-2 md:flex">
                   <span style={{ fontSize: 17, fontWeight: 800, color: lane.color }}>{score}</span>
-                  <div style={{ flex: 1, height: 6, background: "#F1F2F6", borderRadius: 4, overflow: "hidden" }}><div style={{ height: "100%", width: `${score}%`, background: lane.dot, borderRadius: 4 }} /></div>
+                  <div style={{ flex: 1, height: 6, background: D.inset, borderRadius: 4, overflow: "hidden" }}><div style={{ height: "100%", width: `${score}%`, background: lane.dot, borderRadius: 4 }} /></div>
                 </div>
                 <div className="hidden md:block">
                   <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: lane.color, background: lane.bg, border: `1px solid ${lane.border}`, padding: "4px 10px", borderRadius: 20 }}>
                     <span style={{ width: 7, height: 7, borderRadius: "50%", background: lane.dot }} />{lane.label}
                   </span>
                 </div>
-                <div className="hidden text-sm font-medium md:block" style={{ color: "#4B5563" }}>{shortStage(c, job)}</div>
-                <div className="hidden text-right md:block" style={{ color: "#C4C7D2", fontSize: 18 }}>›</div>
+                <div className="hidden text-sm font-medium md:block" style={{ color: D.text2 }}>{shortStage(c, job)}</div>
+                <div className="hidden text-right md:block" style={{ color: D.text5, fontSize: 18 }}>›</div>
               </div>
             );
           })}
