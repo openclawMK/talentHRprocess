@@ -108,6 +108,85 @@ router.post("/assessment/:candidateId/ocean", async (req, res) => {
 });
 
 /**
+ * GET /api/interview-booking/:candidateId — public lookup for the candidate's
+ * self-serve interview booking page. Exposes only open slots for their role
+ * (plus whichever slot they've already booked) — never other candidates' data.
+ */
+router.get("/interview-booking/:candidateId", (req, res) => {
+  try {
+    const candidate = readJSON(CANDIDATES_PATH).find((c) => c.candidate_id === req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "This booking link is invalid or has expired." });
+    const job = readJSON(JOBS_PATH).find((j) => j.job_id === candidate.job_id);
+    if (!job) return res.status(404).json({ error: "This role is no longer available." });
+
+    const now = Date.now();
+    const slots = (job.interview_slots || [])
+      .filter((s) => new Date(s.start).getTime() > now)
+      .filter((s) => !s.candidate_id || s.candidate_id === candidate.candidate_id)
+      .sort((a, b) => new Date(a.start) - new Date(b.start))
+      .map((s) => ({ slot_id: s.slot_id, start: s.start, duration_minutes: s.duration_minutes, booked_by_me: s.candidate_id === candidate.candidate_id }));
+
+    res.json({
+      name: candidate.profile?.name || "there",
+      role_title: job.role_title,
+      company_name: job.company?.name || null,
+      slots,
+      my_booking: slots.find((s) => s.booked_by_me) || null,
+    });
+  } catch (err) {
+    console.error("interview-booking lookup error:", err);
+    res.status(500).json({ error: "Couldn't load this booking page. Please try again." });
+  }
+});
+
+/**
+ * POST /api/interview-booking/:candidateId/book  { slot_id }
+ * Books an open slot for the candidate, releasing any earlier slot they held
+ * for this role. Fails with 409 if someone else took it in the meantime.
+ */
+router.post("/interview-booking/:candidateId/book", async (req, res) => {
+  try {
+    const { slot_id } = req.body;
+    if (!slot_id) return res.status(400).json({ error: "Missing slot_id." });
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    const candidate = candidates.find((c) => c.candidate_id === req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "This booking link is invalid or has expired." });
+
+    const jobs = readJSON(JOBS_PATH);
+    const jobIdx = jobs.findIndex((j) => j.job_id === candidate.job_id);
+    if (jobIdx === -1) return res.status(404).json({ error: "This role is no longer available." });
+    const job = jobs[jobIdx];
+
+    const slot = (job.interview_slots || []).find((s) => s.slot_id === slot_id);
+    if (!slot) return res.status(404).json({ error: "That time slot no longer exists." });
+    if (slot.candidate_id && slot.candidate_id !== candidate.candidate_id)
+      return res.status(409).json({ error: "That time was just taken — please pick another." });
+    if (new Date(slot.start).getTime() <= Date.now())
+      return res.status(400).json({ error: "That time has already passed." });
+
+    // Release any earlier slot this candidate held for this role.
+    for (const s of job.interview_slots) {
+      if (s.candidate_id === candidate.candidate_id && s.slot_id !== slot_id) {
+        s.candidate_id = null;
+        s.booked_at = null;
+      }
+    }
+    slot.candidate_id = candidate.candidate_id;
+    slot.booked_at = new Date().toISOString();
+    writeJSON(JOBS_PATH, jobs);
+
+    const when = new Date(slot.start).toLocaleString("en-MY", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kuala_Lumpur" });
+    const result = await notify(candidate.profile?.contact?.phone, "booking_confirmed", { name: candidate.profile?.name, role: job.role_title, when });
+
+    res.json({ ok: true, slot: { slot_id: slot.slot_id, start: slot.start, duration_minutes: slot.duration_minutes }, message_sent: !result.skipped });
+  } catch (err) {
+    console.error("book interview slot error:", err);
+    res.status(500).json({ error: "Failed to book that time." });
+  }
+});
+
+/**
  * GET /api/portal/:token — public role info for the application landing page.
  */
 router.get("/portal/:token", (req, res) => {

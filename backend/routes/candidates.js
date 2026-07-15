@@ -523,6 +523,50 @@ router.post("/candidates/:jobId/:candidateId/send-interview-invite", async (req,
 });
 
 /**
+ * POST /api/candidates/:jobId/:candidateId/send-booking-link  { base_url? }
+ * Sends the candidate a link to self-book one of this role's open interview
+ * slots (set up via /jobs/:jobId/interview-slots). Always returns the link so
+ * HR can copy/share it even if WhatsApp delivery is skipped.
+ */
+router.post("/candidates/:jobId/:candidateId/send-booking-link", async (req, res) => {
+  try {
+    const { base_url } = req.body;
+    const candidates = readJSON(CANDIDATES_PATH);
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const openSlots = (job.interview_slots || []).filter((s) => !s.candidate_id && new Date(s.start).getTime() > Date.now());
+    if (openSlots.length === 0) return res.status(400).json({ error: "No open interview slots for this role yet — add some first." });
+
+    const cand = candidates[idx];
+    const base = (base_url || process.env.FRONTEND_URL || "").replace(/\/$/, "");
+    const url = `${base}/interview-booking/${cand.candidate_id}`;
+
+    const result = await notify(cand.profile?.contact?.phone, "booking_link", {
+      name: cand.profile?.name,
+      role: job.role_title,
+      url,
+    });
+
+    cand.booking_link_sent_at = today();
+    writeJSON(CANDIDATES_PATH, candidates);
+
+    res.json({
+      ok: true,
+      booking_url: url,
+      message_id: result.sid || null,
+      skipped: !!result.skipped,
+      reason: result.reason || result.error || null,
+    });
+  } catch (err) {
+    console.error("send-booking-link error:", err);
+    res.status(500).json({ error: "Failed to send booking link." });
+  }
+});
+
+/**
  * POST /api/candidates/:jobId/:candidateId/send-ocean-test  { base_url? }
  * Builds the candidate's standalone OCEAN assessment link and (if a phone is on
  * file) sends it over WhatsApp. Always returns the link so HR can copy/share it.

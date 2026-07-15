@@ -66,9 +66,12 @@ export default function CandidateDetail() {
   const [noteResult, setNoteResult] = useState(null);
   const [regenLoading, setRegenLoading] = useState(false);
   const [inviteModal, setInviteModal] = useState(false);
+  const [inviteMode, setInviteMode] = useState("fixed"); // fixed | pick
   const [invite, setInvite] = useState({ interview_type: "In-person interview", date: "", time: "" });
   const [inviteSending, setInviteSending] = useState(false);
   const [inviteResult, setInviteResult] = useState(null);
+  const [bookingSending, setBookingSending] = useState(false);
+  const [bookingResult, setBookingResult] = useState(null);
   const [showChat, setShowChat] = useState(false);
   const [chat, setChat] = useState(null);
   const [outcomeSaving, setOutcomeSaving] = useState(false);
@@ -114,6 +117,12 @@ export default function CandidateDetail() {
     try { setInviteResult((await axios.post(`/api/candidates/${jobId}/${candidateId}/send-interview-invite`, invite)).data); }
     catch (e) { setInviteResult({ error: e.response?.data?.error || "Failed to send invite." }); }
     finally { setInviteSending(false); }
+  }
+  async function sendBookingLink() {
+    setBookingSending(true); setBookingResult(null);
+    try { setBookingResult((await axios.post(`/api/candidates/${jobId}/${candidateId}/send-booking-link`, {})).data); }
+    catch (e) { setBookingResult({ error: e.response?.data?.error || "Failed to send booking link." }); }
+    finally { setBookingSending(false); }
   }
   async function setOutcome(outcome) {
     const verb = outcome === "offer" ? "send an OFFER message to" : "send a REJECTION message to";
@@ -688,24 +697,45 @@ export default function CandidateDetail() {
       {/* Invite modal */}
       {inviteModal && (
         <Modal title="Send interview invite via WhatsApp" onClose={() => setInviteModal(false)}>
-          {inviteResult?.ok ? (
-            <div className="text-sm">
-              <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">{inviteResult.skipped ? "WhatsApp isn't configured — logged but not sent." : "Invite sent! ✅ The candidate can reply YES to confirm."}</div>
-              <button onClick={() => { setInviteModal(false); setChat(null); }} className="mt-4 w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white">Done</button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Interview type</span>
-                <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={invite.interview_type} onChange={(e) => setInvite({ ...invite, interview_type: e.target.value })}>
-                  <option>In-person interview</option><option>Phone interview</option><option>Video interview</option><option>Walk-in interview</option>
-                </select></label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Date</span><input type="date" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={invite.date} onChange={(e) => setInvite({ ...invite, date: e.target.value })} /></label>
-                <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Time</span><input type="time" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={invite.time} onChange={(e) => setInvite({ ...invite, time: e.target.value })} /></label>
+          <div className="mb-3 flex gap-2">
+            <button onClick={() => setInviteMode("fixed")} className="rounded-md px-3 py-1.5 text-sm font-medium" style={{ background: inviteMode === "fixed" ? "#111827" : "#F3F4F6", color: inviteMode === "fixed" ? "#fff" : "#374151" }}>Pick a fixed time</button>
+            <button onClick={() => setInviteMode("pick")} className="rounded-md px-3 py-1.5 text-sm font-medium" style={{ background: inviteMode === "pick" ? "#111827" : "#F3F4F6", color: inviteMode === "pick" ? "#fff" : "#374151" }}>Let them pick a time</button>
+          </div>
+
+          {inviteMode === "fixed" ? (
+            inviteResult?.ok ? (
+              <div className="text-sm">
+                <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">{inviteResult.skipped ? "WhatsApp isn't configured — logged but not sent." : "Invite sent! ✅ The candidate can reply YES to confirm."}</div>
+                <button onClick={() => { setInviteModal(false); setChat(null); }} className="mt-4 w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white">Done</button>
               </div>
-              {inviteResult?.error && <p className="text-sm text-red-600">{inviteResult.error}</p>}
-              <button onClick={sendInvite} disabled={inviteSending || !invite.date || !invite.time} className="w-full rounded-md py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: "#16A34A" }}>{inviteSending ? "Sending…" : "Send invite"}</button>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Interview type</span>
+                  <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={invite.interview_type} onChange={(e) => setInvite({ ...invite, interview_type: e.target.value })}>
+                    <option>In-person interview</option><option>Phone interview</option><option>Video interview</option><option>Walk-in interview</option>
+                  </select></label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Date</span><input type="date" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={invite.date} onChange={(e) => setInvite({ ...invite, date: e.target.value })} /></label>
+                  <label className="block"><span className="mb-1 block text-sm font-medium text-gray-700">Time</span><input type="time" className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={invite.time} onChange={(e) => setInvite({ ...invite, time: e.target.value })} /></label>
+                </div>
+                {inviteResult?.error && <p className="text-sm text-red-600">{inviteResult.error}</p>}
+                <button onClick={sendInvite} disabled={inviteSending || !invite.date || !invite.time} className="w-full rounded-md py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: "#16A34A" }}>{inviteSending ? "Sending…" : "Send invite"}</button>
+              </div>
+            )
+          ) : (
+            bookingResult?.ok ? (
+              <div className="text-sm">
+                <div className="rounded-md bg-green-50 px-3 py-2 text-green-700">{bookingResult.skipped ? "WhatsApp isn't configured — logged but not sent." : "Booking link sent! ✅ The candidate can now pick their own time."}</div>
+                <div className="mt-2 break-all rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-500">Link: {bookingResult.booking_url}</div>
+                <button onClick={() => { setInviteModal(false); setBookingResult(null); }} className="mt-4 w-full rounded-md bg-gray-900 py-2 text-sm font-medium text-white">Done</button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600">Sends a link where the candidate picks from this role's open interview slots. Add slots first from the job dashboard's <b>Interview slots</b> section if there aren't any yet.</p>
+                {bookingResult?.error && <p className="text-sm text-red-600">{bookingResult.error}</p>}
+                <button onClick={sendBookingLink} disabled={bookingSending} className="w-full rounded-md py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: "#16A34A" }}>{bookingSending ? "Sending…" : "Send booking link"}</button>
+              </div>
+            )
           )}
         </Modal>
       )}

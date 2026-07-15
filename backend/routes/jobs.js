@@ -524,6 +524,99 @@ router.patch("/jobs/:jobId/pipeline", (req, res) => {
   }
 });
 
+// GET /api/jobs/:jobId/interview-slots — all slots for this role, newest first,
+// with the booked candidate's name resolved for display.
+router.get("/jobs/:jobId/interview-slots", (req, res) => {
+  const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+  if (!job) return res.status(404).json({ error: "Job not found." });
+  const candidates = readJSON(CANDIDATES_PATH);
+  const slots = (job.interview_slots || [])
+    .slice()
+    .sort((a, b) => new Date(a.start) - new Date(b.start))
+    .map((s) => ({
+      ...s,
+      candidate_name: s.candidate_id ? candidates.find((c) => c.candidate_id === s.candidate_id)?.profile?.name || "Unknown" : null,
+    }));
+  res.json({ slots });
+});
+
+// POST /api/jobs/:jobId/interview-slots  { slots: [{ start, duration_minutes }] }
+// Bulk-creates open interview time slots that candidates can self-book.
+router.post("/jobs/:jobId/interview-slots", (req, res) => {
+  try {
+    const { slots } = req.body;
+    if (!Array.isArray(slots) || slots.length === 0) return res.status(400).json({ error: "slots must be a non-empty array." });
+
+    const jobs = readJSON(JOBS_PATH);
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+
+    const job = jobs[idx];
+    job.interview_slots = job.interview_slots || [];
+    const created = [];
+    for (const s of slots) {
+      if (!s?.start || Number.isNaN(new Date(s.start).getTime())) continue;
+      const slot = {
+        slot_id: uuidv4(),
+        start: new Date(s.start).toISOString(),
+        duration_minutes: Number(s.duration_minutes) > 0 ? Number(s.duration_minutes) : 30,
+        candidate_id: null,
+        booked_at: null,
+      };
+      job.interview_slots.push(slot);
+      created.push(slot);
+    }
+    if (created.length === 0) return res.status(400).json({ error: "No valid slots to add." });
+    jobs[idx] = job;
+    writeJSON(JOBS_PATH, jobs);
+    res.status(201).json({ slots: created });
+  } catch (err) {
+    console.error("create interview slots error:", err);
+    res.status(500).json({ error: "Failed to create slots." });
+  }
+});
+
+// DELETE /api/jobs/:jobId/interview-slots/:slotId — remove an open (unbooked) slot
+router.delete("/jobs/:jobId/interview-slots/:slotId", (req, res) => {
+  try {
+    const jobs = readJSON(JOBS_PATH);
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+    const job = jobs[idx];
+    const slot = (job.interview_slots || []).find((s) => s.slot_id === req.params.slotId);
+    if (!slot) return res.status(404).json({ error: "Slot not found." });
+    if (slot.candidate_id) return res.status(400).json({ error: "Can't delete a booked slot — cancel the booking first." });
+    job.interview_slots = job.interview_slots.filter((s) => s.slot_id !== req.params.slotId);
+    jobs[idx] = job;
+    writeJSON(JOBS_PATH, jobs);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("delete interview slot error:", err);
+    res.status(500).json({ error: "Failed to delete slot." });
+  }
+});
+
+// POST /api/jobs/:jobId/interview-slots/:slotId/cancel — HR frees up a booked slot
+// (e.g. the candidate asked to reschedule over the phone).
+router.post("/jobs/:jobId/interview-slots/:slotId/cancel", (req, res) => {
+  try {
+    const jobs = readJSON(JOBS_PATH);
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+    const job = jobs[idx];
+    const slot = (job.interview_slots || []).find((s) => s.slot_id === req.params.slotId);
+    if (!slot) return res.status(404).json({ error: "Slot not found." });
+    slot.candidate_id = null;
+    slot.booked_at = null;
+    jobs[idx] = job;
+    writeJSON(JOBS_PATH, jobs);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("cancel interview slot error:", err);
+    res.status(500).json({ error: "Failed to cancel slot." });
+  }
+});
+
 // GET /api/jobs/:jobId/criteria — criteria + metadata for a job
 router.get("/jobs/:jobId/criteria", (req, res) => {
   const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);

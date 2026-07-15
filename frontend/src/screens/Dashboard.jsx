@@ -76,6 +76,13 @@ export default function Dashboard() {
   const [bulkSelected, setBulkSelected] = useState([]);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [bulkResult, setBulkResult] = useState(null);
+  const [slots, setSlots] = useState(null);
+  const [showSlots, setShowSlots] = useState(false);
+  const [newSlotDate, setNewSlotDate] = useState("");
+  const [newSlotTime, setNewSlotTime] = useState("");
+  const [newSlotDuration, setNewSlotDuration] = useState(30);
+  const [slotBusy, setSlotBusy] = useState(false);
+  const [slotError, setSlotError] = useState("");
 
   async function saveHrAlerts(alerts = hrAlerts, phone = hrPhone) {
     try {
@@ -102,6 +109,32 @@ export default function Dashboard() {
   const loadAnalytics = useCallback(() => {
     axios.get(`/api/jobs/${jobId}/analytics`).then((r) => setAnalytics(r.data?.empty ? null : r.data)).catch(() => setAnalytics(null));
   }, [jobId]);
+  const loadSlots = useCallback(() => {
+    axios.get(`/api/jobs/${jobId}/interview-slots`).then((r) => setSlots(r.data?.slots || [])).catch(() => setSlots([]));
+  }, [jobId]);
+
+  async function addSlot() {
+    if (!newSlotDate || !newSlotTime) return;
+    setSlotBusy(true); setSlotError("");
+    try {
+      const start = new Date(`${newSlotDate}T${newSlotTime}:00`).toISOString();
+      await axios.post(`/api/jobs/${jobId}/interview-slots`, { slots: [{ start, duration_minutes: Number(newSlotDuration) || 30 }] });
+      setNewSlotTime("");
+      loadSlots();
+    } catch (e) {
+      setSlotError(e.response?.data?.error || "Couldn't add that slot.");
+    } finally {
+      setSlotBusy(false);
+    }
+  }
+  async function deleteSlot(slotId) {
+    try { await axios.delete(`/api/jobs/${jobId}/interview-slots/${slotId}`); loadSlots(); }
+    catch (e) { setSlotError(e.response?.data?.error || "Couldn't remove that slot."); }
+  }
+  async function cancelSlot(slotId) {
+    try { await axios.post(`/api/jobs/${jobId}/interview-slots/${slotId}/cancel`); loadSlots(); }
+    catch { /* ignore */ }
+  }
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => {
@@ -115,6 +148,7 @@ export default function Dashboard() {
   }, [jobId]);
   useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
+  useEffect(() => { if (showSlots) loadSlots(); }, [showSlots, loadSlots]);
 
   async function toggleStage(key) {
     if (!pipeline) return;
@@ -333,6 +367,60 @@ export default function Dashboard() {
           )}
         </div>
       )}
+
+      {/* interview slots */}
+      <div style={{ ...cardBox, borderRadius: 14, padding: 22, marginBottom: 20 }}>
+        <div onClick={() => setShowSlots((v) => !v)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ color: "#7C3AED", fontSize: 16 }}>🗓</span><span style={{ fontSize: 15, fontWeight: 700 }}>Interview slots</span></div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {slots && <span style={{ fontSize: 12.5, fontWeight: 600, color: "#9AA0AE" }}>{slots.filter((s) => !s.candidate_id).length} open · {slots.filter((s) => s.candidate_id).length} booked</span>}
+            <span style={{ fontSize: 12, color: "#B6B9C6" }}>{showSlots ? "▲" : "▼"}</span>
+          </div>
+        </div>
+        {showSlots && (
+          <div style={{ marginTop: 14 }}>
+            <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 14 }}>Add open interview times, then send a candidate a booking link from their profile so they can pick one themselves.</div>
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 16 }}>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-gray-600">Date</span><input type="date" value={newSlotDate} onChange={(e) => setNewSlotDate(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-gray-600">Time</span><input type="time" value={newSlotTime} onChange={(e) => setNewSlotTime(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm" /></label>
+              <label className="block"><span className="mb-1 block text-xs font-medium text-gray-600">Duration</span>
+                <select value={newSlotDuration} onChange={(e) => setNewSlotDuration(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                  <option value={15}>15 min</option><option value={30}>30 min</option><option value={45}>45 min</option><option value={60}>60 min</option>
+                </select></label>
+              <button onClick={addSlot} disabled={!newSlotDate || !newSlotTime || slotBusy} style={{ padding: "9px 16px", background: "#7C3AED", color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer", opacity: !newSlotDate || !newSlotTime || slotBusy ? 0.5 : 1 }}>{slotBusy ? "Adding…" : "+ Add slot"}</button>
+            </div>
+            {slotError && <p className="mb-3 text-sm text-red-600">{slotError}</p>}
+            {slots === null ? (
+              <div style={{ fontSize: 13, color: "#9AA0AE" }}>Loading…</div>
+            ) : slots.length === 0 ? (
+              <div style={{ fontSize: 13, color: "#9AA0AE" }}>No interview slots yet — add one above.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {slots.map((s) => {
+                  const d = new Date(s.start);
+                  const label = d.toLocaleString("en-MY", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Asia/Kuala_Lumpur" });
+                  return (
+                    <div key={s.slot_id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "#FAFAFC", borderRadius: 11 }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 600, color: "#374151", minWidth: 190 }}>{label} · {s.duration_minutes}min</span>
+                      {s.candidate_id ? (
+                        <>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#047857", background: "#ECFDF5", border: "1px solid #A7F3D0", padding: "3px 10px", borderRadius: 20 }}>Booked · {s.candidate_name}</span>
+                          <button onClick={() => cancelSlot(s.slot_id)} style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 600, color: "#B91C1C", background: "none", border: "none", cursor: "pointer" }}>Cancel booking</button>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: "#6D28D9", background: "#F5F3FF", border: "1px solid #E9E5FF", padding: "3px 10px", borderRadius: 20 }}>Open</span>
+                          <button onClick={() => deleteSlot(s.slot_id)} style={{ marginLeft: "auto", fontSize: 12.5, fontWeight: 600, color: "#9AA0AE", background: "none", border: "none", cursor: "pointer" }}>Remove</button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* filter pills + compare */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }} className="flex-wrap">

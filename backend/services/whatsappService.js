@@ -120,6 +120,14 @@ const TEMPLATES = {
     `please complete a short personality questionnaire. It takes about ${p.minutes || 5} minutes — ` +
     `there are no right or wrong answers.\n\n` +
     `Complete it here: ${p.url}`,
+
+  booking_link: (p) =>
+    `Hi ${p.name || "there"}! 🎉 You're invited to interview for the *${p.role}* role. ` +
+    `Pick a time that works for you:\n\n${p.url}`,
+
+  booking_confirmed: (p) =>
+    `Hi ${p.name || "there"}! ✅ Your *${p.role}* interview is confirmed for *${p.when}*. ` +
+    `We look forward to speaking with you.`,
 };
 
 /** Build a message body from a template key + params. */
