@@ -235,6 +235,17 @@ export default function CandidateDetail() {
         </div>
       </div>
 
+      {/* Low CV-parse-confidence warning — this genuinely affects the recommendation
+          (it can force REJECT or cap confidence at Low), so HR should see why. */}
+      {candidate.low_confidence_warning && (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 14, padding: "14px 18px", marginBottom: 16 }}>
+          <span style={{ fontSize: 18 }}>⚠️</span>
+          <div style={{ fontSize: 13.5, color: "#92400E", lineHeight: 1.5 }}>
+            <b>This CV was hard to read clearly</b> (parse confidence {candidate.parse_confidence_overall ?? "—"}%). Some fields below may be incomplete or approximate — this can affect the AI recommendation. Worth a manual check against the original CV.
+          </div>
+        </div>
+      )}
+
       {/* Pipeline stepper */}
       <div style={{ ...cardBox, padding: "20px 28px", marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "flex-start" }}>

@@ -256,26 +256,35 @@ router.post("/compare-candidates", async (req, res) => {
     const job = findJob(job_id || a.job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
-    const summarize = (c) => ({
-      name: c.profile.name,
-      age: c.profile.age,
-      total_experience_months: c.profile.total_experience_months,
-      lane: c.score?.lane,
-      strengths: c.score?.strengths,
-      gaps: c.score?.gaps,
-      work_history: (c.profile.work_history || []).map(
-        (w) => `${w.title} at ${w.employer}`
-      ),
-    });
+    // Fairness: age is deliberately excluded (never a scoring or comparison
+    // factor — matches the age exclusion in scorer.js).
+    const summarize = (c) => {
+      const budget = computeBudgetFit(c, job);
+      const bm = getSalaryBenchmark(job.role_title, job.location);
+      const market = bm ? compareToMarket(c.profile?.expected_salary, bm) : null;
+      return {
+        name: c.profile.name,
+        total_experience_months: c.profile.total_experience_months,
+        lane: c.score?.lane,
+        strengths: c.score?.strengths,
+        gaps: c.score?.gaps,
+        work_history: (c.profile.work_history || []).map(
+          (w) => `${w.title} at ${w.employer}`
+        ),
+        expected_salary_rm: c.profile?.expected_salary || null,
+        budget_fit: budget?.label || null,
+        market_fit: market?.label || null,
+      };
+    };
 
     const system =
       "You are an expert HR advisor comparing two candidates. Be direct and specific. " +
-      "Do not reference gender, race, religion, or marital status. Return plain text only.";
+      "Do not reference gender, race, religion, age, or marital status. Return plain text only.";
     const user = `Compare these two candidates for ${job.role_title}.
 Candidate A: ${JSON.stringify(summarize(a))}
 Candidate B: ${JSON.stringify(summarize(b))}
 
-Write 3-4 sentences for an HR manager explaining who is stronger for what reason, what each is better at, and which specific factor should drive the final decision.`;
+Write 3-4 sentences for an HR manager explaining who is stronger for what reason, what each is better at, and which specific factor should drive the final decision — including expected salary vs. budget/market where it's actually the deciding factor.`;
 
     const comparison_text = await chatText({ system, user, temperature: 0.4 });
     return res.json({ comparison_text });

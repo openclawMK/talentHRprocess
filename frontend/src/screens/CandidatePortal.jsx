@@ -54,7 +54,7 @@ export default function CandidatePortal() {
     if (!form.name.trim() || !form.email.trim() || !file) { setError("Please fill in your name, email and attach your CV."); return; }
     setApplying(true); setError("");
     try {
-      const fd = new FormData(); fd.append("file", file); fd.append("name", form.name); fd.append("email", form.email); fd.append("phone", form.phone); fd.append("expected_salary", form.expected_salary);
+      const fd = new FormData(); fd.append("file", file); fd.append("name", form.name); fd.append("email", form.email); fd.append("phone", form.phone); fd.append("expected_salary", form.expected_salary); fd.append("consent", "true");
       const res = await axios.post(`/api/portal/${token}/apply`, fd);
       setCandidateId(res.data.candidate_id); setParsed(res.data.parsed); setStep("assessment");
     } catch (e) { setError(e.response?.data?.error || "We couldn't process your CV. Please try again."); }

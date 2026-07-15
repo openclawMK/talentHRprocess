@@ -133,10 +133,14 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     const job = findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
 
-    const { name, email, phone, expected_salary } = req.body;
+    const { name, email, phone, expected_salary, consent } = req.body;
     if (!req.file) return res.status(400).json({ error: "Please attach your CV." });
     if (!name?.trim() || !email?.trim())
       return res.status(400).json({ error: "Name and email are required." });
+    // PDPA consent must be affirmatively given and is recorded on the candidate
+    // record (not just gated client-side) so we can demonstrate it was captured.
+    if (consent !== "true" && consent !== true)
+      return res.status(400).json({ error: "Please provide consent to data processing before submitting." });
 
     const extracted = await extractText(tempPath);
     if (extracted.unsupported) return res.status(400).json({ error: extracted.message });
@@ -161,6 +165,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
       submitted_date: today(),
       parse_confidence_overall: parseOverall,
       low_confidence_warning: parseOverall < 70,
+      pdpa_consent: { given: true, at: new Date().toISOString() },
       profile,
       score: null,
       hr_notes_list: [],
