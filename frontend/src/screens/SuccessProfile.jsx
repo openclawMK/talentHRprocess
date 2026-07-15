@@ -6,7 +6,13 @@ const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
 const card = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 22, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
 const OCEAN_LEVELS = ["low", "medium-low", "medium", "medium-high", "high"];
 const LEVEL_PCT = { low: 20, "medium-low": 40, medium: 60, "medium-high": 80, high: 100 };
-const TRAITS = [["O", "Openness"], ["C", "Conscientious."], ["E", "Extraversion"], ["A", "Agreeableness"], ["N", "Neuroticism"]];
+const TRAITS = [
+  ["O", "Openness", "Curiosity and willingness to try new ideas or approaches"],
+  ["C", "Conscientious.", "Reliability, organisation, and follow-through on tasks"],
+  ["E", "Extraversion", "Energy and comfort in social or customer-facing situations"],
+  ["A", "Agreeableness", "Cooperation, warmth, and ease working with others"],
+  ["N", "Neuroticism", "Emotional sensitivity to stress — low = calmer under pressure"],
+];
 const PILL = {
   must: { color: "#065F46", bg: "#ECFDF5", border: "#A7F3D0", head: "#047857", title: "✓ Must-haves", key: "must_haves" },
   nice: { color: "#4338CA", bg: "#EEF2FF", border: "#C7D2FE", head: "#6366F1", title: "＋ Nice-to-haves", key: "nice_to_haves" },
@@ -35,7 +41,12 @@ export default function SuccessProfile() {
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJob(r.data.find((j) => j.job_id === jobId) || null));
-    axios.get(`/api/jobs/${jobId}/success-profile`).then((r) => setProfile(r.data && Object.keys(r.data).length ? { ...EMPTY, ...r.data } : { ...EMPTY })).catch(() => setProfile({ ...EMPTY }));
+    axios.get(`/api/jobs/${jobId}/success-profile`).then((r) => {
+      const has = r.data && Object.keys(r.data).length;
+      setProfile(has ? { ...EMPTY, ...r.data } : { ...EMPTY });
+      // Auto-generated at role creation and never explicitly saved yet — flag for review.
+      if (has && r.data.created_at && r.data.created_at === r.data.last_updated) setAiBanner(true);
+    }).catch(() => setProfile({ ...EMPTY }));
   }, [jobId]);
 
   const set = (k, v) => setProfile((p) => ({ ...p, [k]: v }));
@@ -119,15 +130,16 @@ export default function SuccessProfile() {
         <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Ideal OCEAN profile</div>
         <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 20 }}>Target personality traits for top performers in this role</div>
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-5">
-          {TRAITS.map(([key, lbl]) => {
+          {TRAITS.map(([key, lbl, desc]) => {
             const val = profile.ideal_ocean_profile?.[key] || "medium";
             const idx = OCEAN_LEVELS.indexOf(val);
             return (
               <div key={key}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 8 }}>
+                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 4 }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{lbl}</span>
                   <span style={{ fontSize: 12, fontWeight: 700, color: "#6366F1", textTransform: "capitalize" }}>{val}</span>
                 </div>
+                <div style={{ fontSize: 11.5, color: "#9AA0AE", lineHeight: 1.4, marginBottom: 10, minHeight: 30 }}>{desc}</div>
                 <div style={{ height: 8, background: "#F1F2F6", borderRadius: 5, overflow: "hidden", marginBottom: 8 }}><div style={{ height: "100%", width: `${LEVEL_PCT[val]}%`, background: "linear-gradient(90deg,#818CF8,#7C3AED)", borderRadius: 5 }} /></div>
                 <input type="range" min="0" max="4" value={idx < 0 ? 2 : idx} onChange={(e) => set("ideal_ocean_profile", { ...profile.ideal_ocean_profile, [key]: OCEAN_LEVELS[Number(e.target.value)] })} className="w-full accent-violet-600" />
               </div>
