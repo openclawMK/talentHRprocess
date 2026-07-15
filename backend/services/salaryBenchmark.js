@@ -17,7 +17,7 @@ const SRC = Object.fromEntries((DATA.meta.sources || []).map((s) => [s.id, s]));
 
 const norm = (s) => (s || "").toLowerCase().trim();
 const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
-const shortSource = (id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : "Market");
+const shortSource = (id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : id === "Hays2026" ? "Hays 2026" : "Market");
 // Industry label for a role (explicit tag, or a sector-based fallback for the
 // original F&B/professional roles that predate industry tagging).
 const industryOf = (rule) => rule.industry || (rule.sector === "frontline" ? "F&B / Retail / Hospitality" : "Professional / Office");

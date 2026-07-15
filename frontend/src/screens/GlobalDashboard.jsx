@@ -9,8 +9,8 @@ const card = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16
 const QUICK = [
   { icon: "↥", title: "Upload & score CV", sub: "Parse a PDF or DOCX CV and auto-score it", ibg: "#EEF2FF", ic: "#4F46E5", to: "/upload" },
   { icon: "＋", title: "Create job role", sub: "Draft scoring criteria automatically with AI", ibg: "#F5F3FF", ic: "#7C3AED", to: "/jobs/new" },
-  { icon: "🧭", title: "Send OCEAN link", sub: "WhatsApp a candidate their assessment", ibg: "#ECFDF5", ic: "#059669", to: "/jobs" },
-  { icon: "⤓", title: "Export reports", sub: "Download candidate assessments as PDF", ibg: "#FFF7ED", ic: "#C2410C", to: "/jobs" },
+  { icon: "💼", title: "Companies", sub: "Manage the businesses you're hiring for", ibg: "#ECFDF5", ic: "#059669", to: "/companies" },
+  { icon: "💰", title: "Salary Center", sub: "Benchmark pay against the Malaysian market", ibg: "#FFF7ED", ic: "#C2410C", to: "/salary-center" },
 ];
 
 const FUNNEL = [
