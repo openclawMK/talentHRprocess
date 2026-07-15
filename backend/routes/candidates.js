@@ -596,6 +596,50 @@ router.post("/candidates/:jobId/:candidateId/outcome", async (req, res) => {
 });
 
 /**
+ * POST /api/candidates/:jobId/bulk-outcome  { candidate_ids: [...], outcome: "offer" | "rejected" }
+ * Same as /outcome but applied to many candidates at once — used by the
+ * candidate table's bulk-select toolbar. Continues past individual failures
+ * and reports a per-candidate result so a bad phone number on one candidate
+ * doesn't block the rest.
+ */
+router.post("/candidates/:jobId/bulk-outcome", async (req, res) => {
+  try {
+    const { candidate_ids, outcome } = req.body;
+    if (!["offer", "rejected"].includes(outcome))
+      return res.status(400).json({ error: "outcome must be 'offer' or 'rejected'." });
+    if (!Array.isArray(candidate_ids) || candidate_ids.length === 0)
+      return res.status(400).json({ error: "candidate_ids must be a non-empty array." });
+
+    const job = findJob(req.params.jobId);
+    if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const candidates = readJSON(CANDIDATES_PATH);
+    const template = outcome === "offer" ? "outcome_successful" : "outcome_unsuccessful";
+    const results = [];
+
+    for (const candidateId of candidate_ids) {
+      const idx = candidates.findIndex((c) => c.candidate_id === candidateId && c.job_id === req.params.jobId);
+      if (idx === -1) { results.push({ candidate_id: candidateId, ok: false, error: "Candidate not found." }); continue; }
+      const cand = candidates[idx];
+      cand.outcome = outcome;
+      cand.outcome_date = today();
+      try {
+        const result = await notify(cand.profile?.contact?.phone, template, { name: cand.profile?.name, role: job.role_title });
+        results.push({ candidate_id: candidateId, ok: true, message_sent: !result.skipped });
+      } catch {
+        results.push({ candidate_id: candidateId, ok: true, message_sent: false });
+      }
+    }
+
+    writeJSON(CANDIDATES_PATH, candidates);
+    res.json({ outcome, results });
+  } catch (err) {
+    console.error("bulk-outcome error:", err);
+    res.status(500).json({ error: "Failed to record outcomes." });
+  }
+});
+
+/**
  * GET /api/candidates/:jobId/:candidateId/whatsapp-history
  * Returns the merged inbound/outbound message thread for this candidate.
  */

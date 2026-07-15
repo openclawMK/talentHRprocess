@@ -40,6 +40,8 @@ function avatarFor(name) {
   return AVATARS[h % AVATARS.length];
 }
 function shortStage(candidate, job) {
+  if (candidate.outcome === "offer") return "Offer sent";
+  if (candidate.outcome === "rejected") return "Rejected";
   const { currentKey, rejected } = candidateStages(candidate, job);
   if (rejected) return "Rejected";
   return STAGE_LABEL[currentKey] || "—";
@@ -70,6 +72,10 @@ export default function Dashboard() {
   const [hrSaved, setHrSaved] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [salary, setSalary] = useState(null);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkSelected, setBulkSelected] = useState([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkResult, setBulkResult] = useState(null);
 
   async function saveHrAlerts(alerts = hrAlerts, phone = hrPhone) {
     try {
@@ -130,6 +136,27 @@ export default function Dashboard() {
   }
   function toggleSel(id) {
     setSelected((p) => p.includes(id) ? p.filter((x) => x !== id) : p.length < 4 ? [...p, id] : p);
+  }
+  function toggleBulkSel(id) {
+    setBulkSelected((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  }
+  async function runBulkOutcome(outcome) {
+    if (bulkSelected.length === 0) return;
+    const verb = outcome === "offer" ? "advance to offer" : "reject";
+    if (!window.confirm(`${verb === "reject" ? "Reject" : "Advance"} ${bulkSelected.length} candidate${bulkSelected.length === 1 ? "" : "s"}? Each will get their outcome WhatsApp message.`)) return;
+    setBulkBusy(true); setBulkResult(null);
+    try {
+      const { data } = await axios.post(`/api/candidates/${jobId}/bulk-outcome`, { candidate_ids: bulkSelected, outcome });
+      const sent = data.results.filter((r) => r.ok && r.message_sent).length;
+      const failed = data.results.filter((r) => !r.ok).length;
+      setBulkResult({ outcome, total: bulkSelected.length, sent, failed });
+      setBulkSelected([]); setBulkMode(false);
+      load();
+    } catch (e) {
+      setBulkResult({ error: e.response?.data?.error || "Bulk update failed." });
+    } finally {
+      setBulkBusy(false);
+    }
   }
 
   const merged = [...(candidates || [])].sort((x, y) => (y.score?.combined_score ?? -1) - (x.score?.combined_score ?? -1));
@@ -325,6 +352,7 @@ export default function Dashboard() {
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           <span onClick={loadBestMatch} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: showBm ? "#fff" : "#6D28D9", background: showBm ? "linear-gradient(135deg,#8B5CF6,#7C3AED)" : "#F5F3FF", border: "1px solid #E9E5FF" }}>✨ Best match</span>
           <span onClick={() => { setCompareMode((v) => !v); setSelected([]); }} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: compareMode ? "#fff" : "#4338CA", background: compareMode ? GRAD : "#EEF2FF" }}>{compareMode ? "Cancel compare" : "⇄ Compare"}</span>
+          <span onClick={() => { setBulkMode((v) => !v); setBulkSelected([]); setBulkResult(null); }} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: bulkMode ? "#fff" : "#374151", background: bulkMode ? "#111827" : "#F3F4F8" }}>{bulkMode ? "Cancel bulk actions" : "☑ Bulk actions"}</span>
           <span style={{ fontSize: 13, color: "#6B7280" }}>Sorted by <b style={{ color: "#374151" }}>Score ↓</b></span>
         </div>
       </div>
@@ -378,6 +406,28 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* bulk actions bar */}
+      {bulkMode && (
+        <div style={{ display: "flex", alignItems: "center", gap: 14, background: "#F3F4F8", border: "1px solid #E2E4EC", borderRadius: 12, padding: "12px 18px", marginBottom: 14 }} className="flex-wrap">
+          <span style={{ fontSize: 14, color: "#111827", fontWeight: 700 }}>{bulkSelected.length} selected</span>
+          <span style={{ fontSize: 13, color: "#6B7280" }}>Tick candidates, then advance or reject them all at once.</span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
+            <button onClick={() => runBulkOutcome("rejected")} disabled={bulkSelected.length === 0 || bulkBusy} style={{ padding: "9px 16px", background: "#fff", color: "#B91C1C", border: "1px solid #FECACA", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: bulkSelected.length ? "pointer" : "default", opacity: bulkSelected.length ? 1 : 0.5 }}>{bulkBusy ? "Working…" : "Reject selected"}</button>
+            <button onClick={() => runBulkOutcome("offer")} disabled={bulkSelected.length === 0 || bulkBusy} style={{ padding: "9px 16px", background: "#16A34A", color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: bulkSelected.length ? "pointer" : "default", opacity: bulkSelected.length ? 1 : 0.5 }}>{bulkBusy ? "Working…" : "Advance to offer"}</button>
+          </div>
+        </div>
+      )}
+      {bulkResult && (
+        <div style={{ background: bulkResult.error ? "#FEF2F2" : "#ECFDF5", border: `1px solid ${bulkResult.error ? "#FECACA" : "#A7F3D0"}`, color: bulkResult.error ? "#B91C1C" : "#047857", borderRadius: 12, padding: "12px 16px", marginBottom: 14, fontSize: 13.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span>
+            {bulkResult.error
+              ? bulkResult.error
+              : `${bulkResult.total} candidate${bulkResult.total === 1 ? "" : "s"} marked ${bulkResult.outcome === "offer" ? "offer" : "rejected"} · ${bulkResult.sent} notified by WhatsApp${bulkResult.failed ? ` · ${bulkResult.failed} failed` : ""}`}
+          </span>
+          <span onClick={() => setBulkResult(null)} style={{ cursor: "pointer", fontWeight: 700 }}>✕</span>
+        </div>
+      )}
+
       {/* compare bar */}
       {compareMode && (
         <div style={{ display: "flex", alignItems: "center", gap: 14, background: "#F5F3FF", border: "1px solid #E9E5FF", borderRadius: 12, padding: "12px 18px", marginBottom: 14 }} className="flex-wrap">
@@ -403,13 +453,15 @@ export default function Dashboard() {
             const lane = LANE[displayLane(c.score)] || LANE.in_progress;
             const score = round(c.score?.combined_score);
             const sel = selected.includes(c.candidate_id);
+            const bulkSel = bulkSelected.includes(c.candidate_id);
             const years = c.profile?.total_experience_months != null ? Math.round(c.profile.total_experience_months / 12) : "—";
             const loc = c.profile?.contact?.location?.split(",")[0] || "—";
             return (
-              <div key={c.candidate_id} onClick={() => compareMode ? toggleSel(c.candidate_id) : navigate(`/jobs/${jobId}/candidate/${c.candidate_id}`)}
-                className="grid items-center md:!grid-cols-[1fr_150px_130px_140px_36px]" style={{ gridTemplateColumns: "1fr auto", gap: 16, padding: "15px 22px", borderBottom: "1px solid #F1F2F6", cursor: "pointer", background: sel ? "#F5F3FF" : "#fff" }}>
+              <div key={c.candidate_id} onClick={() => bulkMode ? toggleBulkSel(c.candidate_id) : compareMode ? toggleSel(c.candidate_id) : navigate(`/jobs/${jobId}/candidate/${c.candidate_id}`)}
+                className="grid items-center md:!grid-cols-[1fr_150px_130px_140px_36px]" style={{ gridTemplateColumns: "1fr auto", gap: 16, padding: "15px 22px", borderBottom: "1px solid #F1F2F6", cursor: "pointer", background: bulkSel ? "#F3F4F8" : sel ? "#F5F3FF" : "#fff" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 13, minWidth: 0 }}>
                   {compareMode && <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${sel ? "#7C3AED" : "#D6D8E3"}`, background: sel ? "#7C3AED" : "#fff", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{sel ? "✓" : ""}</div>}
+                  {bulkMode && <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${bulkSel ? "#111827" : "#D6D8E3"}`, background: bulkSel ? "#111827" : "#fff", color: "#fff", fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{bulkSel ? "✓" : ""}</div>}
                   <div style={{ width: 40, height: 40, borderRadius: 11, background: avatarFor(c.profile?.name), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{initials(c.profile?.name)}</div>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 15, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.profile?.name || "Unnamed"}</div>
