@@ -259,6 +259,26 @@ router.get("/analytics", (req, res) => {
     const laneTotal = by_lane.green + by_lane.amber + by_lane.red || 1;
     stale.sort((a, b) => b.days_waiting - a.days_waiting);
 
+    // Average score + applicant count by submission month, last 4 months with data.
+    const monthBuckets = {};
+    for (const c of candidates) {
+      if (!c.submitted_date) continue;
+      const d = new Date(c.submitted_date);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      monthBuckets[key] = monthBuckets[key] || { sum: 0, n: 0, applicants: 0, label: d.toLocaleDateString("en-US", { month: "short" }) };
+      monthBuckets[key].applicants += 1;
+      if (typeof c.score?.combined_score === "number") {
+        monthBuckets[key].sum += c.score.combined_score;
+        monthBuckets[key].n += 1;
+      }
+    }
+    const monthKeys = Object.keys(monthBuckets).sort().slice(-4);
+    const score_trend = monthKeys.map((k) => ({ month: monthBuckets[k].label, avg: avg(monthBuckets[k].sum, monthBuckets[k].n), applicants: monthBuckets[k].applicants }));
+    const lastTwoScores = monthKeys.slice(-2).map((k) => avg(monthBuckets[k].sum, monthBuckets[k].n));
+    const score_trend_delta_pct = lastTwoScores.length === 2 && lastTwoScores[0] > 0 ? Math.round(((lastTwoScores[1] - lastTwoScores[0]) / lastTwoScores[0]) * 1000) / 10 : null;
+    const lastTwoApplicants = monthKeys.slice(-2).map((k) => monthBuckets[k].applicants);
+    const applicant_trend_delta_pct = lastTwoApplicants.length === 2 && lastTwoApplicants[0] > 0 ? Math.round(((lastTwoApplicants[1] - lastTwoApplicants[0]) / lastTwoApplicants[0]) * 1000) / 10 : null;
+
     const roles = Object.values(perRole)
       .map((p) => ({
         job_id: p.job_id,
@@ -292,11 +312,52 @@ router.get("/analytics", (req, res) => {
       roles,
       stale_count: stale.length,
       stale_top: stale[0] || null,
+      score_trend,
+      score_trend_delta_pct,
+      applicant_trend_delta_pct,
       generated_at: new Date().toISOString(),
     });
   } catch (err) {
     console.error("global analytics error:", err);
     res.status(500).json({ error: "Failed to load analytics." });
+  }
+});
+
+// GET /api/candidates-recent?limit=  — top-scored candidates across every role,
+// for the global dashboard's cross-role candidate table.
+router.get("/candidates-recent", (req, res) => {
+  try {
+    const limit = Math.min(20, Math.max(1, Number(req.query.limit) || 8));
+    const jobs = readJSON(JOBS_PATH);
+    const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
+    let candidates = [];
+    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+
+    const results = candidates
+      .map((c) => {
+        const job = jobById[c.job_id];
+        if (!job) return null;
+        return {
+          candidate_id: c.candidate_id,
+          job_id: c.job_id,
+          name: c.profile?.name || "Unnamed",
+          experience_years: c.profile?.total_experience_months != null ? Math.round(c.profile.total_experience_months / 12) : null,
+          location: c.profile?.contact?.location?.split(",")[0] || null,
+          role_title: job.role_title,
+          company_name: job.company?.name || null,
+          score: c.score?.combined_score ?? null,
+          lane: c.score?.lane || null,
+          stage: candidateStageKey(c, job),
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => (b.score ?? -1) - (a.score ?? -1))
+      .slice(0, limit);
+
+    res.json({ results });
+  } catch (err) {
+    console.error("candidates-recent error:", err);
+    res.status(500).json({ error: "Failed to load candidates." });
   }
 });
 
