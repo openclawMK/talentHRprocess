@@ -250,7 +250,7 @@ router.get("/analytics", (req, res) => {
       const days = Math.max(0, Math.round((todayMs - submitted) / 86400000));
       if (stage !== "offer" && stage !== "rejected" && days >= 5) {
         pr.stale += 1;
-        stale.push({ name: c.profile?.name || "Candidate", days_waiting: days, current_stage: stage, role: job.role_title });
+        stale.push({ job_id: c.job_id, candidate_id: c.candidate_id, name: c.profile?.name || "Candidate", days_waiting: days, current_stage: stage, role: job.role_title });
       }
     }
 
@@ -297,6 +297,96 @@ router.get("/analytics", (req, res) => {
   } catch (err) {
     console.error("global analytics error:", err);
     res.status(500).json({ error: "Failed to load analytics." });
+  }
+});
+
+// GET /api/candidates-search?q=  — global candidate search for the header search
+// bar. Matches candidate name, role title, or company name; returns the
+// top 8 across every company/role.
+router.get("/candidates-search", (req, res) => {
+  try {
+    const q = (req.query.q || "").trim().toLowerCase();
+    if (!q) return res.json({ results: [] });
+
+    const jobs = readJSON(JOBS_PATH);
+    const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
+    let candidates = [];
+    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+
+    const results = [];
+    for (const c of candidates) {
+      const job = jobById[c.job_id];
+      if (!job) continue;
+      const name = c.profile?.name || "";
+      const hay = `${name} ${job.role_title} ${job.company?.name || ""}`.toLowerCase();
+      if (!hay.includes(q)) continue;
+      results.push({
+        candidate_id: c.candidate_id,
+        job_id: c.job_id,
+        name: name || "Unnamed",
+        role_title: job.role_title,
+        company_name: job.company?.name || null,
+        score: c.score?.combined_score ?? null,
+        lane: c.score?.lane || null,
+      });
+      if (results.length >= 8) break;
+    }
+    res.json({ results });
+  } catch (err) {
+    console.error("candidates-search error:", err);
+    res.status(500).json({ error: "Search failed." });
+  }
+});
+
+// GET /api/alerts — real notification feed: stale candidates (5+ days with no
+// action) and flagged pre-hire checks awaiting HR review. Powers the header bell.
+router.get("/alerts", (req, res) => {
+  try {
+    const jobs = readJSON(JOBS_PATH);
+    const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
+    let candidates = [];
+    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+
+    const todayMs = Date.now();
+    const alerts = [];
+
+    for (const c of candidates) {
+      const job = jobById[c.job_id];
+      if (!job) continue;
+      const stage = candidateStageKey(c, job);
+      const name = c.profile?.name || "Candidate";
+
+      if (stage !== "offer" && stage !== "rejected") {
+        const submitted = c.submitted_date ? new Date(c.submitted_date).getTime() : todayMs;
+        const days = Math.max(0, Math.round((todayMs - submitted) / 86400000));
+        if (days >= 5) {
+          alerts.push({
+            type: "stale", severity: days >= 10 ? "high" : "medium",
+            job_id: c.job_id, candidate_id: c.candidate_id,
+            message: `${name} has been waiting ${days} days at ${stage.replace("_", " ")}`,
+            role: job.role_title, at: c.submitted_date || null,
+          });
+        }
+      }
+
+      for (const [key, check] of Object.entries(c.pre_hire_checks || {})) {
+        if (check?.status === "flagged") {
+          alerts.push({
+            type: "flagged_check", severity: "high",
+            job_id: c.job_id, candidate_id: c.candidate_id,
+            message: `${name}: ${key.replace("_", " ")} flagged — review before any offer`,
+            role: job.role_title, at: check.updated || null,
+          });
+        }
+      }
+    }
+
+    const rank = { high: 0, medium: 1, low: 2 };
+    alerts.sort((a, b) => (rank[a.severity] ?? 3) - (rank[b.severity] ?? 3));
+    res.json({ alerts: alerts.slice(0, 20), count: alerts.length });
+  } catch (err) {
+    console.error("alerts error:", err);
+    res.status(500).json({ error: "Failed to load alerts." });
   }
 });
 
