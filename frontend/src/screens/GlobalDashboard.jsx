@@ -83,7 +83,7 @@ export default function GlobalDashboard() {
               })}
             </div>
 
-            <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20 }}>
+            <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20 }}>
               <div style={{ fontSize: 15, fontWeight: 700 }}>Score trend</div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: D.text3, marginTop: 12 }}>
                 <span>Avg score this month</span>
@@ -167,7 +167,7 @@ export default function GlobalDashboard() {
               <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: D.text2, background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 10, padding: "8px 11px", whiteSpace: "nowrap" }}>This quarter ›</span>
             </div>
 
-            <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 22, display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 22, display: "flex", flexDirection: "column", gap: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
                   <span style={{ fontSize: 26, fontWeight: 700, color: D.blue }}>#</span>
@@ -191,7 +191,7 @@ export default function GlobalDashboard() {
               {/* AI Assistant teaser */}
               <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, padding: 16, background: D.copilotGrad }}>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>AI Assistant</div>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "rgba(10,12,18,0.6)", borderRadius: 14, padding: "10px 14px", fontSize: 12, color: D.text2, lineHeight: 1.5, marginTop: 16 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8, background: D.chatBubble, borderRadius: 14, padding: "10px 14px", fontSize: 12, color: D.text2, lineHeight: 1.5, marginTop: 16 }}>
                   <span style={{ width: 11, height: 11, marginTop: 2, borderRadius: "50%", borderStyle: "solid", borderWidth: 2, borderColor: D.blue, borderTopColor: "transparent", flexShrink: 0 }} />
                   <span style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{insightBusy ? "Thinking…" : insight}</span>
                 </div>
@@ -205,7 +205,7 @@ export default function GlobalDashboard() {
               <div style={{ fontSize: 15, fontWeight: 700 }}>Lane breakdown</div>
               <div style={{ fontSize: 12.5, color: D.text4, marginTop: 3 }}>AI fit across all candidates</div>
             </div>
-            <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20, display: "flex", flexDirection: "column" }}>
+            <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20, display: "flex", flexDirection: "column" }}>
               <div style={{ display: "flex", height: 14, borderRadius: 8, overflow: "hidden", marginBottom: 22, background: D.inset }}>
                 <div style={{ width: `${lanes.green.pct}%`, background: D.green }} />
                 <div style={{ width: `${lanes.amber.pct}%`, background: D.amber }} />

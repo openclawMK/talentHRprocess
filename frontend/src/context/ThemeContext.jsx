@@ -28,6 +28,7 @@ const DARK = {
   pillBg: "#20222B", pillBorder: "#2C2E39",
   avatarBlue: "#3B6FF6", avatarPurple: "#6D4BF0", avatarGrey: "#2A2B33",
   copilotGrad: "radial-gradient(120% 80% at 80% 0%,#2A2410 0%,#141417 45%)",
+  chatBubble: "rgba(10,12,18,0.6)",
   font: "'Hanken Grotesk', sans-serif",
 };
 
@@ -53,6 +54,7 @@ const LIGHT = {
   pillBg: "#F3F4F8", pillBorder: "#E2E4EC",
   avatarBlue: "#4F46E5", avatarPurple: "#7C3AED", avatarGrey: "#E5E7EB",
   copilotGrad: "radial-gradient(120% 80% at 80% 0%,#FFF7E6 0%,#FFFFFF 45%)",
+  chatBubble: "#EEF0F5",
   font: "'Hanken Grotesk', sans-serif",
 };
 
