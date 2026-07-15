@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { usePalette } from "../context/ThemeContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
-const card = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 22, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
 const OCEAN_LEVELS = ["low", "medium-low", "medium", "medium-high", "high"];
 const LEVEL_PCT = { low: 20, "medium-low": 40, medium: 60, "medium-high": 80, high: 100 };
 const TRAITS = [
@@ -29,6 +29,9 @@ const EMPTY = {
 export default function SuccessProfile() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const D = usePalette();
+  const card = { background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 22 };
+  const benchInput = { width: 90, padding: "6px 10px", border: `0.5px solid ${D.border}`, borderRadius: 8, fontSize: 14, fontWeight: 700, textAlign: "right", outline: "none", background: D.cardBg, color: D.text };
   const [job, setJob] = useState(null);
   const [profile, setProfile] = useState(null);
   const [generating, setGenerating] = useState(false);
@@ -80,7 +83,7 @@ export default function SuccessProfile() {
 
   return (
     <div style={{ maxWidth: 960, margin: "0 auto" }} className="pb-8">
-      <div onClick={() => navigate(`/jobs/${jobId}/dashboard`)} style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to candidates</div>
+      <div onClick={() => navigate(`/jobs/${jobId}/dashboard`)} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to candidates</div>
 
       {/* Banner */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(135deg,#F5F3FF,#EEF2FF)", border: "1px solid #E9E5FF", borderRadius: 16, padding: "18px 22px", marginBottom: 22 }} className="flex-wrap gap-3">
@@ -99,21 +102,21 @@ export default function SuccessProfile() {
 
       {/* 2x2 grid */}
       <div className="grid gap-4 sm:grid-cols-2" style={{ marginBottom: 16 }}>
-        {["must", "nice", "deal"].map((k) => <PillCard key={k} cfg={PILL[k]} items={profile[PILL[k].key]} onChange={(v) => set(PILL[k].key, v)} />)}
+        {["must", "nice", "deal"].map((k) => <PillCard key={k} cfg={PILL[k]} items={profile[PILL[k].key]} onChange={(v) => set(PILL[k].key, v)} card={card} D={D} />)}
         {/* Benchmarks */}
         <div style={card}>
-          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16 }}>Benchmarks</div>
+          <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 16, color: D.text }}>Benchmarks</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <Bench label="Ideal experience (years)"><input type="number" min="0" value={profile.benchmark_experience_years} onChange={(e) => set("benchmark_experience_years", Number(e.target.value))} style={benchInput} /></Bench>
-            <Bench label="Team size led"><input type="number" min="0" value={profile.benchmark_team_size} onChange={(e) => set("benchmark_team_size", Number(e.target.value))} style={benchInput} /></Bench>
-            <Bench label="Education"><input value={profile.benchmark_education} onChange={(e) => set("benchmark_education", e.target.value)} placeholder="e.g. Diploma or above" style={{ ...benchInput, width: 200 }} /></Bench>
-            <div style={{ height: 1, background: "#F1F2F6", margin: "2px 0" }} />
-            <Bench label="Salary budget — min (RM/mo)"><input type="number" min="0" value={profile.salary_budget_min} onChange={(e) => set("salary_budget_min", Number(e.target.value))} placeholder="e.g. 1800" style={benchInput} /></Bench>
-            <Bench label="Salary budget — max (RM/mo)"><input type="number" min="0" value={profile.salary_budget_max} onChange={(e) => set("salary_budget_max", Number(e.target.value))} placeholder="e.g. 2800" style={benchInput} /></Bench>
+            <Bench label="Ideal experience (years)" D={D}><input type="number" min="0" value={profile.benchmark_experience_years} onChange={(e) => set("benchmark_experience_years", Number(e.target.value))} style={benchInput} /></Bench>
+            <Bench label="Team size led" D={D}><input type="number" min="0" value={profile.benchmark_team_size} onChange={(e) => set("benchmark_team_size", Number(e.target.value))} style={benchInput} /></Bench>
+            <Bench label="Education" D={D}><input value={profile.benchmark_education} onChange={(e) => set("benchmark_education", e.target.value)} placeholder="e.g. Diploma or above" style={{ ...benchInput, width: 200 }} /></Bench>
+            <div style={{ height: 1, background: D.border, margin: "2px 0" }} />
+            <Bench label="Salary budget — min (RM/mo)" D={D}><input type="number" min="0" value={profile.salary_budget_min} onChange={(e) => set("salary_budget_min", Number(e.target.value))} placeholder="e.g. 1800" style={benchInput} /></Bench>
+            <Bench label="Salary budget — max (RM/mo)" D={D}><input type="number" min="0" value={profile.salary_budget_max} onChange={(e) => set("salary_budget_max", Number(e.target.value))} placeholder="e.g. 2800" style={benchInput} /></Bench>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12.5, color: "#6B7280" }}>Suggest from market for a</span>
-            <select value={salLevel} onChange={(e) => setSalLevel(e.target.value)} style={{ fontSize: 12.5, padding: "5px 8px", border: "1px solid #E2E4EC", borderRadius: 8 }}>
+            <span style={{ fontSize: 12.5, color: D.text3 }}>Suggest from market for a</span>
+            <select value={salLevel} onChange={(e) => setSalLevel(e.target.value)} style={{ fontSize: 12.5, padding: "5px 8px", border: `0.5px solid ${D.border}`, borderRadius: 8, background: D.cardBg, color: D.text2 }}>
               <option value="junior">junior (0–2 yrs)</option>
               <option value="mid">mid (3–5 yrs)</option>
               <option value="senior">senior (6+ yrs)</option>
@@ -121,14 +124,14 @@ export default function SuccessProfile() {
             <button onClick={suggestSalaryFromMarket} disabled={salSuggesting} style={{ fontSize: 12.5, fontWeight: 600, padding: "6px 12px", background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 8, cursor: "pointer" }}>✨ {salSuggesting ? "Fetching…" : "Suggest"}</button>
           </div>
           {salNote && <div style={{ fontSize: 12, color: "#047857", marginTop: 8 }}>{salNote}</div>}
-          <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 8 }}>Salary now feeds the Profile-fit score (does their expected pay match their experience for this role?) — and still flags budget fit.</div>
+          <div style={{ fontSize: 12, color: D.text4, marginTop: 8 }}>Salary now feeds the Profile-fit score (does their expected pay match their experience for this role?) — and still flags budget fit.</div>
         </div>
       </div>
 
       {/* Ideal OCEAN */}
       <div style={{ ...card, marginBottom: 22 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Ideal OCEAN profile</div>
-        <div style={{ fontSize: 13, color: "#9AA0AE", marginBottom: 20 }}>Target personality traits for top performers in this role</div>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, color: D.text }}>Ideal OCEAN profile</div>
+        <div style={{ fontSize: 13, color: D.text4, marginBottom: 20 }}>Target personality traits for top performers in this role</div>
         <div className="grid grid-cols-2 gap-5 sm:grid-cols-5">
           {TRAITS.map(([key, lbl, desc]) => {
             const val = profile.ideal_ocean_profile?.[key] || "medium";
@@ -136,11 +139,11 @@ export default function SuccessProfile() {
             return (
               <div key={key}>
                 <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 4 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: "#374151" }}>{lbl}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: D.text2 }}>{lbl}</span>
                   <span style={{ fontSize: 12, fontWeight: 700, color: "#6366F1", textTransform: "capitalize" }}>{val}</span>
                 </div>
-                <div style={{ fontSize: 11.5, color: "#9AA0AE", lineHeight: 1.4, marginBottom: 10, minHeight: 30 }}>{desc}</div>
-                <div style={{ height: 8, background: "#F1F2F6", borderRadius: 5, overflow: "hidden", marginBottom: 8 }}><div style={{ height: "100%", width: `${LEVEL_PCT[val]}%`, background: "linear-gradient(90deg,#818CF8,#7C3AED)", borderRadius: 5 }} /></div>
+                <div style={{ fontSize: 11.5, color: D.text4, lineHeight: 1.4, marginBottom: 10, minHeight: 30 }}>{desc}</div>
+                <div style={{ height: 8, background: D.inset, borderRadius: 5, overflow: "hidden", marginBottom: 8 }}><div style={{ height: "100%", width: `${LEVEL_PCT[val]}%`, background: "linear-gradient(90deg,#818CF8,#7C3AED)", borderRadius: 5 }} /></div>
                 <input type="range" min="0" max="4" value={idx < 0 ? 2 : idx} onChange={(e) => set("ideal_ocean_profile", { ...profile.ideal_ocean_profile, [key]: OCEAN_LEVELS[Number(e.target.value)] })} className="w-full accent-violet-600" />
               </div>
             );
@@ -149,19 +152,18 @@ export default function SuccessProfile() {
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button onClick={() => navigate(`/jobs/${jobId}/dashboard`)} style={{ padding: "11px 18px", background: "#fff", color: "#6B7280", border: "1px solid #E2E4EC", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+        <button onClick={() => navigate(`/jobs/${jobId}/dashboard`)} style={{ padding: "11px 18px", background: D.cardBg, color: D.text3, border: `0.5px solid ${D.border}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
         <button onClick={save} disabled={saving} style={{ padding: "11px 20px", background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)", opacity: saving ? 0.7 : 1 }}>{saving ? "Saving…" : "Save success profile"}</button>
       </div>
     </div>
   );
 }
 
-const benchInput = { width: 90, padding: "6px 10px", border: "1px solid #E2E4EC", borderRadius: 8, fontSize: 14, fontWeight: 700, textAlign: "right", outline: "none" };
-function Bench({ label, children }) {
-  return <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}><span style={{ fontSize: 14, color: "#4B5563" }}>{label}</span>{children}</div>;
+function Bench({ label, children, D }) {
+  return <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}><span style={{ fontSize: 14, color: D.text3 }}>{label}</span>{children}</div>;
 }
 
-function PillCard({ cfg, items, onChange }) {
+function PillCard({ cfg, items, onChange, card, D }) {
   const [adding, setAdding] = useState(false);
   const [text, setText] = useState("");
   function add() { const v = text.trim(); if (v) onChange([...(items || []), v]); setText(""); setAdding(false); }
@@ -175,9 +177,9 @@ function PillCard({ cfg, items, onChange }) {
           </span>
         ))}
         {adding ? (
-          <input autoFocus value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") add(); if (e.key === "Escape") { setText(""); setAdding(false); } }} onBlur={add} placeholder="Type & Enter" style={{ fontSize: 13, padding: "7px 12px", border: "1px solid #D6D8E3", borderRadius: 9, outline: "none", minWidth: 120 }} />
+          <input autoFocus value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") add(); if (e.key === "Escape") { setText(""); setAdding(false); } }} onBlur={add} placeholder="Type & Enter" style={{ fontSize: 13, padding: "7px 12px", border: `0.5px solid ${D.border}`, borderRadius: 9, outline: "none", minWidth: 120, background: D.cardBg, color: D.text }} />
         ) : (
-          <span onClick={() => setAdding(true)} style={{ fontSize: 13, fontWeight: 500, color: "#9AA0AE", background: "#fff", border: "1px dashed #D6D8E3", padding: "7px 12px", borderRadius: 9, cursor: "pointer" }}>＋ Add</span>
+          <span onClick={() => setAdding(true)} style={{ fontSize: 13, fontWeight: 500, color: D.text4, background: D.cardBg, border: `1px dashed ${D.border}`, padding: "7px 12px", borderRadius: 9, cursor: "pointer" }}>＋ Add</span>
         )}
       </div>
     </div>

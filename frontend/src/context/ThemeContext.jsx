@@ -59,12 +59,10 @@ const LIGHT = {
 const PALETTES = { dark: DARK, light: LIGHT };
 
 export function ThemeProvider({ children }) {
-  // Defaults to light until every screen is converted to the palette —
-  // several screens still have hardcoded white cards with no explicit text
-  // color, which read as invisible white-on-white if dark is forced on.
-  // The toggle still lets anyone preview dark on the screens that are done.
+  // Every workspace screen now reads from the palette (no hardcoded white
+  // cards left), so dark — matching the client mockup — is the default.
   const [theme, setTheme] = useState(() => {
-    try { const saved = localStorage.getItem(KEY); return saved === "dark" ? "dark" : "light"; } catch { return "light"; }
+    try { const saved = localStorage.getItem(KEY); return saved === "light" ? "light" : "dark"; } catch { return "dark"; }
   });
 
   useEffect(() => {
