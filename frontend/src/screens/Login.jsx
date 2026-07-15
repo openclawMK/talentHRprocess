@@ -4,6 +4,11 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
+const BORDER = "#ECEDF2";
+const TEXT_SECONDARY = "#6B7280";
+const ACCENT_1 = "#6366F1";
+const ACCENT_2 = "#7C3AED";
+const ACCENT_BG = "#F0F0FE";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -30,102 +35,98 @@ export default function Login() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      {/* Left hero */}
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F6FA", padding: 20 }}>
       <div
-        className="relative hidden flex-col justify-between overflow-hidden md:flex"
         style={{
-          width: "46%",
-          background: "linear-gradient(155deg, #312E81 0%, #4F46E5 52%, #7C3AED 100%)",
-          color: "#fff",
-          padding: "56px 60px",
+          width: "100%",
+          maxWidth: 940,
+          display: "flex",
+          background: "#fff",
+          border: `1px solid ${BORDER}`,
+          borderRadius: 16,
+          boxShadow: "0 1px 2px rgba(16,24,40,.04)",
+          overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", width: 460, height: 460, borderRadius: "50%", background: "rgba(255,255,255,.07)", top: -160, right: -140 }} />
-        <div style={{ position: "absolute", width: 320, height: 320, borderRadius: "50%", background: "rgba(255,255,255,.05)", bottom: -120, left: -80 }} />
-
-        <div style={{ display: "flex", alignItems: "center", gap: 12, position: "relative" }}>
-          <div style={{ width: 42, height: 42, borderRadius: 12, background: "rgba(255,255,255,.18)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 18 }}>PQ</div>
-          <div style={{ fontWeight: 700, fontSize: 19, letterSpacing: "-.2px" }}>PeopleQuest</div>
-        </div>
-
-        <div style={{ position: "relative" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, letterSpacing: "1.4px", textTransform: "uppercase", opacity: 0.7, marginBottom: 18 }}>Talent AI</div>
-          <h1 className="font-display" style={{ fontSize: 42, lineHeight: 1.12, fontWeight: 800, margin: "0 0 20px", letterSpacing: "-1px" }}>
-            Hire with<br />confidence, not<br />guesswork.
-          </h1>
-          <p style={{ fontSize: 16, lineHeight: 1.6, opacity: 0.82, maxWidth: 380, margin: "0 0 30px" }}>
-            AI screens every CV, scores candidates across multiple dimensions, and tells you who to hire — with the reasons to back it up.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {[
-              "Score 200 CVs in the time it takes to read one",
-              "Transparent 3-layer scoring you can defend",
-              "Hire / Hold / Reject with a confidence level",
-            ].map((t) => (
-              <div key={t} style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 15 }}>
-                <span style={{ width: 22, height: 22, borderRadius: "50%", background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>✓</span>
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ position: "relative", fontSize: 13, opacity: 0.6 }}>PeopleQuest Sdn Bhd · Kuala Lumpur</div>
-      </div>
-
-      {/* Right form */}
-      <div className="flex flex-1 items-center justify-center p-10" style={{ backgroundColor: "#fff" }}>
-        <form onSubmit={submit} style={{ width: "100%", maxWidth: 380 }}>
-          <h2 className="font-display" style={{ fontSize: 26, fontWeight: 700, margin: "0 0 6px", letterSpacing: "-.4px" }}>Welcome back</h2>
-          <p style={{ fontSize: 15, color: "#6B7280", margin: "0 0 30px" }}>Sign in to your HR workspace</p>
-
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 7 }}>Work email</label>
-          <input
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "100%", padding: "12px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 15, color: "#111827", marginBottom: 18, background: "#fff", outline: "none" }}
-          />
-
-          <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 7 }}>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "100%", padding: "12px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 15, color: "#111827", marginBottom: 14, background: "#fff", outline: "none" }}
-          />
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#4B5563", cursor: "pointer" }}>
-              <span
-                onClick={() => setRemember((v) => !v)}
-                style={{ width: 16, height: 16, borderRadius: 5, background: remember ? GRAD : "#E2E4EC", display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 11 }}
-              >
-                {remember ? "✓" : ""}
-              </span>
-              Remember me
-            </label>
-            <a style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer" }}>Forgot password?</a>
-          </div>
-
-          {error && <p style={{ color: "#DC2626", fontSize: 14, margin: "0 0 14px" }}>{error}</p>}
-
-          <button
-            type="submit"
-            disabled={busy}
-            style={{ width: "100%", padding: 13, background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 15, cursor: "pointer", boxShadow: "0 6px 18px rgba(99,102,241,.32)", opacity: busy ? 0.7 : 1 }}
-          >
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
-
-          <div style={{ marginTop: 24, padding: "14px 16px", background: "#F5F3FF", border: "1px solid #E9E5FF", borderRadius: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: "#6D28D9", letterSpacing: ".4px", textTransform: "uppercase", marginBottom: 6 }}>Demo credentials</div>
-            <div style={{ fontSize: 13, color: "#5B5570", lineHeight: 1.7 }}>
-              Email <b style={{ color: "#312E81" }}>hr@peoplequest.my</b><br />
-              Password <b style={{ color: "#312E81" }}>peoplequest</b>
+        {/* Left hero */}
+        <div
+          className="relative hidden flex-col justify-between md:flex"
+          style={{ width: "44%", background: GRAD, color: "#fff", padding: "44px 40px" }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 26 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 9, background: "#fff", color: ACCENT_2, fontWeight: 700, fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>PQ</div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>PeopleQuest</div>
+            </div>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", opacity: 0.75, fontWeight: 600, marginBottom: 14, textTransform: "uppercase" }}>Talent AI</div>
+            <h1 style={{ fontSize: 26, lineHeight: 1.25, fontWeight: 600, margin: "0 0 12px" }}>Hire with confidence, not guesswork.</h1>
+            <p style={{ fontSize: 13, opacity: 0.85, lineHeight: 1.6, margin: "0 0 18px" }}>
+              Score CVs, run OCEAN personality assessments, and interview against a transparent 3-layer model — all in one workspace.
+            </p>
+            <div>
+              {[
+                "Score 200 CVs while you make coffee",
+                "Transparent 3-layer scoring, no black box",
+                "Hire / Hold / Reject — decided, not guessed",
+              ].map((t) => (
+                <div key={t} style={{ display: "flex", gap: 8, fontSize: 12.5, opacity: 0.92, marginBottom: 9 }}>
+                  <span>✓</span>{t}
+                </div>
+              ))}
             </div>
           </div>
-        </form>
+          <div style={{ fontSize: 11, opacity: 0.65 }}>PeopleQuest Sdn Bhd · Kuala Lumpur</div>
+        </div>
+
+        {/* Right form */}
+        <div className="flex flex-1 items-center justify-center" style={{ padding: 30 }}>
+          <form onSubmit={submit} style={{ width: "100%", maxWidth: 340 }}>
+            <h1 style={{ fontSize: 19, fontWeight: 600, margin: "0 0 3px" }}>Welcome back</h1>
+            <p style={{ fontSize: 12.5, color: TEXT_SECONDARY, margin: "0 0 18px" }}>Sign in to your HR workspace.</p>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: TEXT_SECONDARY, marginBottom: 6 }}>Work email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ width: "100%", fontSize: 13, padding: "8px 11px", borderRadius: 10, border: `1px solid ${BORDER}`, background: "#fff", color: "#111827", outline: "none" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 500, color: TEXT_SECONDARY, marginBottom: 6 }}>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ width: "100%", fontSize: 13, padding: "8px 11px", borderRadius: 10, border: `1px solid ${BORDER}`, background: "#fff", color: "#111827", outline: "none" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 12, color: TEXT_SECONDARY, marginBottom: 16 }}>
+              <label style={{ display: "flex", gap: 6, alignItems: "center", cursor: "pointer" }}>
+                <input type="checkbox" checked={remember} onChange={() => setRemember((v) => !v)} style={{ width: "auto" }} />
+                Remember me
+              </label>
+              <a style={{ color: ACCENT_1, cursor: "pointer" }}>Forgot password?</a>
+            </div>
+
+            {error && <p style={{ color: "#DC2626", fontSize: 13, margin: "0 0 14px" }}>{error}</p>}
+
+            <button
+              type="submit"
+              disabled={busy}
+              style={{ width: "100%", justifyContent: "center", display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 15px", borderRadius: 10, fontSize: 13, fontWeight: 500, background: GRAD, color: "#fff", border: "none", cursor: "pointer", opacity: busy ? 0.7 : 1 }}
+            >
+              {busy ? "Signing in…" : "Sign in"}
+            </button>
+
+            <div style={{ background: ACCENT_BG, borderRadius: 12, padding: "12px 14px", fontSize: 12, color: ACCENT_2, marginTop: 16 }}>
+              <b>Demo credentials</b><br />hr@peoplequest.my / peoplequest
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
