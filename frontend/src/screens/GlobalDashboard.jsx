@@ -170,10 +170,17 @@ export default function GlobalDashboard() {
               )}
 
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderTop: `0.5px solid ${D.border}`, marginTop: 16, paddingTop: 16 }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
-                  <span style={{ fontSize: 30, fontWeight: 800, color: D.blue }}>{a.score_trend_delta_pct != null ? `${a.score_trend_delta_pct >= 0 ? "+" : ""}${Math.round(a.score_trend_delta_pct)}` : "—"}</span>
-                  <span style={{ fontSize: 16, fontWeight: 600, color: D.text3 }}>% avg</span>
-                </div>
+                {a.score_trend_delta_pct != null ? (
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                    <span style={{ fontSize: 30, fontWeight: 800, color: D.blue }}>{a.score_trend_delta_pct >= 0 ? "+" : ""}{Math.round(a.score_trend_delta_pct)}</span>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: D.text3 }}>% avg</span>
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                    <span style={{ fontSize: 30, fontWeight: 800, color: D.blue }}>{trend[trend.length - 1]?.avg ?? a.avg_score ?? 0}</span>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: D.text3 }}>avg score</span>
+                  </div>
+                )}
                 <span style={{ fontSize: 11, color: D.text4 }}>Last updated {new Date(a.generated_at).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</span>
               </div>
             </div>
@@ -239,11 +246,11 @@ export default function GlobalDashboard() {
               </div>
 
               {/* AI Assistant teaser */}
-              <div style={{ position: "relative", height: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, overflow: "hidden", background: "radial-gradient(120% 80% at 80% 0%,#2A2410 0%,#141417 45%)" }}>
-                <div style={{ position: "absolute", top: 16, left: 18, fontSize: 14, fontWeight: 600 }}>AI Assistant</div>
-                <div style={{ position: "absolute", left: 18, right: 18, bottom: 16, display: "flex", alignItems: "center", gap: 8, background: "rgba(10,12,18,0.6)", borderRadius: 999, padding: "8px 14px", fontSize: 12, color: D.text2 }}>
-                  <span style={{ width: 11, height: 11, borderRadius: "50%", border: `2px solid ${D.blue}`, borderTopColor: "transparent", flexShrink: 0 }} />
-                  {insightBusy ? "Thinking…" : insight}
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, padding: 16, background: "radial-gradient(120% 80% at 80% 0%,#2A2410 0%,#141417 45%)" }}>
+                <div style={{ fontSize: 14, fontWeight: 600 }}>AI Assistant</div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "rgba(10,12,18,0.6)", borderRadius: 14, padding: "10px 14px", fontSize: 12, color: D.text2, lineHeight: 1.5, marginTop: 16 }}>
+                  <span style={{ width: 11, height: 11, marginTop: 2, borderRadius: "50%", border: `2px solid ${D.blue}`, borderTopColor: "transparent", flexShrink: 0 }} />
+                  <span style={{ display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{insightBusy ? "Thinking…" : insight}</span>
                 </div>
               </div>
             </div>
