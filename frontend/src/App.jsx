@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import WorkspaceLayout from "./components/WorkspaceLayout.jsx";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 import Login from "./screens/Login.jsx";
 import GlobalDashboard from "./screens/GlobalDashboard.jsx";
@@ -56,6 +57,7 @@ function HRApp() {
 export default function App() {
   return (
     <AuthProvider>
+      <ThemeProvider>
       <Routes>
         {/* Public candidate portal — no HR chrome, no auth */}
         <Route path="/apply/:token" element={<CandidatePortal />} />
@@ -75,6 +77,7 @@ export default function App() {
           }
         />
       </Routes>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

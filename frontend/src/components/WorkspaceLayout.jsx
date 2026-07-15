@@ -2,29 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import {
-  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet,
+  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet, Sun, Moon,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
+import { useTheme } from "../context/ThemeContext.jsx";
 import AskAssistant from "./AskAssistant.jsx";
-
-const LANE_DOT = { green: "#3FB984", amber: "#E0A33A", red: "#E5654C" };
-
-// Dark shell palette — matches the GlobalDashboard redesign panel so the
-// chrome and the home screen's "My Pipelines" panel read as one design.
-const D = {
-  page: "#0B0B0D",
-  cardBg: "#141417",
-  border: "#24252C",
-  hair: "#1B1C21",
-  railActive: "#17181C",
-  text: "#F4F5F7",
-  text2: "#C9CAD0",
-  text3: "#8A8B92",
-  text4: "#6E6F76",
-  text5: "#5C5D66",
-  blue: "#4C7DFB",
-  font: "'Hanken Grotesk', sans-serif",
-};
 
 const NAV = [
   { to: "/", label: "Home", fullLabel: "Dashboard", icon: LayoutGrid, section: "WORKSPACE", match: (p) => p === "/" },
@@ -38,6 +20,8 @@ export default function WorkspaceLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { theme, palette: D, toggle: toggleTheme } = useTheme();
+  const LANE_DOT = { green: D.green, amber: D.amber, red: D.red };
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -146,7 +130,7 @@ export default function WorkspaceLayout({ children }) {
   );
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#F3F4F8", fontFamily: D.font }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: D.page, color: D.text, fontFamily: D.font }}>
       {/* Desktop icon rail */}
       <aside className="fixed inset-y-0 left-0 hidden w-[72px] flex-col items-center py-[18px] lg:flex" style={{ backgroundColor: D.page, borderRight: `0.5px solid ${D.hair}` }}>
         <Link to="/" className="mb-4 flex h-9 w-9 items-center justify-center rounded-[11px] text-[13px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</Link>
@@ -255,6 +239,10 @@ export default function WorkspaceLayout({ children }) {
               </div>
             )}
           </div>
+
+          <button onClick={toggleTheme} title={theme === "dark" ? "Switch to light" : "Switch to dark"} className="flex h-9 w-9 items-center justify-center rounded-[11px]" style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, color: D.text3 }}>
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
 
           <button onClick={signOut} title="Sign out" className="flex items-center gap-2.5 rounded-[11px] py-1 pl-2 pr-1" style={{ color: D.text4 }}>
             <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>

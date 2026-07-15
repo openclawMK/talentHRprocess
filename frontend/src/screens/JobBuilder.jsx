@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { usePalette } from "../context/ThemeContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
 // Fallback list if the industries lookup fails — the live list is fetched from
@@ -17,13 +18,13 @@ const INTERVIEW_CRITERIA_OPTIONS = [
   { value: 6, label: "6", hint: "Max detail" },
 ];
 
-const input = { width: "100%", padding: "11px 14px", border: "1px solid #E2E4EC", borderRadius: 10, fontSize: 15, color: "#111827", outline: "none", background: "#fff" };
-const label = { display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 7 };
-
 export default function JobBuilder() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const presetCompanyId = params.get("company") || "";
+  const D = usePalette();
+  const input = { width: "100%", padding: "11px 14px", border: `0.5px solid ${D.border}`, borderRadius: 10, fontSize: 15, color: D.text, outline: "none", background: D.cardBg };
+  const label = { display: "block", fontSize: 13, fontWeight: 600, color: D.text2, marginBottom: 7 };
 
   const [form, setForm] = useState({ role_title: "", industry: "F&B / Retail / Hospitality", location: "Kuala Lumpur", role_level: "entry", experience_years_min: 1, education_level_min: "SPM", key_responsibilities: "" });
   const [interviewCriteriaCount, setInterviewCriteriaCount] = useState(3);
@@ -90,12 +91,12 @@ export default function JobBuilder() {
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
-      <div onClick={() => navigate(companyId ? `/companies/${companyId}` : "/companies")} style={{ fontSize: 14, color: "#6366F1", fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back</div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 6px" }}>Create a new role</h1>
-      <p style={{ fontSize: 15, color: "#6B7280", margin: "0 0 26px" }}>Fill in the basics — next you'll define the Success Profile that scores every candidate.</p>
+      <div onClick={() => navigate(companyId ? `/companies/${companyId}` : "/companies")} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back</div>
+      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 6px", color: D.text }}>Create a new role</h1>
+      <p style={{ fontSize: 15, color: D.text3, margin: "0 0 26px" }}>Fill in the basics — next you'll define the Success Profile that scores every candidate.</p>
 
       {/* Company */}
-      <div style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 26, boxShadow: "0 1px 2px rgba(16,24,40,.04)", marginBottom: 16 }}>
+      <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 26, marginBottom: 16 }}>
         <label style={label}>Company</label>
         {!newCompanyMode ? (
           <div style={{ display: "flex", gap: 10 }}>
@@ -113,14 +114,14 @@ export default function JobBuilder() {
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button type="button" onClick={createCompany} disabled={creatingCompany || !newCompany.name.trim()} style={{ padding: "9px 15px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer", opacity: creatingCompany || !newCompany.name.trim() ? 0.5 : 1 }}>{creatingCompany ? "Creating…" : "Create company"}</button>
-              <button type="button" onClick={() => setNewCompanyMode(false)} style={{ padding: "9px 15px", background: "transparent", color: "#9AA0AE", border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancel</button>
+              <button type="button" onClick={() => setNewCompanyMode(false)} style={{ padding: "9px 15px", background: "transparent", color: D.text4, border: "none", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancel</button>
             </div>
           </div>
         )}
       </div>
 
       {/* Role form */}
-      <div style={{ background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, padding: 26, boxShadow: "0 1px 2px rgba(16,24,40,.04)", marginBottom: 16 }}>
+      <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 26, marginBottom: 16 }}>
         <div className="grid gap-[18px] sm:grid-cols-2" style={{ marginBottom: 18 }}>
           <div>
             <label style={label}>Job title</label>
@@ -143,7 +144,7 @@ export default function JobBuilder() {
             <div style={{ display: "flex", gap: 8 }}>
               {ROLE_LEVELS.map((rl) => (
                 <button key={rl.value} type="button" onClick={() => set("role_level", rl.value)}
-                  style={{ flex: 1, padding: "11px 8px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${form.role_level === rl.value ? "#7C3AED" : "#E2E4EC"}`, background: form.role_level === rl.value ? "#F5F3FF" : "#fff", color: form.role_level === rl.value ? "#6D28D9" : "#374151" }}>{rl.label}</button>
+                  style={{ flex: 1, padding: "11px 8px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${form.role_level === rl.value ? "#7C3AED" : D.border}`, background: form.role_level === rl.value ? "#F5F3FF" : D.cardBg, color: form.role_level === rl.value ? "#6D28D9" : D.text2 }}>{rl.label}</button>
               ))}
             </div>
           </div>
@@ -153,10 +154,10 @@ export default function JobBuilder() {
           <div style={{ display: "flex", gap: 8 }}>
             {INTERVIEW_CRITERIA_OPTIONS.map((o) => (
               <button key={o.value} type="button" onClick={() => setInterviewCriteriaCount(o.value)}
-                style={{ flex: 1, padding: "9px 8px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${interviewCriteriaCount === o.value ? "#7C3AED" : "#E2E4EC"}`, background: interviewCriteriaCount === o.value ? "#F5F3FF" : "#fff", color: interviewCriteriaCount === o.value ? "#6D28D9" : "#374151" }}>{o.label} <span style={{ fontWeight: 500, opacity: 0.7 }}>· {o.hint}</span></button>
+                style={{ flex: 1, padding: "9px 8px", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${interviewCriteriaCount === o.value ? "#7C3AED" : D.border}`, background: interviewCriteriaCount === o.value ? "#F5F3FF" : D.cardBg, color: interviewCriteriaCount === o.value ? "#6D28D9" : D.text2 }}>{o.label} <span style={{ fontWeight: 500, opacity: 0.7 }}>· {o.hint}</span></button>
             ))}
           </div>
-          <div style={{ fontSize: 12, color: "#9AA0AE", marginTop: 6 }}>How many distinct things you'll score in the interview — each gets its own weight inside the 50% interview score. More questions per criterion can still be chosen later when conducting the interview.</div>
+          <div style={{ fontSize: 12, color: D.text4, marginTop: 6 }}>How many distinct things you'll score in the interview — each gets its own weight inside the 50% interview score. More questions per criterion can still be chosen later when conducting the interview.</div>
         </div>
         <div><label style={label}>Key responsibilities (one per line)</label>
           <textarea style={{ ...input, minHeight: 120, lineHeight: 1.6, resize: "vertical" }} value={form.key_responsibilities} onChange={(e) => set("key_responsibilities", e.target.value)} placeholder={"Manage daily operations\nLead a team of 10 staff\nHandle customer escalations"} />
@@ -169,10 +170,10 @@ export default function JobBuilder() {
         <div style={{ fontSize: 13.5, color: "#6D5D9E", lineHeight: 1.55 }}>Next, you'll define this role's <b style={{ color: "#4C1D95" }}>Success Profile</b> — the ideal candidate (must-haves, dealbreakers, personality, salary budget). AI drafts it for you; you review and adjust before it starts scoring candidates.</div>
       </div>
 
-      {error && <div style={{ color: "#DC2626", fontSize: 14, marginBottom: 14 }}>{error}</div>}
+      {error && <div style={{ color: D.red, fontSize: 14, marginBottom: 14 }}>{error}</div>}
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-        <button onClick={() => navigate("/companies")} style={{ padding: "12px 18px", background: "#fff", color: "#6B7280", border: "1px solid #E2E4EC", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
+        <button onClick={() => navigate("/companies")} style={{ padding: "12px 18px", background: D.cardBg, color: D.text3, border: `0.5px solid ${D.border}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
         <button onClick={save} disabled={!valid || saving} style={{ padding: "12px 22px", background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)", opacity: !valid || saving ? 0.5 : 1 }}>
           {saving ? "Creating…" : "Continue to Success Profile →"}
         </button>

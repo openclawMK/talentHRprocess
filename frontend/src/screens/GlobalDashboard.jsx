@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext.jsx";
+import { usePalette } from "../context/ThemeContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
 const card = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 16, boxShadow: "0 1px 2px rgba(16,24,40,.04)" };
@@ -13,37 +14,7 @@ const QUICK = [
   { icon: "💰", title: "Salary Center", sub: "Benchmark pay against the Malaysian market", ibg: "#FFF7ED", ic: "#C2410C", to: "/salary-center" },
 ];
 
-// Dark redesign palette — extracted pixel-for-pixel (computed styles + CSS
-// custom properties) from the client-supplied mockup.
-const D = {
-  page: "#0B0B0D",
-  cardBg: "#141417",
-  inset: "#0E1016",
-  border: "#24252C",
-  hair: "#1B1C21",
-  text: "#F4F5F7",
-  text2: "#C9CAD0",
-  text3: "#8A8B92",
-  textMuted: "#8A8B92",
-  text4: "#6E6F76",
-  textDim: "#6E6F76",
-  text5: "#5C5D66",
-  blue: "#4C7DFB",
-  green: "#3FB984", greenBg: "rgba(63,185,132,0.14)", greenBorder: "rgba(63,185,132,0.28)",
-  amber: "#E0A33A", amberBg: "rgba(224,163,58,0.14)", amberBorder: "rgba(224,163,58,0.28)",
-  red: "#E5654C", redBg: "rgba(229,101,76,0.14)", redBorder: "rgba(229,101,76,0.28)",
-  gold: "#E8B23A", goldText: "#3A2A06",
-  pillBg: "#20222B", pillBorder: "#2C2E39",
-  avatarBlue: "#3B6FF6", avatarPurple: "#6D4BF0", avatarGrey: "#2A2B33",
-  font: "'Hanken Grotesk', sans-serif",
-};
-const LANE = {
-  green: { label: "Strong", c: D.green, bg: D.greenBg, border: D.greenBorder },
-  amber: { label: "Review", c: D.amber, bg: D.amberBg, border: D.amberBorder },
-  red: { label: "Likely no", c: D.red, bg: D.redBg, border: D.redBorder },
-};
 const STAGE_LABEL = { cv_submission: "CV review", ocean_assessment: "OCEAN", interview: "Interview", offer: "Offer", rejected: "Rejected" };
-function avatarBg(i) { return [D.avatarBlue, D.avatarPurple][i % 2]; }
 
 const INSIGHT_PROMPTS = [
   "In one short, specific sentence, what's the single most useful thing I should look at in my hiring pipeline right now?",
@@ -54,6 +25,13 @@ const INSIGHT_PROMPTS = [
 export default function GlobalDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const D = usePalette();
+  const LANE = {
+    green: { label: "Strong", c: D.green, bg: D.greenBg, border: D.greenBorder },
+    amber: { label: "Review", c: D.amber, bg: D.amberBg, border: D.amberBorder },
+    red: { label: "Likely no", c: D.red, bg: D.redBg, border: D.redBorder },
+  };
+  const avatarBg = (i) => [D.avatarBlue, D.avatarPurple][i % 2];
   const [a, setA] = useState(null);
   const [recent, setRecent] = useState(null);
   const [promoDismissed, setPromoDismissed] = useState(() => localStorage.getItem("pq_hide_promo") === "1");
@@ -152,7 +130,7 @@ export default function GlobalDashboard() {
 
               <div style={{ display: "flex", background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 12, padding: 4, marginTop: 16 }}>
                 {["Week", "Month", "Quarter"].map((p) => (
-                  <div key={p} style={{ flex: 1, textAlign: "center", fontSize: 12, fontWeight: p === "Month" ? 600 : 400, color: p === "Month" ? "#fff" : D.text4, background: p === "Month" ? "#20263A" : "transparent", borderRadius: 9, padding: 7 }}>{p}</div>
+                  <div key={p} style={{ flex: 1, textAlign: "center", fontSize: 12, fontWeight: p === "Month" ? 600 : 400, color: p === "Month" ? D.text : D.text4, background: p === "Month" ? D.pillBg : "transparent", borderRadius: 9, padding: 7 }}>{p}</div>
                 ))}
               </div>
 
@@ -246,7 +224,7 @@ export default function GlobalDashboard() {
               </div>
 
               {/* AI Assistant teaser */}
-              <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, padding: 16, background: "radial-gradient(120% 80% at 80% 0%,#2A2410 0%,#141417 45%)" }}>
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, padding: 16, background: D.copilotGrad }}>
                 <div style={{ fontSize: 14, fontWeight: 600 }}>AI Assistant</div>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 8, background: "rgba(10,12,18,0.6)", borderRadius: 14, padding: "10px 14px", fontSize: 12, color: D.text2, lineHeight: 1.5, marginTop: 16 }}>
                   <span style={{ width: 11, height: 11, marginTop: 2, borderRadius: "50%", border: `2px solid ${D.blue}`, borderTopColor: "transparent", flexShrink: 0 }} />
