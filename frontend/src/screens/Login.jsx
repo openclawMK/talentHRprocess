@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -20,84 +20,52 @@ const GRAD_BTN = "linear-gradient(150deg,#3B6FF6,#6D4BF0)";
 const KEYFRAMES = `
 @keyframes pqauth { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 @keyframes pqglow { 0%, 100% { opacity: 0.55; transform: translate(0px, 0px) scale(1); } 50% { opacity: 1; transform: translate(6%, -4%) scale(1.2); } }
+@keyframes pqgrid { from { background-position: 0px 0px; } to { background-position: 46px 46px; } }
+@keyframes pqtwinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.65; } }
 `;
 
-// Faint drifting grid with slowly-pulsing glow nodes, matching the mockup's canvas hero background.
-function GridCanvas() {
-  const ref = useRef(null);
+// Faint drifting grid with a few pulsing glow nodes, matching the mockup's animated hero
+// background. Pure CSS (no rAF/canvas) so it's driven by the compositor, not a JS loop.
+const GRID_NODES = [
+  { top: "14%", left: "22%", delay: "0s", duration: "5.5s" },
+  { top: "38%", left: "68%", delay: "1.2s", duration: "6.2s" },
+  { top: "62%", left: "34%", delay: "2.4s", duration: "4.8s" },
+  { top: "78%", left: "58%", delay: "0.6s", duration: "5.8s" },
+  { top: "26%", left: "48%", delay: "3s", duration: "6.6s" },
+];
 
-  useEffect(() => {
-    const canvas = ref.current;
-    const ctx = canvas.getContext("2d");
-    const parent = canvas.parentElement;
-    let raf;
-    let nodes = [];
-
-    function resize() {
-      const w = parent.clientWidth;
-      const h = parent.clientHeight;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const spacing = 46;
-      const cols = Math.ceil(w / spacing);
-      const rows = Math.ceil(h / spacing);
-      nodes = Array.from({ length: 16 }, () => ({
-        x: Math.round(Math.random() * cols) * spacing,
-        y: Math.round(Math.random() * rows) * spacing,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.4 + Math.random() * 0.5,
-      }));
-    }
-
-    function draw(t) {
-      const w = parent.clientWidth;
-      const h = parent.clientHeight;
-      ctx.clearRect(0, 0, w, h);
-      const spacing = 46;
-
-      ctx.strokeStyle = "rgba(76,125,251,0.07)";
-      ctx.lineWidth = 1;
-      for (let x = 0; x <= w; x += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-        ctx.stroke();
-      }
-      for (let y = 0; y <= h; y += spacing) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-      }
-
-      for (const n of nodes) {
-        const glow = 0.25 + 0.45 * (0.5 + 0.5 * Math.sin(t * 0.001 * n.speed + n.phase));
-        const r = 34;
-        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r);
-        g.addColorStop(0, `rgba(120,150,255,${glow})`);
-        g.addColorStop(1, "rgba(120,150,255,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      raf = requestAnimationFrame(draw);
-    }
-
-    resize();
-    raf = requestAnimationFrame(draw);
-    const ro = new ResizeObserver(resize);
-    ro.observe(parent);
-    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
-  }, []);
-
-  return <canvas ref={ref} style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
+function GridBackground() {
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "repeating-linear-gradient(90deg, rgba(76,125,251,0.09) 0px, rgba(76,125,251,0.09) 1px, transparent 1px, transparent 46px), repeating-linear-gradient(0deg, rgba(76,125,251,0.09) 0px, rgba(76,125,251,0.09) 1px, transparent 1px, transparent 46px)",
+          animation: "pqgrid 6s linear infinite",
+        }}
+      />
+      {GRID_NODES.map((n, i) => (
+        <div
+          key={i}
+          style={{
+            position: "absolute",
+            top: n.top,
+            left: n.left,
+            width: 68,
+            height: 68,
+            marginLeft: -34,
+            marginTop: -34,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(120,150,255,0.7), transparent 70%)",
+            animation: `pqtwinkle ${n.duration} ease-in-out infinite`,
+            animationDelay: n.delay,
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 const TICKS = [
@@ -143,7 +111,7 @@ export default function Login() {
         style={{ width: "54%", background: "radial-gradient(120% 90% at 15% 10%, #1B2545 0%, #0E1016 55%)", padding: "56px 60px" }}
       >
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(120deg, rgba(59,111,246,.28), rgba(109,75,240,.3), rgba(59,111,246,.12), rgba(109,75,240,.28))", backgroundSize: "300% 300%", animation: "pqauth 16s ease infinite", pointerEvents: "none" }} />
-        <GridCanvas />
+        <GridBackground />
         <div style={{ position: "absolute", top: "-15%", left: "-10%", width: 520, height: 520, borderRadius: "50%", background: "radial-gradient(circle, rgba(76,125,251,.35), transparent 70%)", filter: "blur(20px)", animation: "pqglow 12s ease-in-out infinite", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: "-20%", right: "-5%", width: 460, height: 460, borderRadius: "50%", background: "radial-gradient(circle, rgba(109,75,240,.32), transparent 70%)", filter: "blur(20px)", animation: "pqglow 14s ease-in-out infinite reverse", pointerEvents: "none" }} />
 
