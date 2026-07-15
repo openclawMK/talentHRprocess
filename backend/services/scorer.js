@@ -149,6 +149,10 @@ const SP_STOP = new Set([
   "years", "year", "minimum", "min", "experience", "strong", "ability", "staff",
   "no", "any", "kind", "explanation", "month", "months", "least", "good", "able",
   "have", "has", "must", "should", "record", "level", "work", "working",
+  // Near-universal in a Malaysian CV (employer names, "Bahasa Malaysia" as a
+  // language, location) regardless of domain — too common to be a useful
+  // signal on its own; excluded from hasEvidence matching specifically.
+  "malaysian", "malaysia",
 ]);
 
 // Normalize text so "F&B" survives tokenization and matching is case-insensitive.
@@ -171,15 +175,27 @@ export function evidenceBlob(candidate) {
   return spNorm(parts.join(" | "));
 }
 
-// Does the CV show evidence for a free-text requirement? Lenient: any stemmed
-// keyword match counts (stem = first 5 chars, so supervise≈supervising).
+// Does the CV show evidence for a free-text requirement? Lenient stemming for
+// longer words (stem = first 5 chars, so supervise≈supervising); short,
+// collision-prone words (<=4 chars, e.g. "bar", "law") require a whole-word
+// match instead of a prefix, since a substring like "bar" would otherwise
+// match inside unrelated words like "barista". A SINGLE coincidental token
+// match is not enough to satisfy a whole multi-word requirement (e.g. one
+// generic word appearing anywhere in the CV shouldn't confirm a specific claim
+// like "Membership in the Malaysian Bar") — at least 2 distinct tokens must
+// match once 2+ are available; a genuinely single-token requirement still
+// needs just that one.
 export function hasEvidence(blob, requirement) {
   const tokens = spNorm(requirement)
     .replace(/[^a-z0-9 ]/g, " ")
     .split(/\s+/)
-    .filter((t) => t.length >= 4 && !SP_STOP.has(t));
+    .filter((t) => t.length >= 3 && !SP_STOP.has(t));
   if (!tokens.length) return true; // nothing concrete to check → no penalty
-  return tokens.some((t) => blob.includes(t.slice(0, 5)));
+  const need = Math.min(2, tokens.length);
+  const matched = tokens.filter((t) =>
+    t.length <= 4 ? new RegExp(`\\b${t}\\b`).test(blob) : blob.includes(t.slice(0, 5))
+  ).length;
+  return matched >= need;
 }
 
 /**
