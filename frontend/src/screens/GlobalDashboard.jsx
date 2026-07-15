@@ -13,18 +13,28 @@ const QUICK = [
   { icon: "💰", title: "Salary Center", sub: "Benchmark pay against the Malaysian market", ibg: "#FFF7ED", ic: "#C2410C", to: "/salary-center" },
 ];
 
-// Dark redesign palette — extracted from the client-supplied mockup.
+// Dark redesign palette — extracted pixel-for-pixel (computed styles + CSS
+// custom properties) from the client-supplied mockup.
 const D = {
   page: "#0B0B0D",
   cardBg: "#141417",
-  border: "rgba(244,245,247,0.08)",
+  inset: "#0E1016",
+  border: "#24252C",
+  hair: "#1B1C21",
   text: "#F4F5F7",
-  textMuted: "#9C9DA6",
-  textDim: "#6E6F78",
+  text2: "#C9CAD0",
+  text3: "#8A8B92",
+  textMuted: "#8A8B92",
+  text4: "#6E6F76",
+  textDim: "#6E6F76",
+  text5: "#5C5D66",
+  blue: "#4C7DFB",
   green: "#3FB984", greenBg: "rgba(63,185,132,0.14)", greenBorder: "rgba(63,185,132,0.28)",
   amber: "#E0A33A", amberBg: "rgba(224,163,58,0.14)", amberBorder: "rgba(224,163,58,0.28)",
   red: "#E5654C", redBg: "rgba(229,101,76,0.14)", redBorder: "rgba(229,101,76,0.28)",
   gold: "#E8B23A", goldText: "#3A2A06",
+  pillBg: "#20222B", pillBorder: "#2C2E39",
+  avatarBlue: "#3B6FF6", avatarPurple: "#6D4BF0", avatarGrey: "#2A2B33",
   font: "'Hanken Grotesk', sans-serif",
 };
 const LANE = {
@@ -33,6 +43,7 @@ const LANE = {
   red: { label: "Likely no", c: D.red, bg: D.redBg, border: D.redBorder },
 };
 const STAGE_LABEL = { cv_submission: "CV review", ocean_assessment: "OCEAN", interview: "Interview", offer: "Offer", rejected: "Rejected" };
+function avatarBg(i) { return [D.avatarBlue, D.avatarPurple][i % 2]; }
 
 const INSIGHT_PROMPTS = [
   "In one short, specific sentence, what's the single most useful thing I should look at in my hiring pipeline right now?",
@@ -113,132 +124,200 @@ export default function GlobalDashboard() {
         </div>
       )}
 
-      {/* ---- New redesign panel: My Pipelines ---- */}
+      {/* ---- New redesign panel: My Pipelines (matches the client mockup 1:1) ---- */}
       <div style={{ background: D.page, borderRadius: 22, padding: 24, marginBottom: 28, fontFamily: D.font, color: D.text }}>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }} className="flex-wrap">
-          <div>
-            <div style={{ fontSize: 19, fontWeight: 700, letterSpacing: "-.3px" }}>My Pipelines</div>
-            <div style={{ fontSize: 13, color: D.textMuted, marginTop: 3 }}>{a?.open_roles ?? 0} roles · {a?.total_applicants ?? 0} candidates in flight</div>
-          </div>
-          <span onClick={() => navigate("/jobs")} style={{ fontSize: 13, fontWeight: 600, color: D.text, cursor: "pointer" }}>All roles →</span>
-        </div>
+        <div className="grid gap-4" style={{ gridTemplateColumns: "1.15fr 1.32fr 0.93fr", marginBottom: 16 }}>
 
-        <div className="grid gap-4 lg:grid-cols-[1.5fr_1fr]" style={{ marginBottom: 20 }}>
-          {/* Score trend */}
-          <div style={{ background: "transparent", border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }} className="flex-wrap">
+          {/* ===== Column 1: My Pipelines + Score trend + Top roles ===== */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontSize: 14.5, fontWeight: 700 }}>Score trend</div>
-                <div style={{ fontSize: 12, color: D.textMuted, marginTop: 3 }}>Avg score this month</div>
+                <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.3px" }}>My Pipelines</div>
+                <div style={{ fontSize: 12.5, color: D.text4, marginTop: 3 }}>{a?.open_roles ?? 0} roles · {a?.total_applicants ?? 0} candidates in flight</div>
               </div>
-              {a.score_trend_delta_pct != null && (
-                <span style={{ fontSize: 11.5, fontWeight: 700, color: a.score_trend_delta_pct >= 0 ? D.green : D.red, background: a.score_trend_delta_pct >= 0 ? D.greenBg : D.redBg, border: `1px solid ${a.score_trend_delta_pct >= 0 ? D.greenBorder : D.redBorder}`, padding: "4px 10px", borderRadius: 999 }}>
-                  {a.score_trend_delta_pct >= 0 ? "+" : ""}{a.score_trend_delta_pct}%
-                </span>
-              )}
+              <span onClick={() => navigate("/jobs")} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: D.text2, background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 10, padding: "8px 11px", cursor: "pointer", whiteSpace: "nowrap" }}>All roles ›</span>
             </div>
 
-            <div style={{ display: "flex", alignItems: "baseline", gap: 8, margin: "14px 0 18px" }}>
-              <span style={{ fontSize: 11.5, color: D.textMuted, fontWeight: 600 }}>Comparative rate</span>
-              <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.5px" }}>{a?.avg_score ?? 0} / 100</span>
-            </div>
+            <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20 }}>
+              <div style={{ fontSize: 15, fontWeight: 700 }}>Score trend</div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: D.text3, marginTop: 12 }}>
+                <span>Avg score this month</span>
+                {a.score_trend_delta_pct != null && <span style={{ fontWeight: 600, color: a.score_trend_delta_pct >= 0 ? D.green : D.red }}>{a.score_trend_delta_pct >= 0 ? "+" : ""}{a.score_trend_delta_pct}%</span>}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: D.text3, marginTop: 8 }}>
+                <span>Comparative rate</span>
+                <span style={{ color: D.text2 }}>{a?.avg_score ?? 0} / 100</span>
+              </div>
 
-            {trend.length === 0 ? (
-              <div style={{ fontSize: 12.5, color: D.textDim, padding: "20px 0" }}>Not enough scored, dated applications yet to chart a trend.</div>
-            ) : (
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 90 }}>
-                {trend.map((t) => (
-                  <div key={t.month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-                    <div style={{ width: "100%", maxWidth: 30, height: Math.max(4, (t.avg / trendMax) * 66), borderRadius: 6, background: D.text, opacity: 0.9 }} />
-                    <span style={{ fontSize: 11, color: D.textMuted, fontWeight: 600 }}>{t.month}</span>
-                  </div>
+              <div style={{ display: "flex", background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 12, padding: 4, marginTop: 16 }}>
+                {["Week", "Month", "Quarter"].map((p) => (
+                  <div key={p} style={{ flex: 1, textAlign: "center", fontSize: 12, fontWeight: p === "Month" ? 600 : 400, color: p === "Month" ? "#fff" : D.text4, background: p === "Month" ? "#20263A" : "transparent", borderRadius: 9, padding: 7 }}>{p}</div>
                 ))}
               </div>
-            )}
-            <div style={{ fontSize: 11, color: D.textDim, marginTop: 14 }}>Last updated {new Date(a.generated_at).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</div>
-          </div>
 
-          {/* Top roles */}
-          <div style={{ background: "transparent", border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20 }}>
-            <div style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 14 }}>Top roles</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {(a.roles || []).slice(0, 3).map((r) => (
-                <div key={r.job_id} onClick={() => navigate(`/jobs/${r.job_id}/dashboard`)} style={{ display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.title}</div>
-                    <div style={{ fontSize: 11.5, color: D.textMuted }}>{r.applicants} applicants · avg {r.avg}{r.stale > 0 ? ` · ${r.stale} stale` : ""}</div>
-                  </div>
-                  <div style={{ display: "flex" }}>
-                    {r.avatars.map((av, i) => (
-                      <span key={i} style={{ width: 24, height: 24, borderRadius: "50%", background: "#26272E", border: `2px solid ${D.page}`, marginLeft: i === 0 ? 0 : -8, fontSize: 9.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>{av}</span>
-                    ))}
-                    {r.more > 0 && <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#26272E", border: `2px solid ${D.page}`, marginLeft: -8, fontSize: 9, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>+{r.more}</span>}
-                  </div>
+              {trend.length === 0 ? (
+                <div style={{ fontSize: 12, color: D.text4, padding: "24px 0" }}>Not enough scored, dated applications yet to chart a trend.</div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 14, height: 90, marginTop: 20 }}>
+                  {trend.map((t) => (
+                    <div key={t.month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                      <div style={{ width: "100%", maxWidth: 26, height: Math.max(4, (t.avg / trendMax) * 66), borderRadius: 6, background: D.blue, opacity: 0.85 }} />
+                      <span style={{ fontSize: 10.5, color: D.text5, fontWeight: 400 }}>{t.month}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {(a.roles || []).length === 0 && <div style={{ fontSize: 12.5, color: D.textDim }}>No roles yet.</div>}
+              )}
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", borderTop: `0.5px solid ${D.border}`, marginTop: 16, paddingTop: 16 }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
+                  <span style={{ fontSize: 30, fontWeight: 800, color: D.blue }}>{a.score_trend_delta_pct != null ? `${a.score_trend_delta_pct >= 0 ? "+" : ""}${Math.round(a.score_trend_delta_pct)}` : "—"}</span>
+                  <span style={{ fontSize: 16, fontWeight: 600, color: D.text3 }}>% avg</span>
+                </div>
+                <span style={{ fontSize: 11, color: D.text4 }}>Last updated {new Date(a.generated_at).toLocaleString("en-MY", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}</span>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>Top roles</span>
+              <span style={{ fontSize: 11.5, color: D.text4 }}>{Math.min(2, (a.roles || []).length)} of {a.roles?.length ?? 0}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3" style={{ marginTop: -8 }}>
+              {(a.roles || []).slice(0, 2).map((r) => {
+                const laneKey = r.g >= r.a && r.g >= r.r ? "green" : r.a >= r.r ? "amber" : "red";
+                const dot = LANE[laneKey].c;
+                return (
+                  <div key={r.job_id} onClick={() => navigate(`/jobs/${r.job_id}/dashboard`)} style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 14, cursor: "pointer" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13.5, fontWeight: 600 }}>
+                      <span style={{ width: 7, height: 7, borderRadius: "50%", background: dot }} />
+                      {r.title}
+                    </div>
+                    <div style={{ fontSize: 12, color: D.text3, marginTop: 8 }}>{r.applicants} applicant{r.applicants === 1 ? "" : "s"}</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: r.stale > 0 ? D.amber : D.green, marginTop: 2 }}>avg {r.avg}{r.stale > 0 ? " · stale" : ""}</div>
+                    <div style={{ display: "flex", marginTop: 12 }}>
+                      {r.avatars.slice(0, 2).map((av, i) => (
+                        <span key={i} style={{ width: 26, height: 26, borderRadius: "50%", background: avatarBg(i), border: `2px solid ${D.cardBg}`, marginLeft: i === 0 ? 0 : -8, fontSize: 9, fontWeight: 700, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>{av}</span>
+                      ))}
+                      {(r.avatars.length - 2 + r.more) > 0 && <span style={{ width: 26, height: 26, borderRadius: "50%", background: D.avatarGrey, border: `2px solid ${D.cardBg}`, marginLeft: -8, fontSize: 9, fontWeight: 600, color: D.text2, display: "flex", alignItems: "center", justifyContent: "center" }}>+{r.avatars.length - 2 + r.more}</span>}
+                    </div>
+                  </div>
+                );
+              })}
+              {(a.roles || []).length === 0 && <div style={{ fontSize: 12.5, color: D.text4, gridColumn: "1 / -1" }}>No roles yet.</div>}
+            </div>
+          </div>
+
+          {/* ===== Column 2: Total Applicants + Average score + AI Assistant teaser ===== */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.3px" }}>Total Applicants</div>
+                <div style={{ fontSize: 12.5, color: D.text4, marginTop: 3 }}>Across every open pipeline</div>
+              </div>
+              <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: D.text2, background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 10, padding: "8px 11px", whiteSpace: "nowrap" }}>This quarter ›</span>
+            </div>
+
+            <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 22, display: "flex", flexDirection: "column", gap: 20 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                  <span style={{ fontSize: 26, fontWeight: 700, color: D.blue }}>#</span>
+                  <span style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-1px" }}>{a?.total_applicants ?? 0}</span>
+                </div>
+                {a.applicant_trend_delta_pct != null && (
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: 12, color: D.text3 }}>Compared to last month</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: a.applicant_trend_delta_pct >= 0 ? D.green : D.red }}>{a.applicant_trend_delta_pct >= 0 ? "+" : ""}{a.applicant_trend_delta_pct}%</div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: D.text3 }}>
+                <span>Average score</span>
+                <b style={{ color: D.text2 }}>{a?.avg_score ?? 0}/100</b>
+                <span style={{ color: D.green }}>▴</span>
+                <span style={{ marginLeft: "auto", color: D.text4 }}>How scoring works?</span>
+              </div>
+
+              {/* AI Assistant teaser */}
+              <div style={{ position: "relative", height: 220, borderRadius: 16, border: `0.5px solid ${D.border}`, overflow: "hidden", background: "radial-gradient(120% 80% at 80% 0%,#2A2410 0%,#141417 45%)" }}>
+                <div style={{ position: "absolute", top: 16, left: 18, fontSize: 14, fontWeight: 600 }}>AI Assistant</div>
+                <div style={{ position: "absolute", left: 18, right: 18, bottom: 16, display: "flex", alignItems: "center", gap: 8, background: "rgba(10,12,18,0.6)", borderRadius: 999, padding: "8px 14px", fontSize: 12, color: D.text2 }}>
+                  <span style={{ width: 11, height: 11, borderRadius: "50%", border: `2px solid ${D.blue}`, borderTopColor: "transparent", flexShrink: 0 }} />
+                  {insightBusy ? "Thinking…" : insight}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===== Column 3: Co-pilot / promo ===== */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: D.text3 }}>Co-pilot</span>
+              <span onClick={() => setInsightIdx((i) => (i + 1) % INSIGHT_PROMPTS.length)} style={{ fontSize: 12, color: D.text3, cursor: "pointer" }}>Next →</span>
+            </div>
+            <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 20, display: "flex", flexDirection: "column" }}>
+              <span style={{ alignSelf: "flex-start", fontSize: 12.5, fontWeight: 600, color: D.text2, background: D.pillBg, border: `0.5px solid ${D.pillBorder}`, borderRadius: 12, padding: 11 }}>✦ Just for today!</span>
+
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginTop: 20 }}>
+                <div style={{ fontSize: 16, fontWeight: 800 }}>Score 200 CVs while you make coffee</div>
+                <span style={{ background: D.gold, color: D.goldText, fontWeight: 800, fontSize: 12, borderRadius: 7, padding: "2px 8px", flexShrink: 0 }}>AI</span>
+              </div>
+
+              <div style={{ fontSize: 12.5, color: D.text3, lineHeight: 1.55, marginTop: 14 }}>Transparent 3-layer scoring — profile fit, OCEAN, and interview — with no black box. Decide Hire / Hold / Reject with evidence.</div>
+
+              <span onClick={() => navigate("/upload")} style={{ fontSize: 13, fontWeight: 600, color: D.text, cursor: "pointer", marginTop: 18 }}>Learn more →</span>
+
+              {!promoDismissed ? (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: `0.5px solid ${D.border}`, marginTop: 20, paddingTop: 16 }}>
+                  <span onClick={() => { localStorage.setItem("pq_hide_promo", "1"); setPromoDismissed(true); }} style={{ fontSize: 11.5, color: D.text4, cursor: "pointer" }}>Don't show again</span>
+                  <button onClick={() => navigate("/jobs")} style={{ fontSize: 12.5, fontWeight: 700, background: D.text, color: D.page, border: "none", borderRadius: 999, padding: "9px 16px", cursor: "pointer" }}>Send OCEAN link</button>
+                </div>
+              ) : (
+                <div style={{ borderTop: `0.5px solid ${D.border}`, marginTop: 20, paddingTop: 16 }}>
+                  <button onClick={() => navigate("/jobs")} style={{ fontSize: 12.5, fontWeight: 700, background: D.text, color: D.page, border: "none", borderRadius: 999, padding: "9px 16px", cursor: "pointer" }}>Send OCEAN link</button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        <div className="grid gap-4 lg:grid-cols-3" style={{ marginBottom: 20 }}>
-          <DarkStat label="Total applicants" value={a?.total_applicants ?? 0} sub="Across every open pipeline" deltaPct={a.applicant_trend_delta_pct} />
-          <DarkStat label="Average score" value={`${a?.avg_score ?? 0}/100`} sub="Across all open roles" />
-          <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ background: D.gold, color: D.goldText, fontWeight: 800, fontSize: 11, borderRadius: 7, padding: "2px 7px" }}>AI</span>
-              <span style={{ fontSize: 13.5, fontWeight: 700 }}>Assistant</span>
-              <span style={{ marginLeft: "auto", fontSize: 10.5, color: D.textDim, fontWeight: 600 }}>Co-pilot</span>
-            </div>
-            <div style={{ fontSize: 12.5, color: D.textMuted, lineHeight: 1.55, minHeight: 44 }}>{insightBusy ? "Thinking…" : insight}</div>
-            <span onClick={() => setInsightIdx((i) => (i + 1) % INSIGHT_PROMPTS.length)} style={{ fontSize: 12, fontWeight: 700, color: D.text, cursor: "pointer" }}>Next →</span>
-          </div>
-        </div>
-
-        {/* Promo banner */}
-        {!promoDismissed && (
-          <div style={{ display: "flex", alignItems: "center", gap: 16, border: `0.5px solid ${D.border}`, borderRadius: 18, padding: "16px 20px", marginBottom: 20 }} className="flex-wrap">
-            <span style={{ fontSize: 20 }}>✦</span>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700 }}>Score 200 CVs while you make coffee</div>
-              <div style={{ fontSize: 12, color: D.textMuted, marginTop: 3 }}>Transparent 3-layer scoring — profile fit, OCEAN, and interview — with no black box. Decide Hire / Hold / Reject with evidence.</div>
-            </div>
-            <span onClick={() => navigate("/upload")} style={{ fontSize: 12.5, fontWeight: 700, color: D.text, cursor: "pointer", whiteSpace: "nowrap" }}>Learn more →</span>
-            <span onClick={() => { localStorage.setItem("pq_hide_promo", "1"); setPromoDismissed(true); }} style={{ fontSize: 11.5, color: D.textDim, cursor: "pointer", whiteSpace: "nowrap" }}>Don't show again</span>
-          </div>
-        )}
 
         {/* Candidates table */}
-        <div style={{ border: `0.5px solid ${D.border}`, borderRadius: 20, padding: "18px 20px" }}>
+        <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 20, padding: "18px 20px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <div style={{ fontSize: 14.5, fontWeight: 700 }}>Candidates</div>
-            <div style={{ fontSize: 11.5, color: D.textDim }}>Sorted by score</div>
+            <div style={{ fontSize: 16, fontWeight: 700 }}>Candidates</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <span style={{ fontSize: 12, color: D.text2, background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 10, padding: "7px 11px" }}>⇄ Compare</span>
+              <span style={{ fontSize: 12, color: D.text2, background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 10, padding: "7px 11px" }}>Sorted by score ›</span>
+            </div>
           </div>
           {recent === null ? (
-            <div style={{ fontSize: 12.5, color: D.textDim, padding: "14px 0" }}>Loading…</div>
+            <div style={{ fontSize: 12.5, color: D.text4, padding: "14px 0" }}>Loading…</div>
           ) : recent.length === 0 ? (
-            <div style={{ fontSize: 12.5, color: D.textDim, padding: "14px 0" }}>No candidates yet.</div>
+            <div style={{ fontSize: 12.5, color: D.text4, padding: "14px 0" }}>No candidates yet.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div className="hidden md:grid" style={{ gridTemplateColumns: "1.6fr 70px 110px 1fr 100px 90px", gap: 12, padding: "0 4px 10px", fontSize: 10.5, fontWeight: 700, color: D.textDim, textTransform: "uppercase", letterSpacing: ".4px" }}>
-                <div>Candidate</div><div>Score</div><div>Stage</div><div>Role</div><div>Lane</div><div></div>
+              <div className="hidden md:grid" style={{ gridTemplateColumns: "1.6fr 70px 110px 1fr 100px 90px", gap: 12, padding: "0 4px 10px", fontSize: 10.5, fontWeight: 600, color: D.text5 }}>
+                <div>Candidate</div><div>Score</div><div>Stage</div><div>Role</div><div>Lane</div><div>Action</div>
               </div>
-              {recent.map((c) => {
+              {recent.map((c, i) => {
                 const lane = LANE[c.lane] || null;
+                const scoreColor = i === 0 ? D.blue : (lane ? lane.c : D.text2);
                 return (
-                  <div key={c.candidate_id} className="grid items-center md:!grid-cols-[1.6fr_70px_110px_1fr_100px_90px]" style={{ gridTemplateColumns: "1fr auto", gap: 12, padding: "12px 4px", borderTop: `0.5px solid ${D.border}` }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
-                      <div style={{ fontSize: 11, color: D.textMuted }}>{c.experience_years != null ? `${c.experience_years} yrs` : "—"}{c.location ? ` · ${c.location}` : ""}</div>
+                  <div key={c.candidate_id} className="grid items-center md:!grid-cols-[1.6fr_70px_110px_1fr_100px_90px]" style={{ gridTemplateColumns: "1fr auto", gap: 12, padding: "12px 4px", borderTop: `0.5px solid ${D.hair}` }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <span style={{ width: 30, height: 30, borderRadius: "50%", background: avatarBg(i), color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{c.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}</span>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
+                        <div style={{ fontSize: 11, color: D.text4 }}>{c.experience_years != null ? `${c.experience_years} yrs` : "—"}{c.location ? ` · ${c.location}` : ""}</div>
+                      </div>
                     </div>
-                    <div className="hidden md:block" style={{ fontSize: 14, fontWeight: 800 }}>{c.score ?? "—"}</div>
-                    <div className="hidden md:block" style={{ fontSize: 12.5, color: D.textMuted }}>{STAGE_LABEL[c.stage] || c.stage}</div>
-                    <div className="hidden md:block" style={{ fontSize: 12.5, color: D.textMuted, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.role_title}</div>
+                    <div className="hidden md:block" style={{ fontSize: 14, fontWeight: 700, color: scoreColor }}>{c.score ?? "—"}</div>
+                    <div className="hidden md:block" style={{ fontSize: 12.5, color: D.text2 }}>{STAGE_LABEL[c.stage] || c.stage}</div>
+                    <div className="hidden md:block" style={{ fontSize: 12.5, color: D.text2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.role_title}</div>
                     <div className="hidden md:block">
-                      {lane && <span style={{ fontSize: 10.5, fontWeight: 700, color: lane.c, background: lane.bg, border: `1px solid ${lane.border}`, padding: "3px 9px", borderRadius: 999 }}>{lane.label}</span>}
+                      {lane && <span style={{ fontSize: 11, fontWeight: 600, color: lane.c, background: lane.bg, border: `0.5px solid ${lane.border}`, padding: "4px 10px", borderRadius: 999 }}>{lane.label}</span>}
                     </div>
-                    <button onClick={() => navigate(`/jobs/${c.job_id}/candidate/${c.candidate_id}`)} style={{ fontSize: 11.5, fontWeight: 700, background: D.text, color: D.page, border: "none", borderRadius: 999, padding: "7px 13px", cursor: "pointer", justifySelf: "start" }}>Review</button>
+                    <button onClick={() => navigate(`/jobs/${c.job_id}/candidate/${c.candidate_id}`)} style={{ fontSize: 12, fontWeight: 700, background: D.text, color: D.page, border: "none", borderRadius: 999, padding: "7px 15px", cursor: "pointer", justifySelf: "start" }}>Review</button>
                   </div>
                 );
               })}
@@ -336,21 +415,6 @@ export default function GlobalDashboard() {
         })}
         {(a?.roles || []).length === 0 && <div style={{ ...card, padding: 24 }} className="col-span-full text-center text-sm text-gray-400">No roles yet.</div>}
       </div>
-    </div>
-  );
-}
-
-function DarkStat({ label, value, sub, deltaPct }) {
-  return (
-    <div style={{ border: "0.5px solid rgba(244,245,247,0.08)", borderRadius: 20, padding: 18 }}>
-      <div style={{ fontSize: 12, color: "#9C9DA6", fontWeight: 600, marginBottom: 10 }}>{label}</div>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.5px" }}>{value}</span>
-        {deltaPct != null && (
-          <span style={{ fontSize: 11, fontWeight: 700, color: deltaPct >= 0 ? "#3FB984" : "#E5654C" }}>{deltaPct >= 0 ? "+" : ""}{deltaPct}%</span>
-        )}
-      </div>
-      <div style={{ fontSize: 11.5, color: "#6E6F78", marginTop: 6 }}>{sub}</div>
     </div>
   );
 }
