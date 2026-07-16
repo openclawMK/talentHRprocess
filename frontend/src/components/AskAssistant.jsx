@@ -51,9 +51,9 @@ export default function AskAssistant() {
     <>
       {/* Floating launcher */}
       {!open && (
-        <button onClick={() => setOpen(true)} title="Ask PeopleQuest"
+        <button onClick={() => setOpen(true)} title="AI Assistant"
           style={{ position: "fixed", right: 22, bottom: 22, zIndex: 60, display: "inline-flex", alignItems: "center", gap: 9, padding: "13px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 999, fontWeight: 700, fontSize: 14, cursor: "pointer", boxShadow: "0 10px 28px rgba(99,102,241,.4)" }}>
-          ✨ Ask PeopleQuest
+          ✨ AI Assistant
         </button>
       )}
 
@@ -64,7 +64,7 @@ export default function AskAssistant() {
           <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "16px 18px", borderBottom: `1px solid ${D.border}`, background: D.cardBg }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, background: GRAD, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>✨</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.2px", color: D.text }}>Ask PeopleQuest</div>
+              <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: "-.2px", color: D.text }}>AI Assistant</div>
               <div style={{ fontSize: 11.5, color: D.text4 }}>Answers from your live hiring data · GPT-4o</div>
             </div>
             {msgs.length > 0 && <button onClick={() => setMsgs([])} title="Clear" style={{ fontSize: 12, color: D.text4, background: "none", border: "none", cursor: "pointer" }}>Clear</button>}

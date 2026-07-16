@@ -195,9 +195,9 @@ export default function GlobalDashboard() {
           <h1 className="font-display" style={{ fontSize: 27, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 5px", color: D.text }}>{greeting}, {firstName} 👋</h1>
           <p style={{ fontSize: 15, color: D.text3, margin: 0 }}>Here's what needs you across your {a?.open_roles ?? 0} open role{a?.open_roles === 1 ? "" : "s"} today.</p>
         </div>
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => navigate("/upload")} style={{ padding: "11px 16px", background: D.cardBg, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>↥ Upload CV</button>
-          <button onClick={() => navigate("/jobs/new")} style={{ padding: "11px 16px", background: GRAD, color: "#fff", border: "none", borderRadius: 10, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 6px 16px rgba(99,102,241,.28)" }}>＋ Create job</button>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: D.text2 }}>{new Date().toLocaleDateString("en-MY", { weekday: "long" })}</div>
+          <div style={{ fontSize: 13, color: D.text4, marginTop: 2 }}>{new Date().toLocaleDateString("en-MY", { day: "numeric", month: "long", year: "numeric" })}</div>
         </div>
       </div>
 
