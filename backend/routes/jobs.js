@@ -333,10 +333,15 @@ router.get("/candidates-recent", (req, res) => {
     let candidates = [];
     try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
 
+    const nowMs = Date.now();
     const results = candidates
       .map((c) => {
         const job = jobById[c.job_id];
         if (!job) return null;
+        const stage = candidateStageKey(c, job);
+        const submitted = c.submitted_date ? new Date(c.submitted_date).getTime() : nowMs;
+        const days_waiting = Math.max(0, Math.round((nowMs - submitted) / 86400000));
+        const is_stale = stage !== "offer" && stage !== "rejected" && days_waiting >= 5;
         return {
           candidate_id: c.candidate_id,
           job_id: c.job_id,
@@ -347,7 +352,9 @@ router.get("/candidates-recent", (req, res) => {
           company_name: job.company?.name || null,
           score: c.score?.combined_score ?? null,
           lane: c.score?.lane || null,
-          stage: candidateStageKey(c, job),
+          stage,
+          days_waiting,
+          is_stale,
         };
       })
       .filter(Boolean)
