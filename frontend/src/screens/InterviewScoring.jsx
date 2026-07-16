@@ -102,25 +102,25 @@ export default function InterviewScoring() {
 
         {/* mode cards */}
         <div className="grid gap-[18px] md:grid-cols-2" style={{ marginBottom: 24 }}>
-          <div style={{ position: "relative", background: "linear-gradient(180deg,#FBFAFF,#fff)", border: "1.5px solid #E7DEFB", borderRadius: 18, padding: 26, display: "flex", flexDirection: "column" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
-            <span style={{ position: "absolute", top: 18, right: 18, fontSize: 11, fontWeight: 700, color: "#6D28D9", background: "#F3EEFE", border: "1px solid #E0D2FA", padding: "4px 10px", borderRadius: 20 }}>★ Recommended</span>
+          <div style={{ position: "relative", background: D.recBg, border: `1.5px solid ${D.recBorder}`, borderRadius: 18, padding: 26, display: "flex", flexDirection: "column" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
+            <span style={{ position: "absolute", top: 18, right: 18, fontSize: 11, fontWeight: 700, color: "#8B5CF6", background: "rgba(124,58,237,.14)", border: "1px solid rgba(124,58,237,.3)", padding: "4px 10px", borderRadius: 20 }}>★ Recommended</span>
             <div style={{ width: 46, height: 46, borderRadius: 13, background: "linear-gradient(135deg,#8B5CF6,#7C3AED)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 18, boxShadow: "0 6px 16px rgba(124,58,237,.3)" }}>✨</div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.2px", marginBottom: 8, color: "#1F2430" }}>AI-generated questions</div>
-            <div style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.55, marginBottom: 18 }}>AI writes tailored questions and a scoring rubric for each criterion, based on this role and the candidate's CV. You rate each one.</div>
+            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-.2px", marginBottom: 8, color: D.text }}>AI-generated questions</div>
+            <div style={{ fontSize: 14, color: D.text3, lineHeight: 1.55, marginBottom: 18 }}>AI writes tailored questions and a scoring rubric for each criterion, based on this role and the candidate's CV. You rate each one.</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 18 }}>
-              {["Tailored to the candidate's CV & gaps", "Scoring rubric for consistent rating", "Probes the areas flagged on the CV"].map((t) => <div key={t} style={{ display: "flex", gap: 9, fontSize: 13.5, color: "#44485A" }}><span style={{ color: "#7C3AED" }}>✓</span> {t}</div>)}
+              {["Tailored to the candidate's CV & gaps", "Scoring rubric for consistent rating", "Probes the areas flagged on the CV"].map((t) => <div key={t} style={{ display: "flex", gap: 9, fontSize: 13.5, color: D.text2 }}><span style={{ color: "#8B5CF6" }}>✓</span> {t}</div>)}
             </div>
             <div style={{ marginBottom: 22 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: "#6B7280", marginBottom: 8 }}>How many questions?</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: D.text3, marginBottom: 8 }}>How many questions?</div>
               <div style={{ display: "flex", gap: 8 }}>
                 {[3, 5, 10].map((n) => (
                   <button key={n} type="button" onClick={(e) => { e.stopPropagation(); setQuestionCount(n); }}
-                    style={{ flex: 1, padding: "9px 0", borderRadius: 9, fontSize: 13.5, fontWeight: 700, cursor: "pointer", border: `1.5px solid ${questionCount === n ? "#7C3AED" : "#E2E4EC"}`, background: questionCount === n ? "#7C3AED" : "#fff", color: questionCount === n ? "#fff" : "#374151" }}>{n}</button>
+                    style={{ flex: 1, padding: "9px 0", borderRadius: 9, fontSize: 13.5, fontWeight: 700, cursor: "pointer", border: `1.5px solid ${questionCount === n ? "#7C3AED" : D.border}`, background: questionCount === n ? "#7C3AED" : D.cardBg, color: questionCount === n ? "#fff" : D.text2 }}>{n}</button>
                 ))}
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto" }}>
-              <span style={{ fontSize: 13, color: "#9AA0AE" }}>🕑 ~30 sec to generate</span>
+              <span style={{ fontSize: 13, color: D.text4 }}>🕑 ~30 sec to generate</span>
               <button type="button" onClick={chooseAi} style={{ fontSize: 14, fontWeight: 700, color: "#fff", background: GRAD, padding: "10px 18px", borderRadius: 10, boxShadow: "0 6px 16px rgba(99,102,241,.28)", border: "none", cursor: "pointer" }}>Generate &amp; start →</button>
             </div>
           </div>
@@ -221,9 +221,9 @@ export default function InterviewScoring() {
                 </>
               ) : (
                 <>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#6D28D9", marginBottom: 8, display: "flex", alignItems: "center", gap: 7 }}>✨ Suggested questions</div>
-                  <div style={{ background: "#FBFAFF", border: "1px solid #ECE7FB", borderRadius: 11, padding: "14px 16px", fontSize: 14, color: "#44405A", lineHeight: 1.7, whiteSpace: "pre-line" }}>{(c.questions || []).join("\n")}</div>
-                  {c.rubric && <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10, padding: "10px 12px", background: "#FCFBFE", borderRadius: 9, fontSize: 12.5, color: "#6D5D9E" }}><span style={{ fontWeight: 700, flexShrink: 0 }}>Rubric</span><span style={{ lineHeight: 1.5 }}>Excellent: {c.rubric.high} · Weak: {c.rubric.low}</span></div>}
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#8B5CF6", marginBottom: 8, display: "flex", alignItems: "center", gap: 7 }}>✨ Suggested questions</div>
+                  <div style={{ background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 11, padding: "14px 16px", fontSize: 14, color: D.text2, lineHeight: 1.7, whiteSpace: "pre-line" }}>{(c.questions || []).join("\n")}</div>
+                  {c.rubric && <div style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 10, padding: "10px 12px", background: D.inset, borderRadius: 9, fontSize: 12.5, color: D.text3 }}><span style={{ fontWeight: 700, flexShrink: 0 }}>Rubric</span><span style={{ lineHeight: 1.5 }}>Excellent: {c.rubric.high} · Weak: {c.rubric.low}</span></div>}
                 </>
               )}
 

@@ -29,6 +29,7 @@ const DARK = {
   avatarBlue: "#3B6FF6", avatarPurple: "#6D4BF0", avatarGrey: "#2A2B33",
   copilotGrad: "radial-gradient(120% 80% at 80% 0%,#2A2410 0%,#141417 45%)",
   chatBubble: "rgba(10,12,18,0.6)",
+  recBg: "linear-gradient(180deg,#17141F,#141417)", recBorder: "rgba(139,92,246,0.4)",
   font: "'Hanken Grotesk', sans-serif",
 };
 
@@ -55,6 +56,7 @@ const LIGHT = {
   avatarBlue: "#4F46E5", avatarPurple: "#7C3AED", avatarGrey: "#E5E7EB",
   copilotGrad: "radial-gradient(120% 80% at 80% 0%,#FFF7E6 0%,#FFFFFF 45%)",
   chatBubble: "#EEF0F5",
+  recBg: "linear-gradient(180deg,#FBFAFF,#FFFFFF)", recBorder: "#E7DEFB",
   font: "'Hanken Grotesk', sans-serif",
 };
 
