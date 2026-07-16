@@ -310,11 +310,14 @@ export default function Dashboard() {
           {FUNNEL.map((f, i) => {
             const n = analytics?.by_stage?.[f.key] ?? 0;
             const bottleneck = n === funMax && funMax > 0;
+            const SC = { cv_submission: D.blue, ocean_assessment: "#8B5CF6", interview: D.amber, offer: D.green }[f.key];
+            const STINT = { cv_submission: D.blueBg, ocean_assessment: "rgba(139,92,246,0.14)", interview: D.amberBg, offer: D.greenBg }[f.key];
+            const SBORDER = { cv_submission: D.blueBorder, ocean_assessment: "rgba(139,92,246,0.32)", interview: D.amberBorder, offer: D.greenBorder }[f.key];
             return (
               <div key={f.key} style={{ display: "flex", alignItems: "center", gap: 6, flex: 1, minWidth: 120 }}>
-                <div style={{ flex: 1, borderRadius: 11, padding: "12px 14px", textAlign: "center", background: bottleneck ? D.amberBg : D.inset, border: bottleneck ? `1px solid ${D.amberBorder}` : "1px solid transparent" }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1, color: bottleneck ? D.amber : D.blue }}>{n}</div>
-                  <div style={{ fontSize: 12, color: D.text3, fontWeight: 600, marginTop: 5 }}>{f.label}</div>
+                <div style={{ flex: 1, borderRadius: 11, padding: "12px 14px", textAlign: "center", background: STINT, border: `${bottleneck ? 1.5 : 1}px solid ${SBORDER}`, boxShadow: bottleneck ? `0 0 0 3px ${STINT}` : "none" }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1, color: SC }}>{n}</div>
+                  <div style={{ fontSize: 12, color: D.text2, fontWeight: 600, marginTop: 5 }}>{f.label}</div>
                 </div>
                 {i < FUNNEL.length - 1 && <span style={{ color: D.text5, fontSize: 15 }}>→</span>}
               </div>
