@@ -4,19 +4,21 @@ import axios from "axios";
 import { round, candidateStatus } from "../lib/format.js";
 import { usePalette } from "../context/ThemeContext.jsx";
 
-const SRC = { cv: { bg: "#EEF2FF", color: "#4338CA" }, ocean: { bg: "#ECFDF5", color: "#047857" }, interview: { bg: "#F5F3FF", color: "#6D28D9" }, hr_notes: { bg: "#FFF7ED", color: "#C2410C" } };
-const BUDGET = {
-  green: { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" }, amber: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A" },
-  red: { color: "#B91C1C", bg: "#FEF2F2", border: "#FECACA" }, blue: { color: "#1D4ED8", bg: "#EFF6FF", border: "#BFDBFE" },
-  neutral: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
-};
-
 function Card({ c, D }) {
   const p = c.profile || {};
   const s = c.score || {};
   const criteria = s.criteria_scores || [];
   const status = candidateStatus(s);
   const budget = c.budget_fit;
+  const srcTag = {
+    cv: { bg: D.blueBg, color: D.blue }, ocean: { bg: D.greenBg, color: D.green },
+    interview: { bg: "rgba(139,92,246,0.16)", color: "#8B5CF6" }, hr_notes: { bg: D.amberBg, color: D.amber },
+  };
+  const bud = {
+    green: { color: D.green, bg: D.greenBg, border: D.greenBorder }, amber: { color: D.amber, bg: D.amberBg, border: D.amberBorder },
+    red: { color: D.red, bg: D.redBg, border: D.redBorder }, blue: { color: D.blue, bg: D.blueBg, border: D.blueBorder },
+    neutral: { color: D.text3, bg: D.pillBg, border: D.border },
+  };
   return (
     <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 24, flex: "1 1 400px", minWidth: 0, display: "flex", flexDirection: "column" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
@@ -27,7 +29,7 @@ function Card({ c, D }) {
 
       <div style={{ display: "flex", flexDirection: "column" }}>
         {criteria.map((m) => {
-          const tag = SRC[m.source] || SRC.cv;
+          const tag = srcTag[m.source] || srcTag.cv;
           const na = m.not_applicable;
           const dot = m.score > 70 ? D.green : m.score >= 40 ? D.amber : D.red;
           return (
@@ -36,16 +38,16 @@ function Card({ c, D }) {
               <span style={{ fontSize: 12.5, color: D.text2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.criterion_name}</span>
               {m.scored && !na
                 ? <div style={{ height: 8, background: D.inset, borderRadius: 5, overflow: "hidden" }}><div style={{ height: "100%", width: `${round(m.score)}%`, background: dot, borderRadius: 5 }} /></div>
-                : <div style={{ height: 8, borderRadius: 5, background: "repeating-linear-gradient(45deg,#E6E8EE,#E6E8EE 4px,#F4F5F8 4px,#F4F5F8 8px)" }} />}
+                : <div style={{ height: 8, borderRadius: 5, background: `repeating-linear-gradient(45deg,${D.border},${D.border} 4px,${D.inset} 4px,${D.inset} 8px)` }} />}
               <span style={{ fontSize: 12, color: D.text5, textAlign: "right" }}>{na ? "—" : `${Math.round(m.weight * 100)}%`}</span>
             </div>
           );
         })}
       </div>
 
-      {budget && budget.status !== "unknown" && (() => { const b = BUDGET[budget.lane] || BUDGET.neutral; return (
+      {budget && budget.status !== "unknown" && (() => { const b = bud[budget.lane] || bud.neutral; return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 18, padding: "10px 12px", background: b.bg, border: `1px solid ${b.border}`, borderRadius: 10 }}>
-          <span style={{ fontSize: 12.5, color: "#6B7280" }}>Budget · expected {budget.expected_label || "—"}</span>
+          <span style={{ fontSize: 12.5, color: D.text3 }}>Budget · expected {budget.expected_label || "—"}</span>
           <span style={{ fontSize: 12.5, fontWeight: 700, color: b.color, whiteSpace: "nowrap" }}>{budget.label}</span>
         </div>
       ); })()}
@@ -95,9 +97,9 @@ export default function CompareView() {
         <Card c={a} D={D} /><Card c={b} D={D} />
       </div>
 
-      <div style={{ background: "#F8F6FE", border: "1px solid #ECE7FB", borderRadius: 16, padding: "22px 24px", marginTop: 16 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1px", color: "#7C3AED", marginBottom: 12 }}>✦ AI COMPARISON</div>
-        <div style={{ fontSize: 14.5, color: "#44405A", lineHeight: 1.65 }}>{busy ? "Analysing both candidates…" : comparison}</div>
+      <div style={{ background: D.recBg, border: `0.5px solid ${D.recBorder}`, borderRadius: 16, padding: "22px 24px", marginTop: 16 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "1px", color: "#8B5CF6", marginBottom: 12 }}>✦ AI COMPARISON</div>
+        <div style={{ fontSize: 14.5, color: D.text2, lineHeight: 1.65 }}>{busy ? "Analysing both candidates…" : comparison}</div>
       </div>
 
       <div style={{ display: "flex", gap: 12, marginTop: 18 }} className="flex-wrap">

@@ -7,23 +7,22 @@ const SECTORS = [
   { key: "frontline", label: "Frontline / F&B / Retail" },
   { key: "professional", label: "Professional / Office" },
 ];
-const SECTOR_BADGE = {
-  frontline: { color: "#B45309", bg: "#FFFBEB", border: "#FDE68A" },
-  professional: { color: "#4338CA", bg: "#EEF2FF", border: "#C7D2FE" },
-  other: { color: "#6B7280", bg: "#F3F4F6", border: "#E5E7EB" },
-};
-const SRC_BADGE = {
-  "DOSM 2023": { color: "#047857", bg: "#ECFDF5" },
-  "JobStreet 2026": { color: "#4338CA", bg: "#EEF2FF" },
-  "Jobstore 2023": { color: "#6D28D9", bg: "#F5F3FF" },
-  Market: { color: "#B45309", bg: "#FFF7ED" },
-};
-
 const PAGE_SIZE = 25;
 
 export default function SalaryCenter() {
   const D = usePalette();
   const cardBox = { background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16 };
+  const SECTOR_BADGE = {
+    frontline: { color: D.amber, bg: D.amberBg, border: D.amberBorder },
+    professional: { color: D.blue, bg: D.blueBg, border: D.blueBorder },
+    other: { color: D.text3, bg: D.pillBg, border: D.border },
+  };
+  const SRC_BADGE = {
+    "DOSM 2023": { color: D.green, bg: D.greenBg },
+    "JobStreet 2026": { color: D.blue, bg: D.blueBg },
+    "Jobstore 2023": { color: "#8B5CF6", bg: "rgba(139,92,246,0.16)" },
+    Market: { color: D.amber, bg: D.amberBg },
+  };
   const [data, setData] = useState(null);
   const [region, setRegion] = useState("");
   const [sector, setSector] = useState("all");
@@ -119,7 +118,7 @@ export default function SalaryCenter() {
                 <div style={{ fontSize: 14.5, fontWeight: 700, color: D.text }}>{r.category}</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: sb.color, background: sb.bg, border: `1px solid ${sb.border}`, padding: "2px 8px", borderRadius: 6, textTransform: "capitalize" }}>{r.sector}</span>
-                  {r.industry && <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", background: "#F3F4F6", padding: "2px 8px", borderRadius: 6 }}>{r.industry}</span>}
+                  {r.industry && <span style={{ fontSize: 11, fontWeight: 600, color: D.text3, background: D.pillBg, padding: "2px 8px", borderRadius: 6 }}>{r.industry}</span>}
                   {r.estimated && <span style={{ fontSize: 11, fontWeight: 600, color: "#B45309" }}>indicative estimate</span>}
                 </div>
               </div>
