@@ -81,6 +81,8 @@ export function reconcileCandidate(candidate, job) {
 export function candidateStageKey(candidate, job) {
   if (candidate.outcome === "rejected") return "rejected";
   if (candidate.outcome === "offer") return "offer";
+  // Freshly applied and not yet scored by the AI — still in the CV review queue.
+  if (!candidate.score || candidate.score.combined_score == null) return "cv_submission";
   if (sourceEnabled(job, "ocean") && !candidate.ocean_completed) return "ocean_assessment";
   if (sourceEnabled(job, "interview") && !candidate.interview_completed) return "interview";
   return "offer"; // all assessment stages done, awaiting the human offer decision

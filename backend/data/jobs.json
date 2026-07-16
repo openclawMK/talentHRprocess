@@ -158,7 +158,37 @@
       "interview": 0.5
     },
     "criteria_generated_by": "seed",
-    "criteria_locked": false
+    "criteria_locked": false,
+    "interview_slots": [
+      {
+        "slot_id": "slot_b0e874d0",
+        "start": "2026-07-18T02:00:00.000Z",
+        "duration_minutes": 45,
+        "candidate_id": null,
+        "booked_at": null
+      },
+      {
+        "slot_id": "slot_99858a69",
+        "start": "2026-07-18T06:00:00.000Z",
+        "duration_minutes": 45,
+        "candidate_id": null,
+        "booked_at": null
+      },
+      {
+        "slot_id": "slot_566b17aa",
+        "start": "2026-07-19T03:00:00.000Z",
+        "duration_minutes": 45,
+        "candidate_id": null,
+        "booked_at": null
+      },
+      {
+        "slot_id": "slot_7574c052",
+        "start": "2026-07-20T07:00:00.000Z",
+        "duration_minutes": 45,
+        "candidate_id": null,
+        "booked_at": null
+      }
+    ]
   },
   {
     "job_id": "job_002",

@@ -5091,5 +5091,290 @@
       "next_action": "Screening passed — proceed to interview",
       "generated_at": "2026-07-14T07:16:45.795Z"
     }
+  },
+  {
+    "candidate_id": "f8b76e31-152a-4b4c-8913-5cbca6ed4fd4",
+    "job_id": "job_001",
+    "source": "portal",
+    "submitted_date": "2026-07-14",
+    "parse_confidence_overall": 88,
+    "low_confidence_warning": false,
+    "profile": {
+      "name": "Nadia Idris",
+      "age": 21,
+      "total_experience_months": 14,
+      "expected_salary": 2100,
+      "languages": [
+        "Bahasa Malaysia",
+        "English"
+      ],
+      "skills": [
+        "customer service",
+        "cash handling",
+        "food preparation"
+      ],
+      "work_history": [
+        {
+          "title": "Service Crew",
+          "employer": "McDonald's",
+          "industry": "F&B",
+          "duration_months": 14,
+          "team_size_managed": 0,
+          "duties": [
+            "counter service",
+            "cash handling",
+            "food prep"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "level": "SPM"
+        }
+      ],
+      "employment_gaps": [],
+      "contact": {
+        "name": "Nadia Idris",
+        "email": "nadia.idris@email.com",
+        "phone": "012-7781234",
+        "location": "Kuala Lumpur, Malaysia"
+      }
+    },
+    "score": {
+      "score_id": "48d2b709-6c32-400e-acc6-b26c70a7aaac",
+      "candidate_id": "f8b76e31-152a-4b4c-8913-5cbca6ed4fd4",
+      "job_id": "job_001",
+      "scored_date": "2026-07-16",
+      "cv_partial_score": 86,
+      "cv_coverage": 0.35,
+      "scored_coverage": 0.35,
+      "pending_sources": [
+        "interview",
+        "ocean"
+      ],
+      "full_score_available": false,
+      "benchmark_score": 97,
+      "benchmark_maturity": "starter",
+      "criteria_scores": [
+        {
+          "criterion_id": "c1",
+          "criterion_name": "Coffee / F&B experience",
+          "source": "cv",
+          "weight": 0.15,
+          "score": 90,
+          "scored": true,
+          "estimated": false
+        },
+        {
+          "criterion_id": "c2",
+          "criterion_name": "Customer service",
+          "source": "cv",
+          "weight": 0.12,
+          "score": 85,
+          "scored": true,
+          "estimated": false
+        },
+        {
+          "criterion_id": "c3",
+          "criterion_name": "Cash handling & POS",
+          "source": "cv",
+          "weight": 0.08,
+          "score": 82,
+          "scored": true,
+          "estimated": false
+        },
+        {
+          "criterion_id": "o1",
+          "criterion_name": "Conscientiousness — reliability",
+          "source": "ocean",
+          "weight": 0.08,
+          "score": null,
+          "scored": false,
+          "not_applicable": false,
+          "estimated": false
+        },
+        {
+          "criterion_id": "o2",
+          "criterion_name": "Agreeableness — customer warmth",
+          "source": "ocean",
+          "weight": 0.07,
+          "score": null,
+          "scored": false,
+          "not_applicable": false,
+          "estimated": false
+        },
+        {
+          "criterion_id": "i1",
+          "criterion_name": "Communication & friendliness",
+          "source": "interview",
+          "weight": 0.2,
+          "score": null,
+          "scored": false,
+          "not_applicable": false,
+          "estimated": false
+        },
+        {
+          "criterion_id": "i2",
+          "criterion_name": "Product knowledge & learning",
+          "source": "interview",
+          "weight": 0.15,
+          "score": null,
+          "scored": false,
+          "not_applicable": false,
+          "estimated": false
+        },
+        {
+          "criterion_id": "i3",
+          "criterion_name": "Handling busy periods",
+          "source": "interview",
+          "weight": 0.15,
+          "score": null,
+          "scored": false,
+          "not_applicable": false,
+          "estimated": false
+        }
+      ],
+      "combined_score": 29,
+      "lane": "green",
+      "must_have_penalty": 0,
+      "missing_must_haves": [],
+      "dealbreaker_triggered": false,
+      "dealbreakers_hit": [],
+      "strengths": [
+        "Solid quick-service F&B background",
+        "Dependable and eager to learn"
+      ],
+      "weaknesses": [],
+      "gaps": [
+        "Barista-specific experience still limited"
+      ],
+      "summary": "Strong CV signals; personality assessment still pending."
+    },
+    "hr_notes_list": [],
+    "portal_status": "submitted",
+    "override": null,
+    "ocean_completed": false,
+    "score_breakdown": {
+      "cv_fit": {
+        "score": 86,
+        "label": "Strong",
+        "weight_in_total": 0.35,
+        "status": "completed",
+        "contributing_factors": [
+          {
+            "factor": "Experience",
+            "result": "1.2 years — meets benchmark of 1",
+            "impact": "positive"
+          },
+          {
+            "factor": "Required skills",
+            "result": "2 of 4 matched",
+            "impact": "partial"
+          },
+          {
+            "factor": "Education",
+            "result": "SPM — meets minimum (SPM)",
+            "impact": "positive"
+          }
+        ]
+      },
+      "personality_fit": {
+        "score": null,
+        "label": "Pending",
+        "weight_in_total": 0.15,
+        "status": "pending",
+        "contributing_factors": []
+      },
+      "interview_result": {
+        "score": null,
+        "label": "Pending",
+        "weight_in_total": 0.5,
+        "status": "pending",
+        "contributing_factors": []
+      },
+      "strengths": [
+        "Solid quick-service F&B background",
+        "Dependable and eager to learn"
+      ],
+      "risks": [],
+      "missing_evidence": [
+        "Interview not yet completed — interview criteria unscored",
+        "OCEAN assessment not yet completed",
+        "No clear evidence of \"coffee\" in CV",
+        "No clear evidence of \"pos\" in CV"
+      ]
+    },
+    "recommendation": null,
+    "interview_completed": false
+  },
+  {
+    "candidate_id": "15cbd375-5a85-4b3a-8909-3ad0a5c7013e",
+    "job_id": "job_001",
+    "source": "portal",
+    "submitted_date": "2026-07-16",
+    "parse_confidence_overall": 88,
+    "low_confidence_warning": false,
+    "profile": {
+      "name": "Haziq Rahman",
+      "age": 20,
+      "total_experience_months": 14,
+      "expected_salary": 2000,
+      "languages": [
+        "Bahasa Malaysia",
+        "English"
+      ],
+      "skills": [
+        "customer service",
+        "cash handling",
+        "food preparation"
+      ],
+      "work_history": [
+        {
+          "title": "Service Crew",
+          "employer": "McDonald's",
+          "industry": "F&B",
+          "duration_months": 14,
+          "team_size_managed": 0,
+          "duties": [
+            "counter service",
+            "cash handling",
+            "food prep"
+          ]
+        }
+      ],
+      "education": [
+        {
+          "level": "SPM"
+        }
+      ],
+      "employment_gaps": [],
+      "contact": {
+        "name": "Haziq Rahman",
+        "email": "haziq.rahman@email.com",
+        "phone": "011-24567890",
+        "location": "Kuala Lumpur, Malaysia"
+      }
+    },
+    "score": {
+      "combined_score": null,
+      "cv_partial_score": null,
+      "full_score_available": false,
+      "pending_sources": [
+        "cv",
+        "ocean",
+        "interview"
+      ],
+      "criteria_scores": [],
+      "strengths": [],
+      "weaknesses": [],
+      "gaps": [],
+      "summary": ""
+    },
+    "hr_notes_list": [],
+    "portal_status": "submitted",
+    "override": null,
+    "ocean_completed": false,
+    "recommendation": null,
+    "interview_completed": false
   }
 ]
