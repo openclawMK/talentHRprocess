@@ -33,6 +33,7 @@ export default function GlobalDashboard() {
   const [insightBusy, setInsightBusy] = useState(false);
   const [popout, setPopout] = useState(null); // null | 'candidates' | 'positions'
   const [filter, setFilter] = useState(null);
+  const [positionFilter, setPositionFilter] = useState(null); // null | 'needs_setup'
 
   useEffect(() => {
     axios.get("/api/analytics").then((r) => setA(r.data)).catch(() => setA(false));
@@ -58,6 +59,7 @@ export default function GlobalDashboard() {
   const greeting = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
 
   function openCandidates(f) { setFilter(f || null); setPopout("candidates"); }
+  function openPositions(f) { setPositionFilter(f || null); setPopout("positions"); }
 
   if (a === null) return <div style={{ ...card, height: 320 }} className="animate-pulse" />;
 
@@ -149,6 +151,40 @@ export default function GlobalDashboard() {
           </div>
         );
       })}
+    </div>
+  );
+
+  const RoleCards = ({ list }) => (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {list.map((j) => {
+        const tot = Math.max(1, j.g + j.a + j.r);
+        return (
+          <div key={j.job_id} onClick={() => { setPopout(null); navigate(`/jobs/${j.job_id}/dashboard`); }} style={{ ...card, padding: 20, cursor: "pointer" }} className="transition-shadow hover:shadow-md">
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14, gap: 8 }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-.3px", marginBottom: 5, color: D.text }}>{j.title}</div>
+                <div style={{ fontSize: 12.5, color: D.text4 }}>{j.location}</div>
+              </div>
+              {j.model_ready
+                ? <span style={{ fontSize: 10, fontWeight: 700, color: D.green, background: D.greenBg, border: `0.5px solid ${D.greenBorder}`, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0 }}>model ready</span>
+                : <span style={{ fontSize: 10, fontWeight: 700, color: D.amber, background: D.amberBg, border: `0.5px solid ${D.amberBorder}`, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0 }}>needs setup</span>}
+            </div>
+            <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
+              <div><div style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-1px", lineHeight: 1, color: D.text }}>{j.applicants}</div><div style={{ fontSize: 12, color: D.text4, marginTop: 3 }}>candidates</div></div>
+              <div style={{ textAlign: "right" }}><div style={{ fontSize: 20, fontWeight: 700, color: D.blue, lineHeight: 1 }}>{j.avg}</div><div style={{ fontSize: 12, color: D.text4, marginTop: 3 }}>avg score</div></div>
+            </div>
+            <div style={{ display: "flex", height: 8, borderRadius: 5, overflow: "hidden", background: D.inset }}>
+              <div style={{ width: `${(j.g / tot) * 100}%`, background: D.green }} />
+              <div style={{ width: `${(j.a / tot) * 100}%`, background: D.amber }} />
+              <div style={{ width: `${(j.r / tot) * 100}%`, background: D.red }} />
+            </div>
+            <div style={{ display: "flex", gap: 14, marginTop: 10, fontSize: 12, color: D.text3 }}>
+              <span>🟢 {j.g}</span><span>🟡 {j.a}</span><span>🔴 {j.r}</span>
+            </div>
+          </div>
+        );
+      })}
+      {list.length === 0 && <div style={{ ...card, padding: 24, textAlign: "center", fontSize: 14, color: D.text4 }} className="col-span-full">No positions match this filter.</div>}
     </div>
   );
 
@@ -259,7 +295,7 @@ export default function GlobalDashboard() {
               </div>
             ))}
             {(a.models_pending ?? 0) > 0 && (
-              <div onClick={() => setPopout("positions")} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 15px", background: D.amberBg, border: `1px solid ${D.amberBorder}`, borderRadius: 12, cursor: "pointer" }}>
+              <div onClick={() => openPositions("needs_setup")} style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 15px", background: D.amberBg, border: `1px solid ${D.amberBorder}`, borderRadius: 12, cursor: "pointer" }}>
                 <span style={{ fontSize: 14, flexShrink: 0 }}>⚠</span>
                 <span style={{ fontSize: 13, color: D.text2, flex: 1 }}><b style={{ color: D.amber }}>{a.models_pending}</b> position{a.models_pending === 1 ? "" : "s"} without a complete scoring model</span>
                 <span style={{ fontSize: 12.5, fontWeight: 700, color: D.amber }}>Fix →</span>
@@ -287,37 +323,28 @@ export default function GlobalDashboard() {
 
       {/* ===== Positions (blue) — synced, read-only ===== */}
       <Section color={D.blue} title="Positions" sub="Synced from your ATS — read-only"
-        right={<span onClick={() => navigate("/jobs")} style={{ fontSize: 13, color: D.blue, fontWeight: 600, cursor: "pointer" }}>View all →</span>} />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {roles.map((j) => {
-          const tot = Math.max(1, j.g + j.a + j.r);
-          return (
-            <div key={j.job_id} onClick={() => navigate(`/jobs/${j.job_id}/dashboard`)} style={{ ...card, padding: 20, cursor: "pointer" }} className="transition-shadow hover:shadow-md">
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 14, gap: 8 }}>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "-.3px", marginBottom: 5, color: D.text }}>{j.title}</div>
-                  <div style={{ fontSize: 12.5, color: D.text4 }}>{j.location}</div>
-                </div>
-                {j.model_ready
-                  ? <span style={{ fontSize: 10, fontWeight: 700, color: D.green, background: D.greenBg, border: `0.5px solid ${D.greenBorder}`, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0 }}>model ready</span>
-                  : <span style={{ fontSize: 10, fontWeight: 700, color: D.amber, background: D.amberBg, border: `0.5px solid ${D.amberBorder}`, padding: "3px 8px", borderRadius: 20, whiteSpace: "nowrap", flexShrink: 0 }}>needs setup</span>}
-              </div>
-              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 14 }}>
-                <div><div style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-1px", lineHeight: 1, color: D.text }}>{j.applicants}</div><div style={{ fontSize: 12, color: D.text4, marginTop: 3 }}>candidates</div></div>
-                <div style={{ textAlign: "right" }}><div style={{ fontSize: 20, fontWeight: 700, color: D.blue, lineHeight: 1 }}>{j.avg}</div><div style={{ fontSize: 12, color: D.text4, marginTop: 3 }}>avg score</div></div>
-              </div>
-              <div style={{ display: "flex", height: 8, borderRadius: 5, overflow: "hidden", background: D.inset }}>
-                <div style={{ width: `${(j.g / tot) * 100}%`, background: D.green }} />
-                <div style={{ width: `${(j.a / tot) * 100}%`, background: D.amber }} />
-                <div style={{ width: `${(j.r / tot) * 100}%`, background: D.red }} />
-              </div>
-              <div style={{ display: "flex", gap: 14, marginTop: 10, fontSize: 12, color: D.text3 }}>
-                <span>🟢 {j.g}</span><span>🟡 {j.a}</span><span>🔴 {j.r}</span>
-              </div>
-            </div>
-          );
-        })}
-        {roles.length === 0 && <div style={{ ...card, padding: 24, textAlign: "center", fontSize: 14, color: D.text4 }} className="col-span-full">No positions synced yet.</div>}
+        right={<span onClick={() => openPositions(null)} style={{ fontSize: 12.5, fontWeight: 700, color: D.blue, cursor: "pointer" }}>Open →</span>} />
+      <div style={{ ...card, padding: 22, marginBottom: 30, cursor: "pointer" }} onClick={() => openPositions(null)} className="transition-shadow hover:shadow-md">
+        <div style={{ display: "flex", gap: 30 }} className="flex-wrap">
+          <div>
+            <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-1.5px", color: D.text, lineHeight: 1 }}>{roles.length}</div>
+            <div style={{ fontSize: 12.5, color: D.text4, marginTop: 4 }}>open position{roles.length === 1 ? "" : "s"}</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-1.5px", color: D.blue, lineHeight: 1 }}>{a.avg_score ?? 0}</div>
+            <div style={{ fontSize: 12.5, color: D.text4, marginTop: 4 }}>avg score</div>
+          </div>
+          <div>
+            <div style={{ fontSize: 40, fontWeight: 800, letterSpacing: "-1.5px", color: (a.models_pending ?? 0) > 0 ? D.amber : D.text5, lineHeight: 1 }}>{a.models_pending ?? 0}</div>
+            <div style={{ fontSize: 12.5, color: D.text4, marginTop: 4 }}>need setup</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 6, marginTop: 18, flexWrap: "wrap" }}>
+          {roles.map((r) => (
+            <span key={r.job_id} title={`${r.title} · ${r.model_ready ? "model ready" : "needs setup"}`} style={{ width: 9, height: 9, borderRadius: "50%", background: r.model_ready ? D.green : D.amber, flexShrink: 0 }} />
+          ))}
+          {roles.length === 0 && <span style={{ fontSize: 12.5, color: D.text4 }}>No positions synced yet.</span>}
+        </div>
       </div>
 
       {/* ===== Pop-outs ===== */}
@@ -334,24 +361,34 @@ export default function GlobalDashboard() {
         </Popout>
       )}
       {popout === "positions" && (
-        <Popout title="Positions needing setup" accent={D.amber} sub="Scoring model incomplete — scores may be unreliable">
-          <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
-            {roles.filter((r) => !r.model_ready).map((r) => (
-              <div key={r.job_id} onClick={() => { setPopout(null); navigate(`/jobs/${r.job_id}/success-profile`); }}
-                style={{ ...card, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }} className="flex-wrap">
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <div style={{ fontSize: 14.5, fontWeight: 700, color: D.text }}>{r.title}</div>
-                  <div style={{ fontSize: 12, color: D.text4, marginTop: 2 }}>
-                    {!r.has_criteria && "Scoring criteria not generated"}
-                    {!r.has_criteria && !r.has_profile && " · "}
-                    {!r.has_profile && "Success Profile not defined"}
-                  </div>
-                </div>
-                <span style={{ fontSize: 12.5, fontWeight: 700, color: D.blue, whiteSpace: "nowrap" }}>Set up →</span>
-              </div>
+        <Popout title="Positions" accent={D.blue}
+          sub={positionFilter === "needs_setup" ? "Scoring model incomplete — scores may be unreliable" : `${roles.length} synced from your ATS`}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+            {[{ k: null, label: `All (${roles.length})` }, { k: "needs_setup", label: `Needs setup (${a.models_pending ?? 0})` }].map((f) => (
+              <span key={f.label} onClick={() => setPositionFilter(f.k)} style={{ fontSize: 12.5, fontWeight: 600, padding: "7px 13px", borderRadius: 999, cursor: "pointer", color: positionFilter === f.k ? "#fff" : D.text2, background: positionFilter === f.k ? D.blue : D.inset, border: `0.5px solid ${positionFilter === f.k ? D.blue : D.border}` }}>{f.label}</span>
             ))}
-            {roles.filter((r) => !r.model_ready).length === 0 && <div style={{ fontSize: 13, color: D.text4, padding: "20px 4px", textAlign: "center" }}>Every position has a complete scoring model.</div>}
           </div>
+          {positionFilter === "needs_setup" ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+              {roles.filter((r) => !r.model_ready).map((r) => (
+                <div key={r.job_id} onClick={() => { setPopout(null); navigate(`/jobs/${r.job_id}/success-profile`); }}
+                  style={{ ...card, padding: "14px 16px", cursor: "pointer", display: "flex", alignItems: "center", gap: 12 }} className="flex-wrap">
+                  <div style={{ flex: 1, minWidth: 160 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 700, color: D.text }}>{r.title}</div>
+                    <div style={{ fontSize: 12, color: D.text4, marginTop: 2 }}>
+                      {!r.has_criteria && "Scoring criteria not generated"}
+                      {!r.has_criteria && !r.has_profile && " · "}
+                      {!r.has_profile && "Success Profile not defined"}
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: D.blue, whiteSpace: "nowrap" }}>Set up →</span>
+                </div>
+              ))}
+              {roles.filter((r) => !r.model_ready).length === 0 && <div style={{ fontSize: 13, color: D.text4, padding: "20px 4px", textAlign: "center" }}>Every position has a complete scoring model.</div>}
+            </div>
+          ) : (
+            <RoleCards list={roles} />
+          )}
         </Popout>
       )}
     </div>
