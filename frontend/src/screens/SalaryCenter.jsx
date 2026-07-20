@@ -154,6 +154,15 @@ export default function SalaryCenter() {
                   <div style={{ position: "absolute", left: `${med}%`, top: -3, width: 3, height: 16, background: D.blue, borderRadius: 2, transform: "translateX(-50%)" }} title="median" />
                 </div>
                 <div style={{ fontSize: 12.5, color: D.text3 }}><b style={{ color: D.text }}>{r.median_label}</b> median · {r.min_label}–{r.max_label}</div>
+                {r.live_asking_rate && r.live_asking_rate.confidence !== "insufficient" && (
+                  <div style={{ fontSize: 12, color: D.green, marginTop: 5, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: D.green, flexShrink: 0 }} />
+                    <span>Live asking rate: <b>{r.live_asking_rate.median_label}</b> median · n={r.live_asking_rate.count}</span>
+                    {r.live_asking_rate.confidence === "early" && (
+                      <span title="Small sample — directional, not confirmed" style={{ fontSize: 10, fontWeight: 700, color: D.amber, background: D.amberBg, border: `0.5px solid ${D.amberBorder}`, padding: "1px 6px", borderRadius: 20 }}>early signal</span>
+                    )}
+                  </div>
+                )}
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                 {r.sources.map((s) => { const c = SRC_BADGE[s] || SRC_BADGE.Market; return <span key={s} style={{ fontSize: 10.5, fontWeight: 700, color: c.color, background: c.bg, padding: "3px 7px", borderRadius: 6 }}>{s}</span>; })}

@@ -21,14 +21,17 @@ const newestSourceYear = (ids = []) => {
   const years = ids.map((id) => SRC[id]?.as_of).filter(Boolean);
   return years.length ? Math.max(...years) : null;
 };
-const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
+export const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
 const shortSource = (id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : id === "Hays2026" ? "Hays 2026" : "Market");
 // Industry label for a role (explicit tag, or a sector-based fallback for the
 // original F&B/professional roles that predate industry tagging).
 const industryOf = (rule) => rule.industry || (rule.sector === "frontline" ? "F&B / Retail / Hospitality" : "Professional / Office");
 
 // Longest keyword match wins, so "outlet supervisor" beats a bare "manager".
-function matchRole(roleTitle) {
+// Exported so liveSalarySignal.js buckets candidates into the same categories
+// as the published benchmark, instead of duplicating (and drifting from) this
+// matching logic.
+export function matchRole(roleTitle) {
   const t = norm(roleTitle);
   let best = null, bestLen = 0;
   for (const rule of DATA.roles) {
@@ -39,7 +42,7 @@ function matchRole(roleTitle) {
   return best;
 }
 
-function regionMultiplier(location) {
+export function regionMultiplier(location) {
   const loc = norm(location);
   if (!loc) return { mult: 1, region: null };
   for (const [state, mult] of Object.entries(DATA.regional_multipliers)) {

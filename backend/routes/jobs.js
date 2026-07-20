@@ -13,7 +13,8 @@ import {
   candidateStageKey,
 } from "../services/pipeline.js";
 import { notify, whatsappConfigured } from "../services/whatsappService.js";
-import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary } from "../services/salaryBenchmark.js";
+import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary, regionMultiplier, rm } from "../services/salaryBenchmark.js";
+import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
 import { generateSuccessProfileForJob } from "./successProfile.js";
 
 const router = Router();
@@ -31,6 +32,13 @@ const writeJSON = (p, d) => fs.writeFileSync(p, JSON.stringify(d, null, 2));
 function weightsValid(criteria) {
   const sum = (criteria || []).reduce((a, c) => a + (Number(c.weight) || 0), 0);
   return Math.abs(sum - 1) <= 0.01;
+}
+
+// Adds RM-formatted labels to a live_asking_rate result, matching the
+// min_label/median_label/max_label convention the published benchmark uses.
+function withLabels(rate) {
+  if (!rate || rate.confidence === "insufficient") return rate;
+  return { ...rate, median_label: rm(rate.median), min_label: rm(rate.min), max_label: rm(rate.max) };
 }
 
 function nextJobId(jobs) {
@@ -94,7 +102,19 @@ router.get("/jobs/:jobId/suggest-salary", (req, res) => {
 // GET /api/salary-center?region= — full benchmark catalogue for the Salary Center.
 router.get("/salary-center", (req, res) => {
   try {
-    res.json({ ...listBenchmarks(req.query.region || ""), regions: benchmarkRegions(), industries: benchmarkIndustries() });
+    const base = listBenchmarks(req.query.region || "");
+    // Live asking rate per row — candidates' own expected_salary, aggregated
+    // across every job matching that category (never blended into the
+    // published figures; returned alongside them, see liveSalarySignal.js).
+    let candidates = [];
+    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+    const jobs = readJSON(JOBS_PATH);
+    const region = req.query.region ? regionMultiplier(req.query.region).region : null;
+    const roles = base.roles.map((r) => ({
+      ...r,
+      live_asking_rate: withLabels(computeLiveAskingRate({ candidates, jobs, category: r.category, region })),
+    }));
+    res.json({ ...base, roles, regions: benchmarkRegions(), industries: benchmarkIndustries() });
   } catch (err) {
     console.error("salary-center error:", err);
     res.status(500).json({ error: "Failed to load salary center." });
@@ -102,7 +122,8 @@ router.get("/salary-center", (req, res) => {
 });
 
 // GET /api/jobs/:jobId/salary-benchmark — indicative market band for the role
-// (DOSM 2023) and how the role's budget compares to it.
+// (DOSM 2023) and how the role's budget compares to it, plus the live asking
+// rate from your own candidates for this same role category.
 router.get("/jobs/:jobId/salary-benchmark", (req, res) => {
   try {
     const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
@@ -113,7 +134,14 @@ router.get("/jobs/:jobId/salary-benchmark", (req, res) => {
     const budgetMax = Number(sp.salary_budget_max) || 0;
     const budgetMin = Number(sp.salary_budget_min) || 0;
     const budget_vs_market = budgetMax ? compareToMarket(budgetMax, benchmark) : null;
-    res.json({ available: true, benchmark, budget: { min: budgetMin, max: budgetMax }, budget_vs_market });
+
+    let candidates = [];
+    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+    const jobs = readJSON(JOBS_PATH);
+    const region = regionMultiplier(job.location).region;
+    const live_asking_rate = withLabels(computeLiveAskingRate({ candidates, jobs, category: benchmark.category, region }));
+
+    res.json({ available: true, benchmark, budget: { min: budgetMin, max: budgetMax }, budget_vs_market, live_asking_rate });
   } catch (err) {
     console.error("salary-benchmark error:", err);
     res.status(500).json({ error: "Failed to load salary benchmark." });

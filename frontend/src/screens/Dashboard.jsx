@@ -285,6 +285,7 @@ export default function Dashboard() {
       {/* market salary benchmark */}
       {salary && (() => {
         const b = salary.benchmark; const bv = salary.budget_vs_market; const bc = bv ? (BUDGET_COLORS[bv.lane] || BUDGET_COLORS.neutral) : null;
+        const live = salary.live_asking_rate;
         return (
           <div style={{ ...cardBox, borderRadius: 14, padding: "16px 20px", marginBottom: 16, display: "flex", alignItems: "center", gap: 16 }} className="flex-wrap">
             <div style={{ width: 42, height: 42, borderRadius: 12, background: D.greenBg, color: D.green, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, flexShrink: 0 }}>💰</div>
@@ -292,6 +293,13 @@ export default function Dashboard() {
               <div style={{ fontSize: 12, fontWeight: 700, color: D.text3, textTransform: "uppercase", letterSpacing: ".4px" }}>Market rate · {b.category} · {b.region}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: D.text, marginTop: 3 }}>{b.range_label} <span style={{ fontSize: 13, color: D.text4, fontWeight: 600 }}>· median {b.median_label}/mo</span></div>
               <div style={{ fontSize: 11.5, color: D.text4, marginTop: 3 }}>{b.estimated ? "Indicative estimate" : "Market data"} — Sources: {b.source_short}</div>
+              {live && live.confidence !== "insufficient" && (
+                <div style={{ fontSize: 12, color: D.green, marginTop: 6, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: D.green, flexShrink: 0 }} />
+                  <span>Your applicants are asking <b>{live.median_label}</b> median (n={live.count}, last {live.window_days}d)</span>
+                  {live.confidence === "early" && <span title="Small sample — directional, not confirmed" style={{ fontSize: 10, fontWeight: 700, color: D.amber, background: D.amberBg, border: `0.5px solid ${D.amberBorder}`, padding: "1px 6px", borderRadius: 20 }}>early signal</span>}
+                </div>
+              )}
             </div>
             {bv && (
               <div style={{ textAlign: "right" }}>
