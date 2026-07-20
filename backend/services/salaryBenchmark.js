@@ -16,6 +16,11 @@ const DATA = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "sala
 const SRC = Object.fromEntries((DATA.meta.sources || []).map((s) => [s.id, s]));
 
 const norm = (s) => (s || "").toLowerCase().trim();
+// Newest publication year behind a role's figures — drives the freshness label.
+const newestSourceYear = (ids = []) => {
+  const years = ids.map((id) => SRC[id]?.as_of).filter(Boolean);
+  return years.length ? Math.max(...years) : null;
+};
 const rm = (n) => `RM${Math.round(n).toLocaleString("en-MY")}`;
 const shortSource = (id) => (id === "DOSM2023" ? "DOSM 2023" : id === "JobStreet2026" ? "JobStreet 2026" : id === "Jobstore2023" ? "Jobstore 2023" : id === "Hays2026" ? "Hays 2026" : "Market");
 // Industry label for a role (explicit tag, or a sector-based fallback for the
@@ -169,6 +174,10 @@ export function listBenchmarks(location) {
       sources: (r.sources || []).map(shortSource),
       basis: r.basis || "role-level",
       estimated: (r.basis || "role-level") === "estimate",
+      // Freshness: newest source year behind this row, plus a per-role
+      // re-verification date when one has been recorded.
+      source_year: newestSourceYear(r.sources),
+      last_verified: r.last_verified || DATA.meta.last_verified || null,
     };
   });
   return {
@@ -177,6 +186,11 @@ export function listBenchmarks(location) {
       minimum_wage: floor,
       currency: DATA.meta.currency,
       note: DATA.meta.note,
+      last_verified: DATA.meta.last_verified || null,
+      last_updated: DATA.meta.last_updated || null,
+      next_review: DATA.meta.next_review || null,
+      review_cadence: DATA.meta.review_cadence || null,
+      freshness_note: DATA.meta.freshness_note || null,
     },
     region: region ? region.replace(/\b\w/g, (c) => c.toUpperCase()) : "Malaysia (national)",
     roles,

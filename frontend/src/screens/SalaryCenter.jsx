@@ -93,6 +93,31 @@ export default function SalaryCenter() {
         </div>
       </div>
 
+      {/* Data freshness — state it plainly rather than implying live data */}
+      {data?.meta?.last_verified && (() => {
+        const fmt = (d) => new Date(d).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" });
+        const overdue = data.meta.next_review && new Date(data.meta.next_review) < new Date();
+        return (
+          <div style={{ ...cardBox, padding: "12px 18px", marginBottom: 14, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: overdue ? D.amber : D.green, flexShrink: 0 }} />
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <div style={{ fontSize: 13, color: D.text2 }}>
+                Sources verified <b style={{ color: D.text }}>{fmt(data.meta.last_verified)}</b>
+                {data.meta.next_review && (
+                  <span style={{ color: overdue ? D.amber : D.text4 }}>
+                    {" · "}{overdue ? "review overdue" : `next review ${fmt(data.meta.next_review)}`}
+                  </span>
+                )}
+              </div>
+              {data.meta.freshness_note && <div style={{ fontSize: 11.5, color: D.text4, marginTop: 2, lineHeight: 1.45 }}>{data.meta.freshness_note}</div>}
+            </div>
+            {data.meta.review_cadence && (
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: D.text3, background: D.pillBg, border: `0.5px solid ${D.border}`, padding: "3px 9px", borderRadius: 20, textTransform: "capitalize", whiteSpace: "nowrap" }}>{data.meta.review_cadence} review</span>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Result count */}
       {data && (
         <div style={{ fontSize: 13, color: D.text4, marginBottom: 10 }}>
@@ -119,7 +144,8 @@ export default function SalaryCenter() {
                 <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 5, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: sb.color, background: sb.bg, border: `1px solid ${sb.border}`, padding: "2px 8px", borderRadius: 6, textTransform: "capitalize" }}>{r.sector}</span>
                   {r.industry && <span style={{ fontSize: 11, fontWeight: 600, color: D.text3, background: D.pillBg, padding: "2px 8px", borderRadius: 6 }}>{r.industry}</span>}
-                  {r.estimated && <span style={{ fontSize: 11, fontWeight: 600, color: "#B45309" }}>indicative estimate</span>}
+                  {r.source_year && <span title="Newest source year behind this figure" style={{ fontSize: 10.5, color: D.text4 }}>as of {r.source_year}</span>}
+                  {r.estimated && <span style={{ fontSize: 11, fontWeight: 600, color: D.amber }}>indicative estimate</span>}
                 </div>
               </div>
               <div>

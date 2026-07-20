@@ -5,25 +5,29 @@
         "id": "DOSM2023",
         "name": "DOSM Salaries & Wages Survey Report 2023",
         "url": "https://open.dosm.gov.my/publications/salaries_wages_2023",
-        "type": "official"
+        "type": "official",
+        "as_of": 2023
       },
       {
         "id": "JobStreet2026",
         "name": "JobStreet Malaysia role salary pages 2026",
         "url": "https://my.jobstreet.com/career-advice",
-        "type": "platform"
+        "type": "platform",
+        "as_of": 2026
       },
       {
         "id": "Jobstore2023",
         "name": "Jobstore Malaysia Salary Guide 2023",
         "url": "https://www.jobstore.com",
-        "type": "guide"
+        "type": "guide",
+        "as_of": 2023
       },
       {
         "id": "Hays2026",
         "name": "Hays Asia Salary Guide 2026 (Malaysia)",
         "url": "https://www.hays.com.my/salary-guide",
-        "type": "guide"
+        "type": "guide",
+        "as_of": 2026
       },
       {
         "id": "Industry",
@@ -36,7 +40,12 @@
     "minimum_wage": 1700,
     "national_median": 2602,
     "regional_damping": 0.6,
-    "note": "Role bands are cross-validated across DOSM (official occupation-group medians) and JobStreet (role-level Malaysian listings), with recruitment-market ranges elsewhere. Roles with basis 'role-level' carry real per-role source figures; basis 'estimate' are indicative anchors (DOSM group + adjacent roles) pending a professional salary guide (e.g. Michael Page/Hays). Regional multipliers (from DOSM state medians) are damped to 60%. Bands floored at minimum wage. Indicative benchmarks, not offers."
+    "note": "Role bands are cross-validated across DOSM (official occupation-group medians) and JobStreet (role-level Malaysian listings), with recruitment-market ranges elsewhere. Roles with basis 'role-level' carry real per-role source figures; basis 'estimate' are indicative anchors (DOSM group + adjacent roles) pending a professional salary guide (e.g. Michael Page/Hays). Regional multipliers (from DOSM state medians) are damped to 60%. Bands floored at minimum wage. Indicative benchmarks, not offers.",
+    "last_verified": "2026-01-15",
+    "last_updated": "2026-01-15",
+    "next_review": "2026-04-15",
+    "review_cadence": "quarterly",
+    "freshness_note": "Underlying sources publish annually (DOSM survey, Hays/Jobstore guides), so figures are re-verified quarterly rather than monthly. 'Verified' means the published source was re-checked on that date."
   },
   "regional_multipliers": {
     "kuala lumpur": 1.33,
