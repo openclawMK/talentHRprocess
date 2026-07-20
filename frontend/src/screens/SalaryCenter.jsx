@@ -154,6 +154,28 @@ export default function SalaryCenter() {
                   <div style={{ position: "absolute", left: `${med}%`, top: -3, width: 3, height: 16, background: D.blue, borderRadius: 2, transform: "translateX(-50%)" }} title="median" />
                 </div>
                 <div style={{ fontSize: 12.5, color: D.text3 }}><b style={{ color: D.text }}>{r.median_label}</b> median · {r.min_label}–{r.max_label}</div>
+
+                {r.tiers && (
+                  <div style={{ marginTop: 9 }}>
+                    <div style={{ fontSize: 10, color: D.text5, marginBottom: 4 }} title="Derived from this row's own min/median/max, not a separately-sourced figure per tier">By experience (indicative)</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {r.tiers.map((t) => {
+                        const tLeft = (t.min / scaleMax) * 100, tWidth = ((t.max - t.min) / scaleMax) * 100;
+                        const tColor = t.tier === "junior" ? "rgba(124,58,237,0.35)" : t.tier === "mid" ? "rgba(124,58,237,0.65)" : "rgba(124,58,237,0.95)";
+                        return (
+                          <div key={t.tier} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ width: 42, fontSize: 10, fontWeight: 700, color: D.text4, textTransform: "capitalize", flexShrink: 0 }}>{t.tier}</span>
+                            <div style={{ position: "relative", flex: 1, height: 5, background: D.inset, borderRadius: 4 }}>
+                              <div style={{ position: "absolute", left: `${tLeft}%`, width: `${Math.max(tWidth, 1)}%`, top: 0, bottom: 0, background: tColor, borderRadius: 4 }} />
+                            </div>
+                            <span style={{ fontSize: 10.5, color: D.text4, whiteSpace: "nowrap", flexShrink: 0 }}>{t.min_label}–{t.max_label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {r.live_asking_rate && r.live_asking_rate.confidence !== "insufficient" && (
                   <div style={{ fontSize: 12, color: D.green, marginTop: 5, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                     <span style={{ width: 6, height: 6, borderRadius: "50%", background: D.green, flexShrink: 0 }} />

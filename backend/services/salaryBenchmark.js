@@ -164,16 +164,24 @@ export function listBenchmarks(location) {
 
   const roles = DATA.roles.map((r) => {
     const median = adj(r.median);
+    const min = Math.min(median, adj(r.min));
+    const max = Math.max(median, adj(r.max));
+    // Same experienceBand() the Success Profile "suggest from market" flow
+    // uses — one methodology, so the two screens never quietly diverge.
+    // Derived from this row's own min/median/max, not independently sourced
+    // per tier — labelled "indicative" in the UI for that reason.
+    const tiers = ["junior", "mid", "senior"].map((tier) => {
+      const band = experienceBand({ min, median, max }, tier);
+      return { tier, min: band.min, max: band.max, min_label: rm(band.min), max_label: rm(band.max) };
+    });
     return {
       category: r.category,
       sector: r.sector || "other",
       industry: industryOf(r),
-      min: Math.min(median, adj(r.min)),
-      median,
-      max: Math.max(median, adj(r.max)),
-      min_label: rm(Math.min(median, adj(r.min))),
+      min, median, max,
+      min_label: rm(min),
       median_label: rm(median),
-      max_label: rm(Math.max(median, adj(r.max))),
+      max_label: rm(max),
       sources: (r.sources || []).map(shortSource),
       basis: r.basis || "role-level",
       estimated: (r.basis || "role-level") === "estimate",
@@ -181,6 +189,7 @@ export function listBenchmarks(location) {
       // re-verification date when one has been recorded.
       source_year: newestSourceYear(r.sources),
       last_verified: r.last_verified || DATA.meta.last_verified || null,
+      tiers,
     };
   });
   return {
