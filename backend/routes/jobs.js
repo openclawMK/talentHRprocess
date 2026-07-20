@@ -205,6 +205,18 @@ router.get("/analytics", (req, res) => {
     const scores = [];
     const stale = [];
 
+    // AI-layer operations: what PeopleQuest itself owns, as opposed to the
+    // client ATS's hiring lifecycle. These drive the analyst dashboard.
+    const ai_ops = {
+      scored: 0,
+      unscored: 0,
+      awaiting_assessment: 0,
+      awaiting_interview: 0,
+      low_confidence: 0,
+      dealbreakers: 0,
+      missing_must_haves: 0,
+    };
+
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     const perRole = {};
     for (const j of jobs) {
@@ -244,7 +256,17 @@ router.get("/analytics", (req, res) => {
         scores.push(c.score.combined_score);
         pr.scoreSum += c.score.combined_score;
         pr.scoreN += 1;
+        ai_ops.scored += 1;
+      } else {
+        ai_ops.unscored += 1;
       }
+
+      // Work that belongs to the AI layer, not to the client's pipeline.
+      if (!c.ocean_completed) ai_ops.awaiting_assessment += 1;
+      if (!c.interview_completed) ai_ops.awaiting_interview += 1;
+      if (c.low_confidence_warning) ai_ops.low_confidence += 1;
+      if (c.score?.dealbreaker_triggered) ai_ops.dealbreakers += 1;
+      if ((c.score?.missing_must_haves || []).length > 0) ai_ops.missing_must_haves += 1;
 
       const submitted = c.submitted_date ? new Date(c.submitted_date).getTime() : todayMs;
       const days = Math.max(0, Math.round((todayMs - submitted) / 86400000));
@@ -280,20 +302,30 @@ router.get("/analytics", (req, res) => {
     const applicant_trend_delta_pct = lastTwoApplicants.length === 2 && lastTwoApplicants[0] > 0 ? Math.round(((lastTwoApplicants[1] - lastTwoApplicants[0]) / lastTwoApplicants[0]) * 1000) / 10 : null;
 
     const roles = Object.values(perRole)
-      .map((p) => ({
-        job_id: p.job_id,
-        title: p.title,
-        dept: p.dept,
-        location: p.location,
-        applicants: p.applicants,
-        avg: avg(p.scoreSum, p.scoreN),
-        g: p.g,
-        a: p.a,
-        r: p.r,
-        stale: p.stale,
-        avatars: p.names.slice(0, 4).map((n) => n.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()),
-        more: Math.max(0, p.names.length - 4),
-      }))
+      .map((p) => {
+        // Is the scoring model ready for this position? Criteria generated and a
+        // Success Profile defined — without both, scores aren't trustworthy.
+        const j = jobById[p.job_id];
+        const has_criteria = (j?.criteria || []).length > 0;
+        const has_profile = !!(j?.successProfile && (j.successProfile.must_haves || []).length > 0);
+        return {
+          job_id: p.job_id,
+          title: p.title,
+          dept: p.dept,
+          location: p.location,
+          applicants: p.applicants,
+          avg: avg(p.scoreSum, p.scoreN),
+          g: p.g,
+          a: p.a,
+          r: p.r,
+          stale: p.stale,
+          has_criteria,
+          has_profile,
+          model_ready: has_criteria && has_profile,
+          avatars: p.names.slice(0, 4).map((n) => n.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()),
+          more: Math.max(0, p.names.length - 4),
+        };
+      })
       .sort((a, b) => b.applicants - a.applicants);
 
     res.json({
@@ -310,6 +342,8 @@ router.get("/analytics", (req, res) => {
         red: { count: by_lane.red, pct: Math.round((by_lane.red / laneTotal) * 100) },
       },
       roles,
+      ai_ops,
+      models_pending: roles.filter((r) => !r.model_ready).length,
       stale_count: stale.length,
       stale_top: stale[0] || null,
       score_trend,
@@ -355,6 +389,12 @@ router.get("/candidates-recent", (req, res) => {
           stage,
           days_waiting,
           is_stale,
+          // AI-layer attributes — what PeopleQuest tracks, vs the ATS's stage.
+          ocean_completed: !!c.ocean_completed,
+          interview_completed: !!c.interview_completed,
+          low_confidence: !!c.low_confidence_warning,
+          dealbreaker: !!c.score?.dealbreaker_triggered,
+          missing_must_haves: (c.score?.missing_must_haves || []).length,
         };
       })
       .filter(Boolean)
