@@ -22,6 +22,17 @@ export default function CompanySelector() {
     axios.get("/api/analytics").then((r) => setA(r.data)).catch(() => setA(null));
   }, []);
 
+  async function deleteCompany(e, c) {
+    e.stopPropagation();
+    if (!window.confirm(`Delete ${c.name}? This can't be undone.`)) return;
+    try {
+      await axios.delete(`/api/companies/${c.id}`);
+      setCompanies((cs) => cs.filter((x) => x.id !== c.id));
+    } catch (err) {
+      window.alert(err?.response?.data?.error || "Couldn't delete this company.");
+    }
+  }
+
   async function createCompany() {
     if (!form.name.trim()) return;
     setSaving(true); setError("");
@@ -86,8 +97,15 @@ export default function CompanySelector() {
             <div style={{ fontSize: 13, color: D.text4, marginTop: 4, maxWidth: 200 }}>Then add roles under it and start hiring.</div>
           </div>
         ) : companies.map((c) => (
-          <div key={c.id} onClick={() => navigate(`/companies/${c.id}`)} style={{ position: "relative", background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 18, cursor: "pointer", overflow: "hidden" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
+          <div key={c.id} onClick={() => navigate(`/companies/${c.id}`)} style={{ position: "relative", background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 18, cursor: "pointer", overflow: "hidden" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg group">
             <div style={{ height: 4, background: c.accent }} />
+            <button
+              onClick={(e) => deleteCompany(e, c)}
+              title="Delete company"
+              style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: 8, background: D.cardBg, border: `0.5px solid ${D.border}`, color: D.text4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer", transition: "color .15s, border-color .15s", zIndex: 1 }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = D.red; e.currentTarget.style.borderColor = D.red; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = D.text4; e.currentTarget.style.borderColor = D.border; }}
+            >✕</button>
             <div style={{ padding: "24px 24px 22px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 15, marginBottom: 22 }}>
                 <div style={{ width: 54, height: 54, borderRadius: 15, background: c.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, flexShrink: 0 }}>{c.initials}</div>

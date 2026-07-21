@@ -6,7 +6,7 @@
  */
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { readTable, insertRow } from "../services/store.js";
+import { readTable, insertRow, deleteRow } from "../services/store.js";
 
 const router = Router();
 
@@ -51,6 +51,29 @@ router.post("/companies", async (req, res) => {
   } catch (err) {
     console.error("create company error:", err);
     res.status(500).json({ error: "Failed to create company." });
+  }
+});
+
+// DELETE /api/companies/:companyId — blocked while it still has any roles.
+router.delete("/companies/:companyId", async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const company = (await readTable("companies")).find((c) => c.id === companyId);
+    if (!company) return res.status(404).json({ error: "Company not found." });
+
+    const roleCount = (await readTable("jobs")).filter((j) => j.company?.id === companyId).length;
+    if (roleCount > 0) {
+      return res.status(409).json({
+        error: `Can't delete — ${company.name} still has ${roleCount} role${roleCount === 1 ? "" : "s"}. Delete ${roleCount === 1 ? "it" : "them"} first.`,
+        role_count: roleCount,
+      });
+    }
+
+    await deleteRow("companies", companyId);
+    res.json({ ok: true, id: companyId });
+  } catch (err) {
+    console.error("delete company error:", err);
+    res.status(500).json({ error: "Failed to delete company." });
   }
 });
 

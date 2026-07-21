@@ -30,6 +30,18 @@ export default function JobSelector() {
     else setCompany(null);
   }, [companyId]);
 
+  async function deleteJob(e, j, applicantCount) {
+    e.stopPropagation();
+    const warn = applicantCount > 0 ? `This role has ${applicantCount} candidate${applicantCount === 1 ? "" : "s"} — deleting it will also delete them and their scores. ` : "";
+    if (!window.confirm(`${warn}Delete ${j.role_title}? This can't be undone.`)) return;
+    try {
+      await axios.delete(`/api/jobs/${j.job_id}`);
+      setJobs((js) => js.filter((x) => x.job_id !== j.job_id));
+    } catch (err) {
+      window.alert(err?.response?.data?.error || "Couldn't delete this role.");
+    }
+  }
+
   const roleMap = {};
   (a?.roles || []).forEach((x) => { roleMap[x.job_id] = x; });
 
@@ -81,8 +93,15 @@ export default function JobSelector() {
               const needsReview = r.a > 0;
               const mono = j.role_title.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
               return (
-                <div key={j.job_id} onClick={() => navigate(`/jobs/${j.job_id}/dashboard`)} style={{ position: "relative", background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 18, cursor: "pointer", overflow: "hidden" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg">
+                <div key={j.job_id} onClick={() => navigate(`/jobs/${j.job_id}/dashboard`)} style={{ position: "relative", background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 18, cursor: "pointer", overflow: "hidden" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg group">
                   <div style={{ height: 4, background: acc.color }} />
+                  <button
+                    onClick={(e) => deleteJob(e, j, r.applicants)}
+                    title="Delete role"
+                    style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: 8, background: D.cardBg, border: `0.5px solid ${D.border}`, color: D.text4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer", transition: "color .15s, border-color .15s", zIndex: 1 }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = D.red; e.currentTarget.style.borderColor = D.red; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = D.text4; e.currentTarget.style.borderColor = D.border; }}
+                  >✕</button>
                   <div style={{ padding: "22px 24px 24px" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 20 }}>
                       <div style={{ width: 46, height: 46, borderRadius: 13, background: acc.bg, color: acc.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, flexShrink: 0 }}>{mono}</div>

@@ -58,7 +58,17 @@ export async function generateSuccessProfileForJob(job) {
     "'low','medium-low','medium','medium-high','high', benchmark_experience_years (number), benchmark_team_size (number), " +
     "salary_budget_min (number, monthly RM), salary_budget_max (number, monthly RM) }. " +
     "For salary, give a realistic monthly gross range in Malaysian Ringgit for this role and industry. " +
-    "Be specific and realistic for the Malaysian job market.";
+    "Be specific and realistic for the Malaysian job market. " +
+    "benchmark_team_size is the number of people this role is expected to directly supervise as part of its normal duties — " +
+    "set it to 0 for any individual-contributor role with no direct reports (e.g. cashier, barista, admin assistant, junior " +
+    "executive). Only set it above 0 for roles whose title or responsibilities explicitly involve managing or supervising staff " +
+    "(e.g. supervisor, manager, team lead, head of department). " +
+    "must_haves and nice_to_haves must be things this SPECIFIC role genuinely needs day-to-day — never generic corporate " +
+    "skills borrowed from an adjacent or more senior role (e.g. do not list accounting/bookkeeping principles for a cashier, " +
+    "or people-management skills for an individual contributor). " +
+    "dealbreakers should describe conduct/history issues an interviewer or reference/background check would need to probe for " +
+    "(e.g. dishonesty, repeated lateness) — never something a CV would state about itself, since a resume cannot disprove or " +
+    "confirm this kind of item.";
 
   const user = `Job title: ${job.role_title}. Industry: ${job.industry}. Key responsibilities: ${
     (job.requirements?.key_responsibilities || []).join("; ") || "n/a"

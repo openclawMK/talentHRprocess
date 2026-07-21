@@ -194,6 +194,21 @@ export async function insertRow(name, obj) {
   if (error) throw new Error(`insertRow(${name}): ${error.message}`);
 }
 
+/**
+ * Delete exactly one row by its primary key. For `jobs`, the DB foreign keys
+ * (candidates -> jobs, scores -> candidates/jobs) are ON DELETE CASCADE, so
+ * this also removes that role's candidates and their scores automatically.
+ * For `companies`, there is no cascade — Postgres will reject the delete with
+ * an FK error if any job still references it, which callers should check for
+ * up front and surface as a clear "delete its roles first" message.
+ */
+export async function deleteRow(name, keyValue) {
+  const def = TABLES[name];
+  if (!def) throw new Error(`Unknown table: ${name}`);
+  const { error } = await supabase.from(name).delete().eq(def.key, keyValue);
+  if (error) throw new Error(`deleteRow(${name}): ${error.message}`);
+}
+
 // --- append-only logs (scores, whatsapp_log, whatsapp_replies) ---
 
 export async function appendRow(table, row) {

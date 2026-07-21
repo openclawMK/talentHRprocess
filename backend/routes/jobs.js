@@ -16,7 +16,7 @@ import { notify, whatsappConfigured } from "../services/whatsappService.js";
 import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary, regionMultiplier, rm } from "../services/salaryBenchmark.js";
 import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
 import { generateSuccessProfileForJob } from "./successProfile.js";
-import { readTable, writeTable, insertRow } from "../services/store.js";
+import { readTable, writeTable, insertRow, deleteRow } from "../services/store.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -875,6 +875,22 @@ router.post("/jobs", async (req, res) => {
   } catch (err) {
     console.error("create job error:", err);
     res.status(500).json({ error: "Failed to create job." });
+  }
+});
+
+// DELETE /api/jobs/:jobId — removes the role. The DB cascades this to its
+// candidates and their scores automatically (foreign keys ON DELETE CASCADE).
+router.delete("/jobs/:jobId", async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const job = (await readTable("jobs")).find((j) => j.job_id === jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+
+    await deleteRow("jobs", jobId);
+    res.json({ ok: true, job_id: jobId });
+  } catch (err) {
+    console.error("delete job error:", err);
+    res.status(500).json({ error: "Failed to delete role." });
   }
 });
 

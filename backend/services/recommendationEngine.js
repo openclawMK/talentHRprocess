@@ -31,7 +31,11 @@ function recentHrNotes(candidate) {
 export async function generateRecommendation(candidate, job) {
   const score = candidate.score || {};
   const combined = score.combined_score ?? 0;
-  const cvFit = score.cv_partial_score ?? 0;
+  // cv_partial_score is frozen at the very first CV-only screening pass and
+  // goes stale once OCEAN/interview run — component_scores.profile_fit is the
+  // same "profile fit" number shown in the UI, recomputed fresh each time, so
+  // it must be preferred whenever available.
+  const cvFit = score.component_scores?.profile_fit ?? score.cv_partial_score ?? 0;
   const green = job.thresholds?.green ?? 70;
   const red = job.thresholds?.red ?? 40;
   const full = score.full_score_available === true;
