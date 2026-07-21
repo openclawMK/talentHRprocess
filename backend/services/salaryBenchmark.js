@@ -69,10 +69,19 @@ export function getSalaryBenchmark(roleTitle, location) {
   const max = Math.max(median, adj(rule.max));
   const sources = (rule.sources || []).map((id) => SRC[id]?.name || id);
 
+  // Same experienceBand() the Salary Center and "suggest from market" flows
+  // use — one methodology, so a role's own dashboard card never quietly
+  // shows a different junior/mid/senior split than the Salary Center does.
+  const tiers = ["junior", "mid", "senior"].map((tier) => {
+    const band = experienceBand({ min, median, max }, tier);
+    return { tier, min: band.min, max: band.max, min_label: rm(band.min), max_label: rm(band.max) };
+  });
+
   return {
     median, min, max,
     range_label: `${rm(min)}–${rm(max)}`,
     median_label: rm(median),
+    tiers,
     category: rule.category,
     sector: rule.sector || null,
     industry: industryOf(rule),
