@@ -24,7 +24,7 @@ import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanS
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
-import { readTable, writeTable, appendScore } from "../services/store.js";
+import { readTable, writeTable, insertRow, appendScore } from "../services/store.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -272,11 +272,11 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     };
     candidate.score = scoreObj;
 
+    // insertRow (not writeTable) — safe under concurrent applications from
+    // multiple candidates hitting this public endpoint at once, see store.js.
+    await insertRow("candidates", candidate);
+    // Candidate row now exists — safe to append the score (FK to candidates).
     await appendScore(scoreObj);
-
-    const candidates = (await readTable("candidates"));
-    candidates.push(candidate);
-    await writeTable("candidates", candidates);
 
     res.status(201).json({
       candidate_id: candidate.candidate_id,

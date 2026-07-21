@@ -16,7 +16,7 @@ import { notify, whatsappConfigured } from "../services/whatsappService.js";
 import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary, regionMultiplier, rm } from "../services/salaryBenchmark.js";
 import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
 import { generateSuccessProfileForJob } from "./successProfile.js";
-import { readTable, writeTable } from "../services/store.js";
+import { readTable, writeTable, insertRow } from "../services/store.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -869,8 +869,8 @@ router.post("/jobs", async (req, res) => {
       console.error("auto success-profile generation failed:", spErr.message);
     }
 
-    jobs.push(newJob);
-    await writeTable("jobs", jobs);
+    // insertRow (not writeTable) — safe under concurrent creates, see store.js.
+    await insertRow("jobs", newJob);
     res.status(201).json(newJob);
   } catch (err) {
     console.error("create job error:", err);

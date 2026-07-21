@@ -21,7 +21,7 @@ import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
-import { readTable, writeTable, readScores, appendScore, deleteScoresForCandidate } from "../services/store.js";
+import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate } from "../services/store.js";
 
 const router = Router();
 
@@ -79,8 +79,9 @@ async function runScoring(candidate, job) {
     summary: insights.summary,
   };
 
-  await appendScore(scoreObj);
-
+  // NOTE: the score is NOT persisted here. The `scores` table has a foreign
+  // key to `candidates`, so the candidate row must be written first. Callers
+  // persist the candidate, then call appendScore(candidate.score).
   candidate.score = scoreObj;
   // Session 11: attach the hiring-intelligence layer.
   candidate.score_breakdown = buildScoreBreakdown(candidate, job);
@@ -149,9 +150,10 @@ router.post("/upload-cv", upload.single("file"), async (req, res) => {
     // Score automatically — HR never triggers scoring manually.
     await runScoring(candidate, job);
 
-    const candidates = await readTable("candidates");
-    candidates.push(candidate);
-    await writeTable("candidates", candidates);
+    // insertRow (not writeTable) — safe under concurrent creates, see store.js.
+    await insertRow("candidates", candidate);
+    // Candidate row now exists — safe to append the score (FK to candidates).
+    await appendScore(candidate.score);
 
     return res.status(201).json(candidate);
   } catch (err) {
@@ -180,6 +182,8 @@ router.post("/score-candidate", async (req, res) => {
 
     await runScoring(candidates[idx], job);
     await writeTable("candidates", candidates);
+    // Candidate row already exists (re-scoring) — safe to append the score.
+    await appendScore(candidates[idx].score);
     return res.json(candidates[idx]);
   } catch (err) {
     console.error("score-candidate error:", err);

@@ -177,6 +177,23 @@ export async function writeTable(name, array) {
   await reconcile(name, def.key, array.map(def.toRow));
 }
 
+/**
+ * Insert exactly one new row. Unlike writeTable(), this never reads the
+ * table first and never deletes anything — so it's safe under concurrent
+ * creates (e.g. two candidates applying via the public portal at the same
+ * moment). writeTable's "read full array, mutate, write full array" pattern
+ * is a read-modify-write race: request A can read a stale snapshot that's
+ * missing B's just-inserted row, then A's reconcile-delete step wipes it.
+ * Always use insertRow() for CREATE — only use writeTable() for bulk
+ * edits/deletes on an array you already trust to be the full current set.
+ */
+export async function insertRow(name, obj) {
+  const def = TABLES[name];
+  if (!def) throw new Error(`Unknown table: ${name}`);
+  const { error } = await supabase.from(name).insert(def.toRow(obj));
+  if (error) throw new Error(`insertRow(${name}): ${error.message}`);
+}
+
 // --- append-only logs (scores, whatsapp_log, whatsapp_replies) ---
 
 export async function appendRow(table, row) {

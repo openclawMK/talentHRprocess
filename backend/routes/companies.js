@@ -6,7 +6,7 @@
  */
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { readTable, writeTable } from "../services/store.js";
+import { readTable, insertRow } from "../services/store.js";
 
 const router = Router();
 
@@ -39,7 +39,6 @@ router.post("/companies", async (req, res) => {
     const { name, industry } = req.body || {};
     if (!name || !name.trim()) return res.status(400).json({ error: "Company name is required." });
 
-    const companies = await readTable("companies");
     const company = {
       id: uuidv4(),
       name: name.trim(),
@@ -47,8 +46,7 @@ router.post("/companies", async (req, res) => {
       accent: accentFor(name.trim()),
       initials: initialsOf(name.trim()),
     };
-    companies.push(company);
-    await writeTable("companies", companies);
+    await insertRow("companies", company);
     res.status(201).json(company);
   } catch (err) {
     console.error("create company error:", err);

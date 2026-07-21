@@ -11,6 +11,37 @@ const pdfParse = require("pdf-parse/lib/pdf-parse.js");
 const EMAIL_RE = /[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/i;
 const PHONE_RE = /(\+?\d[\d\s().-]{6,}\d)/;
 
+// pdf-parse's bundled legacy pdfjs build (v1.10.100) keeps shared
+// module-level state that isn't cleanly torn down between calls — under
+// load, two CVs parsed close together can corrupt each other and throw
+// ("Illegal character: 41" / "bad XRef entry"), even though each PDF is
+// perfectly valid on its own (confirmed: the same file re-parsed solo always
+// succeeds). Serializing calls through this queue cuts the failure rate a
+// lot but doesn't fully eliminate it — the corruption isn't a plain
+// concurrent-access race, it's leftover state from the previous call. The
+// real fix is swapping this library for one that isolates state per call;
+// until then, retrying (below) converts the rare failure into a transparent
+// retry instead of a user-facing error, since a retry always succeeds once
+// the shared state has settled.
+let pdfParseQueue = Promise.resolve();
+function runPdfParseOnce(buffer) {
+  const result = pdfParseQueue.then(() => pdfParse(buffer));
+  pdfParseQueue = result.catch(() => {});
+  return result;
+}
+async function runPdfParseSerialized(buffer, attempts = 3) {
+  let lastErr;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await runPdfParseOnce(buffer);
+    } catch (err) {
+      lastErr = err;
+      await new Promise((r) => setTimeout(r, 50 * (i + 1)));
+    }
+  }
+  throw lastErr;
+}
+
 /**
  * Extract raw text from a CV file.
  *
@@ -35,7 +66,7 @@ export async function extractText(filePath) {
 
   if (ext === ".pdf") {
     const dataBuffer = fs.readFileSync(filePath);
-    const data = await pdfParse(dataBuffer);
+    const data = await runPdfParseSerialized(dataBuffer);
     text = data.text || "";
   } else if (ext === ".docx") {
     const result = await mammoth.extractRawText({ path: filePath });
