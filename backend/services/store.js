@@ -195,6 +195,23 @@ export async function insertRow(name, obj) {
 }
 
 /**
+ * Merge new keys into one candidate's `extra` jsonb bucket, without touching
+ * any other column or row — cheap alternative to writeTable() for caching a
+ * lazily-computed field (e.g. evidence_overrides) on an otherwise read path.
+ * Reads the current `extra` first since a jsonb column update REPLACES it
+ * wholesale rather than merging.
+ */
+export async function patchCandidateExtra(candidateId, extraPatch) {
+  const { data, error: readErr } = await supabase
+    .from("candidates").select("extra").eq("candidate_id", candidateId).single();
+  if (readErr) throw new Error(`patchCandidateExtra read: ${readErr.message}`);
+  const merged = { ...(data?.extra || {}), ...extraPatch };
+  const { error } = await supabase
+    .from("candidates").update({ extra: merged }).eq("candidate_id", candidateId);
+  if (error) throw new Error(`patchCandidateExtra write: ${error.message}`);
+}
+
+/**
  * Delete exactly one row by its primary key. For `jobs`, the DB foreign keys
  * (candidates -> jobs, scores -> candidates/jobs) are ON DELETE CASCADE, so
  * this also removes that role's candidates and their scores automatically.

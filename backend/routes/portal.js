@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from "uuid";
 import { extractText } from "../services/fileExtractor.js";
 import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
+import { refreshEvidenceOverrides } from "../services/successFit.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
 import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
@@ -248,6 +249,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     };
 
     // Score CV criteria + generate insights
+    await refreshEvidenceOverrides(candidate, job);
     const scores = scoreCandidate(candidate, job);
     const insights = await generateCandidateInsights(candidate, job, scores);
     const scoreObj = {

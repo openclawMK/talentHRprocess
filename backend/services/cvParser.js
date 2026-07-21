@@ -7,10 +7,17 @@ Do not infer, guess, or fabricate any information not explicitly stated in the C
 Extract age and date of birth if they are present in the CV.
 Do not extract or reference: gender, race, religion, nationality, marital status, or family information.
 If a field cannot be determined from the CV text, set it to null.
-For confidence scores: 90-100 = clearly stated, 70-89 = reasonably inferred, 50-69 = uncertain, below 50 = flagged.`;
+For confidence scores: 90-100 = clearly stated, 70-89 = reasonably inferred, 50-69 = uncertain, below 50 = flagged.
+For any work_history entry whose end date is "Present", "Current", "till date", "ongoing" or similar (i.e. the person
+still holds that role), set end_date to null but STILL compute duration_months — using today's date (given below) as the
+effective end. Never leave duration_months null for an ongoing role just because there is no explicit end date; that
+would silently drop the person's current job from their total experience.`;
 
 function buildUserPrompt(cvText) {
-  return `Parse this CV and return structured JSON:
+  const today = new Date().toISOString().slice(0, 10);
+  return `Today's date is ${today} — use this as "now" for computing the duration of any ongoing/current role.
+
+Parse this CV and return structured JSON:
 
 CV TEXT:
 ${cvText}

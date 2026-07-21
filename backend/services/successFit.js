@@ -5,6 +5,7 @@
  */
 import { evidenceBlob, hasEvidence, evaluateSuccessProfile } from "./scorer.js";
 import { getSalaryBenchmark, salaryExperienceFit } from "./salaryBenchmark.js";
+import { chatJSON } from "./aiClient.js";
 
 const LEVEL_PCT = { low: 20, "medium-low": 40, medium: 60, "medium-high": 80, high: 100 };
 
@@ -57,8 +58,8 @@ export function computeBudgetFit(candidate, job) {
 export function computeProfileFit(candidate, job) {
   const sp = job.successProfile || {};
   const blob = evidenceBlob(candidate);
-  const must = (sp.must_haves || []).map((t) => hasEvidence(blob, t));
-  const nice = (sp.nice_to_haves || []).map((t) => hasEvidence(blob, t));
+  const must = (sp.must_haves || []).map((t) => hasEvidence(blob, t, candidate.evidence_overrides));
+  const nice = (sp.nice_to_haves || []).map((t) => hasEvidence(blob, t, candidate.evidence_overrides));
 
   const candExp = candidate.profile?.total_experience_months != null ? candidate.profile.total_experience_months / 12 : null;
   const benchExp = sp.benchmark_experience_years || 0;
@@ -112,8 +113,8 @@ export function computeSuccessFit(candidate, job) {
   if (!sp || !Object.keys(sp).length) return null;
 
   const blob = evidenceBlob(candidate);
-  const must = (sp.must_haves || []).map((t) => ({ text: t, met: hasEvidence(blob, t) }));
-  const nice = (sp.nice_to_haves || []).map((t) => ({ text: t, met: hasEvidence(blob, t) }));
+  const must = (sp.must_haves || []).map((t) => ({ text: t, met: hasEvidence(blob, t, candidate.evidence_overrides) }));
+  const nice = (sp.nice_to_haves || []).map((t) => ({ text: t, met: hasEvidence(blob, t, candidate.evidence_overrides) }));
   const evalSp = evaluateSuccessProfile(candidate, job);
   const dealbreakers = (sp.dealbreakers || []).map((t) => ({ text: t, triggered: evalSp.dealbreakers_hit.includes(t) }));
 
@@ -164,4 +165,54 @@ export function computeSuccessFit(candidate, job) {
     has_ocean: !!traits,
     summary: sp.summary || "",
   };
+}
+
+/**
+ * One-directional AI correction for hasEvidence()'s keyword matching: only
+ * re-checks must-haves/nice-to-haves the keyword pass calls UNMET, and only
+ * ever flips them to met if genuinely evidenced — it never revisits or
+ * un-passes anything the keyword pass already got right. Result is cached on
+ * candidate.evidence_overrides (keyed by exact requirement text) so it's
+ * computed once per requirement and reused on every future scoring pass —
+ * this keeps repeated scoring deterministic instead of re-asking the AI (and
+ * risking a different answer) every time OCEAN/interview/notes refresh the
+ * recommendation. Call BEFORE the scoring functions above, since they read
+ * candidate.evidence_overrides synchronously.
+ */
+export async function refreshEvidenceOverrides(candidate, job) {
+  const sp = job.successProfile;
+  if (!sp) return;
+  const overrides = candidate.evidence_overrides || {};
+  const blob = evidenceBlob(candidate);
+  const allReqs = [...(sp.must_haves || []), ...(sp.nice_to_haves || [])];
+  const toCheck = allReqs.filter(
+    (t) => !Object.prototype.hasOwnProperty.call(overrides, t) && !hasEvidence(blob, t)
+  );
+  if (!toCheck.length) return;
+
+  try {
+    const result = await chatJSON({
+      system:
+        "You are a meticulous HR analyst reviewing whether a candidate's CV genuinely evidences each requirement, " +
+        "even when worded differently from the CV (e.g. 'prepares monthly P&L and balance sheets' satisfies 'Financial " +
+        "reporting'; a Bachelor's in Accounting plus ACCA satisfies 'Accounting or finance qualification'). Do not give " +
+        "credit for vague, unrelated, or merely plausible-sounding evidence — only genuine matches. Return valid JSON only.",
+      user: `Work history: ${JSON.stringify(candidate.profile?.work_history || [])}
+Education: ${JSON.stringify(candidate.profile?.education || [])}
+Certifications: ${JSON.stringify(candidate.profile?.certifications || [])}
+Skills: ${JSON.stringify(candidate.profile?.skills || [])}
+
+For EACH requirement below, decide true only if the evidence above genuinely satisfies it:
+${toCheck.map((t, i) => `${i + 1}. ${t}`).join("\n")}
+
+Return: { "results": [{ "requirement": "<exact text as given>", "met": true|false }] }`,
+      temperature: 0,
+    });
+    for (const r of result.results || []) {
+      if (toCheck.includes(r.requirement)) overrides[r.requirement] = !!r.met;
+    }
+    candidate.evidence_overrides = overrides;
+  } catch (e) {
+    console.error("refreshEvidenceOverrides error:", e.message); // leave uncached — retried next scoring pass
+  }
 }

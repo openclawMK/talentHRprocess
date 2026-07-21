@@ -185,7 +185,15 @@ export function evidenceBlob(candidate) {
 // like "Membership in the Malaysian Bar") — at least 2 distinct tokens must
 // match once 2+ are available; a genuinely single-token requirement still
 // needs just that one.
-export function hasEvidence(blob, requirement) {
+// `overrides` is the candidate's cached AI evidence-review verdicts (see
+// successFit.js's refreshEvidenceOverrides) keyed by exact requirement text —
+// checked first so a requirement genuinely met but worded differently in the
+// CV (e.g. "prepares P&L and balance sheets" satisfying "Financial reporting")
+// isn't wrongly marked unmet by the plain keyword match below.
+export function hasEvidence(blob, requirement, overrides) {
+  if (overrides && Object.prototype.hasOwnProperty.call(overrides, requirement)) {
+    return overrides[requirement];
+  }
   const tokens = spNorm(requirement)
     .replace(/[^a-z0-9 ]/g, " ")
     .split(/\s+/)
@@ -207,7 +215,7 @@ export function evaluateSuccessProfile(candidate, job) {
   if (!sp) return { missing_must_haves: [], dealbreakers_hit: [], penalty: 0 };
 
   const text = evidenceBlob(candidate);
-  const missing = (sp.must_haves || []).filter((m) => !hasEvidence(text, m));
+  const missing = (sp.must_haves || []).filter((m) => !hasEvidence(text, m, candidate.evidence_overrides));
   const penalty = Math.min(20, missing.length * 8);
 
   const dealbreakers_hit = [];

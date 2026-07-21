@@ -13,7 +13,7 @@ import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
-import { computeSuccessFit, computeBudgetFit } from "../services/successFit.js";
+import { computeSuccessFit, computeBudgetFit, refreshEvidenceOverrides } from "../services/successFit.js";
 import { buildRoleComparison } from "../services/bestMatch.js";
 import { getSalaryBenchmark, compareToMarket } from "../services/salaryBenchmark.js";
 import { askPeopleQuest } from "../services/assistant.js";
@@ -21,7 +21,7 @@ import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
-import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate } from "../services/store.js";
+import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra } from "../services/store.js";
 
 const router = Router();
 
@@ -51,6 +51,7 @@ async function findCandidate(candidateId) {
  * embed it on the candidate, and return the score object.
  */
 async function runScoring(candidate, job) {
+  await refreshEvidenceOverrides(candidate, job);
   const scores = scoreCandidate(candidate, job);
   const insights = await generateCandidateInsights(candidate, job, scores);
 
@@ -94,6 +95,7 @@ async function runScoring(candidate, job) {
  * (OCEAN / interview / notes). Mutates the candidate in place.
  */
 async function refreshIntelligence(candidate, job) {
+  await refreshEvidenceOverrides(candidate, job);
   candidate.score_breakdown = buildScoreBreakdown(candidate, job);
   candidate.recommendation = await generateRecommendation(candidate, job);
 }
@@ -708,6 +710,17 @@ router.get("/candidates/:jobId/:candidateId/success-fit", async (req, res) => {
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
     const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
+
+    const before = candidate.evidence_overrides;
+    await refreshEvidenceOverrides(candidate, job);
+    // Lazily backfills older candidates the first time their fit is viewed —
+    // cheap single-row patch, never touches other candidates or columns.
+    // Best-effort: demo fallback candidates aren't in the table, so this
+    // simply fails silently for them (nothing to cache, recomputed each view).
+    if (candidate.evidence_overrides && candidate.evidence_overrides !== before) {
+      patchCandidateExtra(candidate.candidate_id, { evidence_overrides: candidate.evidence_overrides }).catch(() => {});
+    }
+
     const fit = computeSuccessFit(candidate, job);
     if (!fit) return res.json({ configured: false });
     res.json({ configured: true, ...fit });
