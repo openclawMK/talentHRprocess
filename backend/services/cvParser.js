@@ -1,10 +1,5 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { chatJSON } from "./aiClient.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const JOBS_PATH = path.join(__dirname, "..", "data", "jobs.json");
+import { readTable } from "./store.js";
 
 const SYSTEM_PROMPT = `You are an expert HR CV parser. Extract structured information from the CV text provided.
 Return ONLY valid JSON matching the schema below.
@@ -56,8 +51,8 @@ Return this exact JSON structure:
 }`;
 }
 
-function loadJob(jobId) {
-  const jobs = JSON.parse(fs.readFileSync(JOBS_PATH, "utf-8"));
+async function loadJob(jobId) {
+  const jobs = await readTable("jobs");
   const job = jobs.find((j) => j.job_id === jobId);
   if (!job) throw new Error(`Unknown jobId: ${jobId}`);
   return job;
@@ -113,7 +108,7 @@ function computeCareerDirection(workHistory) {
  * @returns {Promise<object>} enriched candidate profile
  */
 export async function parseCVWithAI(cvText, jobId) {
-  loadJob(jobId); // validates jobId exists (config available for future use)
+  await loadJob(jobId); // validates jobId exists (config available for future use)
 
   const profile = await chatJSON({
     system: SYSTEM_PROMPT,

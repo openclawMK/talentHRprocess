@@ -10,14 +10,8 @@
  *   TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM (e.g. whatsapp:+14155238886)
  *   FRONTEND_URL (public Vercel URL, for portal links inside messages)
  */
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import twilio from "twilio";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, "..", "data");
-const LOG_PATH = path.join(DATA_DIR, "whatsapp-log.json");
+import { readWhatsappLog, appendWhatsappLog } from "./store.js";
 
 const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_WHATSAPP_FROM } = process.env;
 
@@ -27,21 +21,6 @@ const client =
     : null;
 
 export const whatsappConfigured = !!(client && TWILIO_WHATSAPP_FROM);
-
-const readJSON = (p, fallback) => {
-  try {
-    return JSON.parse(fs.readFileSync(p, "utf-8"));
-  } catch {
-    return fallback;
-  }
-};
-const writeJSON = (p, d) => {
-  try {
-    fs.writeFileSync(p, JSON.stringify(d, null, 2));
-  } catch {
-    /* never block on logging */
-  }
-};
 
 /**
  * Normalize a Malaysian phone number to Twilio WhatsApp format.
@@ -68,23 +47,25 @@ export function phoneDigits(raw) {
   return f ? f.replace(/\D/g, "") : null;
 }
 
-/** Append-only message log. */
+/** Append-only message log. Fire-and-forget — never blocks the caller. */
 export function logMessage(direction, phone, content, status, messageId = null) {
-  const log = readJSON(LOG_PATH, []);
-  log.push({
+  appendWhatsappLog({
     direction, // "outbound" | "inbound"
     phone,
     content,
     status,
     message_id: messageId,
     timestamp: new Date().toISOString(),
-  });
-  writeJSON(LOG_PATH, log);
+  }).catch((e) => console.error("whatsapp log write failed:", e.message));
 }
 
 /** Read the whole message log (used by the conversation panel). */
-export function readLog() {
-  return readJSON(LOG_PATH, []);
+export async function readLog() {
+  try {
+    return await readWhatsappLog();
+  } catch {
+    return [];
+  }
 }
 
 const TEMPLATES = {

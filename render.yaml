@@ -11,3 +11,7 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-4o
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

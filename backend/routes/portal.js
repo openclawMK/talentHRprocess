@@ -24,21 +24,16 @@ import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanS
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
+import { readTable, writeTable, appendScore } from "../services/store.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, "..", "data");
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
-const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
-const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
-const SCORES_PATH = path.join(DATA_DIR, "scores.json");
 
-const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
-const writeJSON = (p, d) => fs.writeFileSync(p, JSON.stringify(d, null, 2));
 const today = () => new Date().toISOString().slice(0, 10);
 
-const findJobByToken = (token) =>
-  readJSON(JOBS_PATH).find((j) => j.portal_token === token);
+const findJobByToken = async (token) =>
+  (await readTable("jobs")).find((j) => j.portal_token === token);
 
 // --- multer: temp storage, keep original extension ---
 const storage = multer.diskStorage({
@@ -58,11 +53,11 @@ router.get("/ocean-questions", (req, res) => {
  * questionnaire that HR sends to an individual candidate who hasn't completed
  * it yet. Exposes only the candidate's first name + role title (no scores).
  */
-router.get("/assessment/:candidateId", (req, res) => {
+router.get("/assessment/:candidateId", async (req, res) => {
   try {
-    const candidate = readJSON(CANDIDATES_PATH).find((c) => c.candidate_id === req.params.candidateId);
+    const candidate = (await readTable("candidates")).find((c) => c.candidate_id === req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "This assessment link is invalid or has expired." });
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === candidate.job_id);
+    const job = (await readTable("jobs")).find((j) => j.job_id === candidate.job_id);
     const done = !!candidate.ocean_traits;
     res.json({
       name: candidate.profile?.name || "there",
@@ -86,11 +81,11 @@ router.post("/assessment/:candidateId/ocean", async (req, res) => {
     const { responses } = req.body;
     if (!responses) return res.status(400).json({ error: "Missing responses." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = (await readTable("candidates"));
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "This assessment link is invalid or has expired." });
 
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === candidates[idx].job_id);
+    const job = (await readTable("jobs")).find((j) => j.job_id === candidates[idx].job_id);
     if (!job) return res.status(400).json({ error: "The role for this assessment no longer exists." });
 
     const traits = computeTraits(responses);
@@ -98,7 +93,7 @@ router.post("/assessment/:candidateId/ocean", async (req, res) => {
     candidates[idx].portal_status = "submitted";
     candidates[idx].score_breakdown = buildScoreBreakdown(candidates[idx], job);
     candidates[idx].recommendation = await generateRecommendation(candidates[idx], job);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     res.json({ ok: true, role_title: job.role_title });
   } catch (err) {
@@ -112,11 +107,11 @@ router.post("/assessment/:candidateId/ocean", async (req, res) => {
  * self-serve interview booking page. Exposes only open slots for their role
  * (plus whichever slot they've already booked) — never other candidates' data.
  */
-router.get("/interview-booking/:candidateId", (req, res) => {
+router.get("/interview-booking/:candidateId", async (req, res) => {
   try {
-    const candidate = readJSON(CANDIDATES_PATH).find((c) => c.candidate_id === req.params.candidateId);
+    const candidate = (await readTable("candidates")).find((c) => c.candidate_id === req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "This booking link is invalid or has expired." });
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === candidate.job_id);
+    const job = (await readTable("jobs")).find((j) => j.job_id === candidate.job_id);
     if (!job) return res.status(404).json({ error: "This role is no longer available." });
 
     const now = Date.now();
@@ -149,11 +144,11 @@ router.post("/interview-booking/:candidateId/book", async (req, res) => {
     const { slot_id } = req.body;
     if (!slot_id) return res.status(400).json({ error: "Missing slot_id." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = (await readTable("candidates"));
     const candidate = candidates.find((c) => c.candidate_id === req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "This booking link is invalid or has expired." });
 
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = (await readTable("jobs"));
     const jobIdx = jobs.findIndex((j) => j.job_id === candidate.job_id);
     if (jobIdx === -1) return res.status(404).json({ error: "This role is no longer available." });
     const job = jobs[jobIdx];
@@ -174,7 +169,7 @@ router.post("/interview-booking/:candidateId/book", async (req, res) => {
     }
     slot.candidate_id = candidate.candidate_id;
     slot.booked_at = new Date().toISOString();
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
 
     const when = new Date(slot.start).toLocaleString("en-MY", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kuala_Lumpur" });
     const result = await notify(candidate.profile?.contact?.phone, "booking_confirmed", { name: candidate.profile?.name, role: job.role_title, when });
@@ -189,8 +184,8 @@ router.post("/interview-booking/:candidateId/book", async (req, res) => {
 /**
  * GET /api/portal/:token — public role info for the application landing page.
  */
-router.get("/portal/:token", (req, res) => {
-  const job = findJobByToken(req.params.token);
+router.get("/portal/:token", async (req, res) => {
+  const job = await findJobByToken(req.params.token);
   if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
   res.json({
     job_id: job.job_id,
@@ -209,7 +204,7 @@ router.get("/portal/:token", (req, res) => {
 router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
   const tempPath = req.file?.path;
   try {
-    const job = findJobByToken(req.params.token);
+    const job = await findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
 
     const { name, email, phone, expected_salary, consent } = req.body;
@@ -277,13 +272,11 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     };
     candidate.score = scoreObj;
 
-    const allScores = readJSON(SCORES_PATH);
-    allScores.push(scoreObj);
-    writeJSON(SCORES_PATH, allScores);
+    await appendScore(scoreObj);
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = (await readTable("candidates"));
     candidates.push(candidate);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     res.status(201).json({
       candidate_id: candidate.candidate_id,
@@ -308,13 +301,13 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
  */
 router.post("/portal/:token/ocean", async (req, res) => {
   try {
-    const job = findJobByToken(req.params.token);
+    const job = await findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
 
     const { candidate_id, responses } = req.body;
     if (!responses) return res.status(400).json({ error: "Missing responses." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = (await readTable("candidates"));
     const idx = candidates.findIndex(
       (c) => c.candidate_id === candidate_id && c.job_id === job.job_id
     );
@@ -326,7 +319,7 @@ router.post("/portal/:token/ocean", async (req, res) => {
     // Session 11: refresh hiring-intelligence layer after OCEAN.
     candidates[idx].score_breakdown = buildScoreBreakdown(candidates[idx], job);
     candidates[idx].recommendation = await generateRecommendation(candidates[idx], job);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     // Fire-and-forget WhatsApp notifications — never block the response.
     const cand = candidates[idx];

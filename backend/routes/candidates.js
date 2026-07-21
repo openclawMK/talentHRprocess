@@ -21,26 +21,22 @@ import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
+import { readTable, writeTable, readScores, appendScore, deleteScoresForCandidate } from "../services/store.js";
 
 const router = Router();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
 const UPLOADS_DIR = path.join(__dirname, "..", "uploads");
-const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
-const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
-const SCORES_PATH = path.join(DATA_DIR, "scores.json");
 const DEMO_PATH = path.join(DATA_DIR, "demo-candidates.json");
 
-// --- tiny JSON helpers ---
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
-const writeJSON = (p, data) => fs.writeFileSync(p, JSON.stringify(data, null, 2));
 const today = () => new Date().toISOString().slice(0, 10);
-const findJob = (jobId) => readJSON(JOBS_PATH).find((j) => j.job_id === jobId);
+const findJob = async (jobId) => (await readTable("jobs")).find((j) => j.job_id === jobId);
 
 // Read-only lookup across live candidates + demo fallback data.
-function findCandidate(candidateId) {
-  const live = readJSON(CANDIDATES_PATH);
+async function findCandidate(candidateId) {
+  const live = await readTable("candidates");
   const hit = live.find((c) => c.candidate_id === candidateId);
   if (hit) return hit;
   try {
@@ -83,9 +79,7 @@ async function runScoring(candidate, job) {
     summary: insights.summary,
   };
 
-  const allScores = readJSON(SCORES_PATH);
-  allScores.push(scoreObj);
-  writeJSON(SCORES_PATH, allScores);
+  await appendScore(scoreObj);
 
   candidate.score = scoreObj;
   // Session 11: attach the hiring-intelligence layer.
@@ -122,7 +116,7 @@ router.post("/upload-cv", upload.single("file"), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No file uploaded." });
     if (!jobId) return res.status(400).json({ error: "Missing jobId." });
 
-    const job = findJob(jobId);
+    const job = await findJob(jobId);
     if (!job) return res.status(400).json({ error: `Unknown jobId: ${jobId}` });
 
     const extracted = await extractText(tempPath);
@@ -155,9 +149,9 @@ router.post("/upload-cv", upload.single("file"), async (req, res) => {
     // Score automatically — HR never triggers scoring manually.
     await runScoring(candidate, job);
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     candidates.push(candidate);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     return res.status(201).json(candidate);
   } catch (err) {
@@ -177,15 +171,15 @@ router.post("/upload-cv", upload.single("file"), async (req, res) => {
 router.post("/score-candidate", async (req, res) => {
   try {
     const { candidate_id, job_id } = req.body;
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === candidate_id);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
 
-    const job = findJob(job_id || candidates[idx].job_id);
+    const job = await findJob(job_id || candidates[idx].job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     await runScoring(candidates[idx], job);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     return res.json(candidates[idx]);
   } catch (err) {
     console.error("score-candidate error:", err);
@@ -200,9 +194,9 @@ router.post("/score-candidate", async (req, res) => {
 router.post("/interview-questions", async (req, res) => {
   try {
     const { candidate_id, job_id } = req.body;
-    const candidate = findCandidate(candidate_id);
+    const candidate = await findCandidate(candidate_id);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(job_id || candidate.job_id);
+    const job = await findJob(job_id || candidate.job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const gaps = candidate.score?.gaps || [];
@@ -250,10 +244,10 @@ Mix behavioural, situational, and competency types.`;
 router.post("/compare-candidates", async (req, res) => {
   try {
     const { candidate_id_1, candidate_id_2, job_id } = req.body;
-    const a = findCandidate(candidate_id_1);
-    const b = findCandidate(candidate_id_2);
+    const a = await findCandidate(candidate_id_1);
+    const b = await findCandidate(candidate_id_2);
     if (!a || !b) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(job_id || a.job_id);
+    const job = await findJob(job_id || a.job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     // Fairness: age is deliberately excluded (never a scoring or comparison
@@ -298,19 +292,19 @@ Write 3-4 sentences for an HR manager explaining who is stronger for what reason
  * POST /api/ocean-assessment { candidate_id, responses }
  * Scores the ocean criteria and recomputes the combined score.
  */
-router.post("/ocean-assessment", (req, res) => {
+router.post("/ocean-assessment", async (req, res) => {
   try {
     const { candidate_id, responses } = req.body;
     if (!responses) return res.status(400).json({ error: "Missing responses." });
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === candidate_id);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(candidates[idx].job_id);
+    const job = await findJob(candidates[idx].job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const traits = computeTraits(responses);
     applyOceanScores(candidates[idx], job, traits);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     return res.json(candidates[idx]);
   } catch (err) {
     console.error("ocean-assessment error:", err);
@@ -324,9 +318,9 @@ router.post("/ocean-assessment", (req, res) => {
  */
 router.get("/jobs/:jobId/best-match", async (req, res) => {
   try {
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
-    const list = readJSON(CANDIDATES_PATH).filter((c) => c.job_id === job.job_id);
+    const list = (await readTable("candidates")).filter((c) => c.job_id === job.job_id);
     const rows = buildRoleComparison(job, list);
     if (rows.length < 2) return res.json({ rows, ai: null });
 
@@ -370,7 +364,7 @@ router.post("/candidates/:jobId/:candidateId/pre-hire-checks", async (req, res) 
   try {
     const CHECK_KEYS = ["background", "health", "references"];
     const STATUSES = ["pending", "clear", "flagged", "skipped"];
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
 
@@ -393,13 +387,13 @@ router.post("/candidates/:jobId/:candidateId/pre-hire-checks", async (req, res) 
     const statusChanged = CHECK_KEYS.some(
       (k) => (JSON.parse(before)[k]?.status || null) !== (cand.pre_hire_checks[k]?.status || null)
     );
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (statusChanged && job) {
       try { cand.recommendation = await generateRecommendation(cand, job); }
       catch (e) { console.error("recommendation refresh failed:", e.message); }
     }
 
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     res.json({ ok: true, candidate: cand, pre_hire_checks: cand.pre_hire_checks, recommendation: cand.recommendation });
   } catch (err) {
     console.error("pre-hire-checks error:", err);
@@ -437,9 +431,9 @@ router.get("/demo-candidates", (req, res) => {
 /**
  * GET /api/candidates/:jobId — all candidates for a role, sorted by combined score.
  */
-router.get("/candidates/:jobId", (req, res) => {
+router.get("/candidates/:jobId", async (req, res) => {
   try {
-    const list = readJSON(CANDIDATES_PATH)
+    const list = (await readTable("candidates"))
       .filter((c) => c.job_id === req.params.jobId)
       .sort(
         (x, y) =>
@@ -455,24 +449,21 @@ router.get("/candidates/:jobId", (req, res) => {
  * DELETE /api/candidates/:jobId/:candidateId — remove a candidate + their scores.
  * Only affects live candidates (demo fallback data is read-only).
  */
-router.delete("/candidates/:jobId/:candidateId", (req, res) => {
+router.delete("/candidates/:jobId/:candidateId", async (req, res) => {
   try {
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1)
       return res.status(404).json({ error: "Candidate not found (demo data can't be deleted)." });
 
     candidates.splice(idx, 1);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     // Clean up the candidate's score records too.
     try {
-      const scores = readJSON(SCORES_PATH).filter(
-        (s) => s.candidate_id !== req.params.candidateId
-      );
-      writeJSON(SCORES_PATH, scores);
+      await deleteScoresForCandidate(req.params.candidateId);
     } catch {
-      /* scores file optional */
+      /* scores table optional */
     }
 
     res.json({ ok: true, candidate_id: req.params.candidateId });
@@ -489,10 +480,10 @@ router.delete("/candidates/:jobId/:candidateId", (req, res) => {
 router.post("/candidates/:jobId/:candidateId/send-interview-invite", async (req, res) => {
   try {
     const { interview_type, date, time } = req.body;
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const cand = candidates[idx];
@@ -508,7 +499,7 @@ router.post("/candidates/:jobId/:candidateId/send-interview-invite", async (req,
     });
 
     cand.whatsapp_invite = { sent_at: today(), interview_type, date, time, confirmed: null };
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     res.json({
       ok: true,
@@ -531,10 +522,10 @@ router.post("/candidates/:jobId/:candidateId/send-interview-invite", async (req,
 router.post("/candidates/:jobId/:candidateId/send-booking-link", async (req, res) => {
   try {
     const { base_url } = req.body;
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const openSlots = (job.interview_slots || []).filter((s) => !s.candidate_id && new Date(s.start).getTime() > Date.now());
@@ -551,7 +542,7 @@ router.post("/candidates/:jobId/:candidateId/send-booking-link", async (req, res
     });
 
     cand.booking_link_sent_at = today();
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     res.json({
       ok: true,
@@ -573,10 +564,10 @@ router.post("/candidates/:jobId/:candidateId/send-booking-link", async (req, res
  */
 router.post("/candidates/:jobId/:candidateId/send-ocean-test", async (req, res) => {
   try {
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const cand = candidates[idx];
@@ -590,7 +581,7 @@ router.post("/candidates/:jobId/:candidateId/send-ocean-test", async (req, res) 
     }
 
     cand.ocean_invite = { sent_at: today() };
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     res.json({
       ok: true,
@@ -615,16 +606,16 @@ router.post("/candidates/:jobId/:candidateId/outcome", async (req, res) => {
     if (!["offer", "rejected"].includes(outcome))
       return res.status(400).json({ error: "outcome must be 'offer' or 'rejected'." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const cand = candidates[idx];
     cand.outcome = outcome;
     cand.outcome_date = today();
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
 
     const template = outcome === "offer" ? "outcome_successful" : "outcome_unsuccessful";
     const result = await notify(cand.profile?.contact?.phone, template, {
@@ -654,10 +645,10 @@ router.post("/candidates/:jobId/bulk-outcome", async (req, res) => {
     if (!Array.isArray(candidate_ids) || candidate_ids.length === 0)
       return res.status(400).json({ error: "candidate_ids must be a non-empty array." });
 
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const template = outcome === "offer" ? "outcome_successful" : "outcome_unsuccessful";
     const results = [];
 
@@ -675,7 +666,7 @@ router.post("/candidates/:jobId/bulk-outcome", async (req, res) => {
       }
     }
 
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     res.json({ outcome, results });
   } catch (err) {
     console.error("bulk-outcome error:", err);
@@ -687,12 +678,12 @@ router.post("/candidates/:jobId/bulk-outcome", async (req, res) => {
  * GET /api/candidates/:jobId/:candidateId/whatsapp-history
  * Returns the merged inbound/outbound message thread for this candidate.
  */
-router.get("/candidates/:jobId/:candidateId/whatsapp-history", (req, res) => {
+router.get("/candidates/:jobId/:candidateId/whatsapp-history", async (req, res) => {
   try {
-    const candidate = findCandidate(req.params.candidateId);
+    const candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
     const digits = phoneDigits(candidate.profile?.contact?.phone);
-    const thread = readLog()
+    const thread = (await readLog())
       .filter((m) => digits && phoneDigits(m.phone) === digits)
       .map((m) => ({ direction: m.direction, body: m.content, at: m.timestamp, status: m.status }))
       .sort((a, b) => new Date(a.at) - new Date(b.at));
@@ -707,11 +698,11 @@ router.get("/candidates/:jobId/:candidateId/whatsapp-history", (req, res) => {
  * GET /api/candidates/:jobId/:candidateId/success-fit
  * Benchmark the candidate against the role's Success Profile.
  */
-router.get("/candidates/:jobId/:candidateId/success-fit", (req, res) => {
+router.get("/candidates/:jobId/:candidateId/success-fit", async (req, res) => {
   try {
-    const candidate = findCandidate(req.params.candidateId);
+    const candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
     const fit = computeSuccessFit(candidate, job);
     if (!fit) return res.json({ configured: false });
@@ -725,11 +716,11 @@ router.get("/candidates/:jobId/:candidateId/success-fit", (req, res) => {
 /**
  * GET /api/candidates/:jobId/:candidateId — single candidate with score.
  */
-router.get("/candidates/:jobId/:candidateId", (req, res) => {
+router.get("/candidates/:jobId/:candidateId", async (req, res) => {
   try {
-    const candidate = findCandidate(req.params.candidateId);
+    const candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     let market = null;
     if (job) {
       const bm = getSalaryBenchmark(job.role_title, job.location);
@@ -749,9 +740,9 @@ router.get("/candidates/:jobId/:candidateId", (req, res) => {
  */
 router.get("/candidates/:jobId/:candidateId/interview-prep", async (req, res) => {
   try {
-    const candidate = findCandidate(req.params.candidateId);
+    const candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const interviewCriteria = (job.criteria || []).filter((c) => c.source === "interview");
@@ -866,15 +857,15 @@ router.post("/candidates/:jobId/:candidateId/interview-scores", async (req, res)
     if (!Array.isArray(ratings) || ratings.length === 0)
       return res.status(400).json({ error: "Missing ratings array." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     applyInterviewScores(candidates[idx], job, ratings);
     await refreshIntelligence(candidates[idx], job); // Session 11
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     res.json(candidates[idx]);
   } catch (err) {
     console.error("interview-scores error:", err);
@@ -888,14 +879,14 @@ router.post("/candidates/:jobId/:candidateId/interview-scores", async (req, res)
  */
 router.post("/candidates/:jobId/:candidateId/regenerate-recommendation", async (req, res) => {
   try {
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     await refreshIntelligence(candidates[idx], job);
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     res.json(candidates[idx]);
   } catch (err) {
     console.error("regenerate-recommendation error:", err);
@@ -910,10 +901,10 @@ router.post("/candidates/:jobId/:candidateId/regenerate-recommendation", async (
  */
 router.post("/candidates/:jobId/:candidateId/final-analysis", async (req, res) => {
   try {
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const candidate = candidates[idx];
@@ -925,7 +916,7 @@ router.post("/candidates/:jobId/:candidateId/final-analysis", async (req, res) =
 
     const analysis = await generateFinalAnalysis(candidate, job);
     candidate.final_analysis = analysis;
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     res.json({ candidate, final_analysis: analysis });
   } catch (err) {
     console.error("final-analysis error:", err);
@@ -945,16 +936,16 @@ router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
     const { notes } = req.body;
     if (!notes?.trim()) return res.status(400).json({ error: "Missing notes." });
 
-    const candidates = readJSON(CANDIDATES_PATH);
+    const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
-    const job = findJob(req.params.jobId);
+    const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
     const result = await applyHrNotes(candidates[idx], notes.trim());
     try { candidates[idx].recommendation = await generateRecommendation(candidates[idx], job); }
     catch (e) { console.error("recommendation refresh failed:", e.message); }
-    writeJSON(CANDIDATES_PATH, candidates);
+    await writeTable("candidates", candidates);
     res.json({ candidate: candidates[idx], saved: result.saved, date: result.date, recommendation: candidates[idx].recommendation });
   } catch (err) {
     console.error("hr-notes error:", err);

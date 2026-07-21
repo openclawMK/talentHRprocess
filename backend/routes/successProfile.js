@@ -2,29 +2,22 @@
  * Role Success Profile (Session 12) — HR-defined benchmark of an ideal hire.
  */
 import { Router } from "express";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { chatJSON } from "../services/aiClient.js";
+import { readTable, writeTable } from "../services/store.js";
 
 const router = Router();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const JOBS_PATH = path.join(__dirname, "..", "data", "jobs.json");
-
-const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
-const writeJSON = (p, d) => fs.writeFileSync(p, JSON.stringify(d, null, 2));
 
 // GET /api/jobs/:jobId/success-profile
-router.get("/jobs/:jobId/success-profile", (req, res) => {
-  const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+router.get("/jobs/:jobId/success-profile", async (req, res) => {
+  const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found." });
   res.json(job.successProfile || {});
 });
 
 // PUT /api/jobs/:jobId/success-profile
-router.put("/jobs/:jobId/success-profile", (req, res) => {
+router.put("/jobs/:jobId/success-profile", async (req, res) => {
   try {
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
 
@@ -44,7 +37,7 @@ router.put("/jobs/:jobId/success-profile", (req, res) => {
       created_at: jobs[idx].successProfile?.created_at || now,
       last_updated: now,
     };
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.json(jobs[idx].successProfile);
   } catch (err) {
     console.error("save success-profile error:", err);
@@ -88,7 +81,7 @@ export async function generateSuccessProfileForJob(job) {
 // POST /api/jobs/:jobId/success-profile/generate — AI suggestion (not saved)
 router.post("/jobs/:jobId/success-profile/generate", async (req, res) => {
   try {
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
     res.json(await generateSuccessProfileForJob(job));
   } catch (err) {

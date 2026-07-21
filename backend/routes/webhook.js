@@ -9,23 +9,10 @@
  * comes in": https://<your-render-backend>.onrender.com/webhook/whatsapp
  */
 import { Router } from "express";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { phoneDigits, logMessage } from "../services/whatsappService.js";
+import { readTable, writeTable, appendWhatsappReply } from "../services/store.js";
 
 const router = Router();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, "..", "data");
-const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
-const REPLIES_PATH = path.join(DATA_DIR, "whatsapp-replies.json");
-
-const readJSON = (p, fb) => {
-  try { return JSON.parse(fs.readFileSync(p, "utf-8")); } catch { return fb; }
-};
-const writeJSON = (p, d) => {
-  try { fs.writeFileSync(p, JSON.stringify(d, null, 2)); } catch { /* ignore */ }
-};
 
 const YES = ["YES", "YA", "OK", "OKAY", "CONFIRM", "SETUJU"];
 const NO = ["NO", "TIDAK", "CANCEL", "RESCHEDULE"];
@@ -42,7 +29,7 @@ router.post("/whatsapp", async (req, res) => {
     const fromDigits = phoneDigits(from);
 
     // Match to a candidate by phone.
-    const candidates = readJSON(CANDIDATES_PATH, []);
+    const candidates = await readTable("candidates");
     const candidate = candidates.find(
       (c) => phoneDigits(c.profile?.contact?.phone) === fromDigits
     );
@@ -53,8 +40,7 @@ router.post("/whatsapp", async (req, res) => {
     else if (NO.includes(word)) action = "reschedule";
 
     // Log the reply.
-    const replies = readJSON(REPLIES_PATH, []);
-    replies.push({
+    await appendWhatsappReply({
       phone: from,
       profile_name: profileName,
       body,
@@ -63,7 +49,6 @@ router.post("/whatsapp", async (req, res) => {
       processed: action !== "manual_review",
       received_at: new Date().toISOString(),
     });
-    writeJSON(REPLIES_PATH, replies);
 
     // Update the matched candidate's invite state, if any.
     if (candidate && action !== "manual_review") {
@@ -76,7 +61,7 @@ router.post("/whatsapp", async (req, res) => {
           needs_reschedule: true,
         };
       }
-      writeJSON(CANDIDATES_PATH, candidates);
+      await writeTable("candidates", candidates);
     }
 
     // Reply inline via TwiML — the reliable way to respond in the sandbox.

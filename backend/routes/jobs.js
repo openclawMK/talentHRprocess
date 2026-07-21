@@ -16,17 +16,14 @@ import { notify, whatsappConfigured } from "../services/whatsappService.js";
 import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary, regionMultiplier, rm } from "../services/salaryBenchmark.js";
 import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
 import { generateSuccessProfileForJob } from "./successProfile.js";
+import { readTable, writeTable } from "../services/store.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
-const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
-const COMPANIES_PATH = path.join(DATA_DIR, "companies.json");
-const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
 const TEMPLATES_PATH = path.join(DATA_DIR, "industry-templates.json");
 
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
-const writeJSON = (p, d) => fs.writeFileSync(p, JSON.stringify(d, null, 2));
 
 // weights must sum to ~1.0 (allow rounding tolerance)
 function weightsValid(criteria) {
@@ -52,9 +49,9 @@ function nextJobId(jobs) {
 }
 
 // GET /api/jobs — all jobs
-router.get("/jobs", (req, res) => {
+router.get("/jobs", async (req, res) => {
   try {
-    res.json(readJSON(JOBS_PATH));
+    res.json(await readTable("jobs"));
   } catch {
     res.status(500).json({ error: "Failed to load jobs." });
   }
@@ -85,9 +82,9 @@ router.post("/generate-criteria", async (req, res) => {
 
 // GET /api/jobs/:jobId/suggest-salary?level=junior|mid|senior
 // AI/market-suggested salary budget for the role at a target experience level.
-router.get("/jobs/:jobId/suggest-salary", (req, res) => {
+router.get("/jobs/:jobId/suggest-salary", async (req, res) => {
   try {
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
     const level = ["junior", "mid", "senior"].includes(req.query.level) ? req.query.level : "mid";
     const s = suggestSalary(job.role_title, job.location, level);
@@ -100,15 +97,15 @@ router.get("/jobs/:jobId/suggest-salary", (req, res) => {
 });
 
 // GET /api/salary-center?region= — full benchmark catalogue for the Salary Center.
-router.get("/salary-center", (req, res) => {
+router.get("/salary-center", async (req, res) => {
   try {
     const base = listBenchmarks(req.query.region || "");
     // Live asking rate per row — candidates' own expected_salary, aggregated
     // across every job matching that category (never blended into the
     // published figures; returned alongside them, see liveSalarySignal.js).
     let candidates = [];
-    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
-    const jobs = readJSON(JOBS_PATH);
+    try { candidates = await readTable("candidates"); } catch { candidates = []; }
+    const jobs = await readTable("jobs");
     const region = req.query.region ? regionMultiplier(req.query.region).region : null;
     const roles = base.roles.map((r) => ({
       ...r,
@@ -124,9 +121,9 @@ router.get("/salary-center", (req, res) => {
 // GET /api/jobs/:jobId/salary-benchmark — indicative market band for the role
 // (DOSM 2023) and how the role's budget compares to it, plus the live asking
 // rate from your own candidates for this same role category.
-router.get("/jobs/:jobId/salary-benchmark", (req, res) => {
+router.get("/jobs/:jobId/salary-benchmark", async (req, res) => {
   try {
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
     const benchmark = getSalaryBenchmark(job.role_title, job.location);
     if (!benchmark) return res.json({ available: false });
@@ -136,8 +133,8 @@ router.get("/jobs/:jobId/salary-benchmark", (req, res) => {
     const budget_vs_market = budgetMax ? compareToMarket(budgetMax, benchmark) : null;
 
     let candidates = [];
-    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
-    const jobs = readJSON(JOBS_PATH);
+    try { candidates = await readTable("candidates"); } catch { candidates = []; }
+    const jobs = await readTable("jobs");
     const region = regionMultiplier(job.location).region;
     const live_asking_rate = withLabels(computeLiveAskingRate({ candidates, jobs, category: benchmark.category, region }));
 
@@ -165,7 +162,7 @@ router.post("/jobs/:jobId/send-portal-link", async (req, res) => {
   try {
     const { candidate_name, phone } = req.body;
     if (!phone) return res.status(400).json({ error: "Phone number is required." });
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
 
     const base = process.env.FRONTEND_URL || "";
@@ -196,15 +193,15 @@ router.post("/jobs/:jobId/send-portal-link", async (req, res) => {
 });
 
 // PATCH /api/jobs/:jobId/whatsapp-settings — { hr_whatsapp_alerts, hr_contact_phone }
-router.patch("/jobs/:jobId/whatsapp-settings", (req, res) => {
+router.patch("/jobs/:jobId/whatsapp-settings", async (req, res) => {
   try {
     const { hr_whatsapp_alerts, hr_contact_phone } = req.body;
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
     if (typeof hr_whatsapp_alerts === "boolean") jobs[idx].hr_whatsapp_alerts = hr_whatsapp_alerts;
     if (typeof hr_contact_phone === "string") jobs[idx].hr_contact_phone = hr_contact_phone;
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.json({
       job_id: jobs[idx].job_id,
       hr_whatsapp_alerts: !!jobs[idx].hr_whatsapp_alerts,
@@ -217,12 +214,12 @@ router.patch("/jobs/:jobId/whatsapp-settings", (req, res) => {
 });
 
 // GET /api/analytics — global, cross-role analytics for the workspace dashboard
-router.get("/analytics", (req, res) => {
+router.get("/analytics", async (req, res) => {
   try {
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     let candidates = [];
     try {
-      candidates = readJSON(CANDIDATES_PATH);
+      candidates = await readTable("candidates");
     } catch {
       candidates = [];
     }
@@ -387,13 +384,13 @@ router.get("/analytics", (req, res) => {
 
 // GET /api/candidates-recent?limit=  — top-scored candidates across every role,
 // for the global dashboard's cross-role candidate table.
-router.get("/candidates-recent", (req, res) => {
+router.get("/candidates-recent", async (req, res) => {
   try {
     const limit = Math.min(20, Math.max(1, Number(req.query.limit) || 8));
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
-    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+    try { candidates = await readTable("candidates"); } catch { candidates = []; }
 
     const nowMs = Date.now();
     const results = candidates
@@ -439,15 +436,15 @@ router.get("/candidates-recent", (req, res) => {
 // GET /api/candidates-search?q=  — global candidate search for the header search
 // bar. Matches candidate name, role title, or company name; returns the
 // top 8 across every company/role.
-router.get("/candidates-search", (req, res) => {
+router.get("/candidates-search", async (req, res) => {
   try {
     const q = (req.query.q || "").trim().toLowerCase();
     if (!q) return res.json({ results: [] });
 
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
-    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+    try { candidates = await readTable("candidates"); } catch { candidates = []; }
 
     const results = [];
     for (const c of candidates) {
@@ -476,12 +473,12 @@ router.get("/candidates-search", (req, res) => {
 
 // GET /api/alerts — real notification feed: stale candidates (5+ days with no
 // action) and flagged pre-hire checks awaiting HR review. Powers the header bell.
-router.get("/alerts", (req, res) => {
+router.get("/alerts", async (req, res) => {
   try {
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
-    try { candidates = readJSON(CANDIDATES_PATH); } catch { candidates = []; }
+    try { candidates = await readTable("candidates"); } catch { candidates = []; }
 
     const todayMs = Date.now();
     const alerts = [];
@@ -527,14 +524,14 @@ router.get("/alerts", (req, res) => {
 });
 
 // GET /api/jobs/:jobId/analytics — pipeline analytics for a role
-router.get("/jobs/:jobId/analytics", (req, res) => {
+router.get("/jobs/:jobId/analytics", async (req, res) => {
   try {
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
 
     let candidates = [];
     try {
-      candidates = readJSON(CANDIDATES_PATH).filter((c) => c.job_id === job.job_id);
+      candidates = (await readTable("candidates")).filter((c) => c.job_id === job.job_id);
     } catch {
       candidates = [];
     }
@@ -598,8 +595,8 @@ router.get("/jobs/:jobId/analytics", (req, res) => {
 });
 
 // GET /api/jobs/:jobId/pipeline — active pipeline + redistributed weights
-router.get("/jobs/:jobId/pipeline", (req, res) => {
-  const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+router.get("/jobs/:jobId/pipeline", async (req, res) => {
+  const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found." });
   res.json({
     job_id: job.job_id,
@@ -610,10 +607,10 @@ router.get("/jobs/:jobId/pipeline", (req, res) => {
 });
 
 // PATCH /api/jobs/:jobId/pipeline — toggle optional stages, recompute candidate scores
-router.patch("/jobs/:jobId/pipeline", (req, res) => {
+router.patch("/jobs/:jobId/pipeline", async (req, res) => {
   try {
     const { stages } = req.body; // { ocean_assessment: bool, interview: bool }
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
 
@@ -631,11 +628,11 @@ router.patch("/jobs/:jobId/pipeline", (req, res) => {
     current.offer = { enabled: true, locked: true };
     job.pipeline_stages = current;
     jobs[idx] = job;
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
 
     // Reconcile existing candidates for this role so dashboards stay correct.
     try {
-      const candidates = readJSON(CANDIDATES_PATH);
+      const candidates = await readTable("candidates");
       let changed = false;
       for (const c of candidates) {
         if (c.job_id === job.job_id) {
@@ -643,7 +640,7 @@ router.patch("/jobs/:jobId/pipeline", (req, res) => {
           changed = true;
         }
       }
-      if (changed) writeJSON(CANDIDATES_PATH, candidates);
+      if (changed) await writeTable("candidates", candidates);
     } catch (e) {
       console.error("pipeline reconcile error:", e.message);
     }
@@ -662,10 +659,10 @@ router.patch("/jobs/:jobId/pipeline", (req, res) => {
 
 // GET /api/jobs/:jobId/interview-slots — all slots for this role, newest first,
 // with the booked candidate's name resolved for display.
-router.get("/jobs/:jobId/interview-slots", (req, res) => {
-  const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+router.get("/jobs/:jobId/interview-slots", async (req, res) => {
+  const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found." });
-  const candidates = readJSON(CANDIDATES_PATH);
+  const candidates = await readTable("candidates");
   const slots = (job.interview_slots || [])
     .slice()
     .sort((a, b) => new Date(a.start) - new Date(b.start))
@@ -678,12 +675,12 @@ router.get("/jobs/:jobId/interview-slots", (req, res) => {
 
 // POST /api/jobs/:jobId/interview-slots  { slots: [{ start, duration_minutes }] }
 // Bulk-creates open interview time slots that candidates can self-book.
-router.post("/jobs/:jobId/interview-slots", (req, res) => {
+router.post("/jobs/:jobId/interview-slots", async (req, res) => {
   try {
     const { slots } = req.body;
     if (!Array.isArray(slots) || slots.length === 0) return res.status(400).json({ error: "slots must be a non-empty array." });
 
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
 
@@ -704,7 +701,7 @@ router.post("/jobs/:jobId/interview-slots", (req, res) => {
     }
     if (created.length === 0) return res.status(400).json({ error: "No valid slots to add." });
     jobs[idx] = job;
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.status(201).json({ slots: created });
   } catch (err) {
     console.error("create interview slots error:", err);
@@ -713,9 +710,9 @@ router.post("/jobs/:jobId/interview-slots", (req, res) => {
 });
 
 // DELETE /api/jobs/:jobId/interview-slots/:slotId — remove an open (unbooked) slot
-router.delete("/jobs/:jobId/interview-slots/:slotId", (req, res) => {
+router.delete("/jobs/:jobId/interview-slots/:slotId", async (req, res) => {
   try {
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
     const job = jobs[idx];
@@ -724,7 +721,7 @@ router.delete("/jobs/:jobId/interview-slots/:slotId", (req, res) => {
     if (slot.candidate_id) return res.status(400).json({ error: "Can't delete a booked slot — cancel the booking first." });
     job.interview_slots = job.interview_slots.filter((s) => s.slot_id !== req.params.slotId);
     jobs[idx] = job;
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.json({ ok: true });
   } catch (err) {
     console.error("delete interview slot error:", err);
@@ -734,9 +731,9 @@ router.delete("/jobs/:jobId/interview-slots/:slotId", (req, res) => {
 
 // POST /api/jobs/:jobId/interview-slots/:slotId/cancel — HR frees up a booked slot
 // (e.g. the candidate asked to reschedule over the phone).
-router.post("/jobs/:jobId/interview-slots/:slotId/cancel", (req, res) => {
+router.post("/jobs/:jobId/interview-slots/:slotId/cancel", async (req, res) => {
   try {
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
     const job = jobs[idx];
@@ -745,7 +742,7 @@ router.post("/jobs/:jobId/interview-slots/:slotId/cancel", (req, res) => {
     slot.candidate_id = null;
     slot.booked_at = null;
     jobs[idx] = job;
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.json({ ok: true });
   } catch (err) {
     console.error("cancel interview slot error:", err);
@@ -754,8 +751,8 @@ router.post("/jobs/:jobId/interview-slots/:slotId/cancel", (req, res) => {
 });
 
 // GET /api/jobs/:jobId/criteria — criteria + metadata for a job
-router.get("/jobs/:jobId/criteria", (req, res) => {
-  const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+router.get("/jobs/:jobId/criteria", async (req, res) => {
+  const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
   if (!job) return res.status(404).json({ error: "Job not found." });
   res.json({
     job_id: job.job_id,
@@ -766,7 +763,7 @@ router.get("/jobs/:jobId/criteria", (req, res) => {
 });
 
 // PATCH /api/jobs/:jobId/criteria — replace a job's criteria
-router.patch("/jobs/:jobId/criteria", (req, res) => {
+router.patch("/jobs/:jobId/criteria", async (req, res) => {
   try {
     const { criteria } = req.body;
     if (!Array.isArray(criteria) || criteria.length === 0)
@@ -774,13 +771,13 @@ router.patch("/jobs/:jobId/criteria", (req, res) => {
     if (!weightsValid(criteria))
       return res.status(400).json({ error: "Criteria weights must sum to 100%" });
 
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
 
     jobs[idx].criteria = criteria;
     jobs[idx].criteria_generated_by = "edited";
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.json(jobs[idx]);
   } catch (err) {
     console.error("patch criteria error:", err);
@@ -809,7 +806,7 @@ router.post("/jobs", async (req, res) => {
 
     let company;
     if (company_id) {
-      company = readJSON(COMPANIES_PATH).find((c) => c.id === company_id);
+      company = (await readTable("companies")).find((c) => c.id === company_id);
       if (!company) return res.status(400).json({ error: "Unknown company." });
     }
 
@@ -831,7 +828,7 @@ router.post("/jobs", async (req, res) => {
       score_weights = { profile: sumBy("cv"), ocean: sumBy("ocean"), interview: sumBy("interview") };
     }
 
-    const jobs = readJSON(JOBS_PATH);
+    const jobs = await readTable("jobs");
     const job_id = nextJobId(jobs);
 
     const expMin = Number(requirements.experience_years_min) || 0;
@@ -873,7 +870,7 @@ router.post("/jobs", async (req, res) => {
     }
 
     jobs.push(newJob);
-    writeJSON(JOBS_PATH, jobs);
+    await writeTable("jobs", jobs);
     res.status(201).json(newJob);
   } catch (err) {
     console.error("create job error:", err);

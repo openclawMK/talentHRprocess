@@ -6,18 +6,17 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { generateCandidateReport } from "../services/pdfExporter.js";
+import { readTable } from "../services/store.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
-const JOBS_PATH = path.join(DATA_DIR, "jobs.json");
-const CANDIDATES_PATH = path.join(DATA_DIR, "candidates.json");
 const DEMO_PATH = path.join(DATA_DIR, "demo-candidates.json");
 
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
 
-function findCandidate(id) {
-  const live = readJSON(CANDIDATES_PATH).find((c) => c.candidate_id === id);
+async function findCandidate(id) {
+  const live = (await readTable("candidates")).find((c) => c.candidate_id === id);
   if (live) return live;
   try {
     return readJSON(DEMO_PATH).find((c) => c.candidate_id === id);
@@ -31,9 +30,9 @@ const safe = (s) => String(s || "").replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/
 // GET /api/candidates/:jobId/:candidateId/export/pdf
 router.get("/candidates/:jobId/:candidateId/export/pdf", async (req, res) => {
   try {
-    const candidate = findCandidate(req.params.candidateId);
+    const candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-    const job = readJSON(JOBS_PATH).find((j) => j.job_id === req.params.jobId);
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
 
     const buffer = await generateCandidateReport(candidate, job);

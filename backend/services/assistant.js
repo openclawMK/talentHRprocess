@@ -5,23 +5,17 @@
  *
  * Read + draft only: it never takes actions (no sending, no score changes).
  */
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { chatText } from "./aiClient.js";
 import { computeBudgetFit } from "./successFit.js";
 import { getSalaryBenchmark, compareToMarket } from "./salaryBenchmark.js";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = path.join(__dirname, "..", "data");
-const readJSON = (f) => JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), "utf-8"));
+import { readTable } from "./store.js";
 
 const years = (m) => (m != null ? Math.round((m / 12) * 10) / 10 : null);
 
 // Compact, token-efficient view of everything the assistant can reason over.
-function buildSnapshot() {
-  const jobs = readJSON("jobs.json");
-  const cands = readJSON("candidates.json");
+async function buildSnapshot() {
+  const jobs = await readTable("jobs");
+  const cands = await readTable("candidates");
 
   const roles = jobs.map((j) => {
     const b = getSalaryBenchmark(j.role_title, j.location);
@@ -83,15 +77,15 @@ const SYSTEM =
  * @returns {Promise<string>} answer text
  */
 export async function askPeopleQuest({ question, history = [], jobId, candidateId }) {
-  const snapshot = buildSnapshot();
+  const snapshot = await buildSnapshot();
 
   let focus = "";
   if (candidateId) {
-    const cands = readJSON("candidates.json");
+    const cands = await readTable("candidates");
     const c = cands.find((x) => x.candidate_id === candidateId);
     if (c) focus = `The HR manager is currently viewing candidate: ${c.profile?.name}.`;
   } else if (jobId) {
-    const j = readJSON("jobs.json").find((x) => x.job_id === jobId);
+    const j = (await readTable("jobs")).find((x) => x.job_id === jobId);
     if (j) focus = `The HR manager is currently viewing the role: ${j.company?.name || ""} · ${j.role_title}.`;
   }
 
