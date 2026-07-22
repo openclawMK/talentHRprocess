@@ -14,6 +14,20 @@ export function applyInterviewScores(candidate, job, ratings) {
   const score = candidate.score;
   if (!score) return;
 
+  // Re-interview: this candidate already has an interview score — snapshot
+  // the previous attempt before overwriting so HR can see the history rather
+  // than silently losing it. The score itself always reflects the LATEST
+  // attempt only; older attempts live in interview_history for reference.
+  if (candidate.interview_completed) {
+    const previous = (score.criteria_scores || []).filter((cs) => cs.source === "interview" && cs.scored);
+    if (previous.length) {
+      candidate.interview_history = [
+        ...(candidate.interview_history || []),
+        { date: new Date().toISOString().slice(0, 10), combined_score: score.combined_score, criteria_scores: previous },
+      ];
+    }
+  }
+
   const ratingMap = Object.fromEntries(ratings.map((r) => [r.criterion_id, r]));
 
   score.criteria_scores = (score.criteria_scores || []).map((cs) => {

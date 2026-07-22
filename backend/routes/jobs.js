@@ -17,6 +17,7 @@ import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, 
 import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
 import { generateSuccessProfileForJob } from "./successProfile.js";
 import { readTable, writeTable, insertRow, deleteRow } from "../services/store.js";
+import { rescoreJobCandidates } from "../services/rescoring.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -782,6 +783,75 @@ router.patch("/jobs/:jobId/criteria", async (req, res) => {
   } catch (err) {
     console.error("patch criteria error:", err);
     res.status(500).json({ error: "Failed to update criteria." });
+  }
+});
+
+// PATCH /api/jobs/:jobId/scoring-weights
+// Body: { score_weights?: { profile, ocean, interview }, motivation?: { enabled, weight } }
+//   score_weights   — the top-level model split (Success-Profile-fit / OCEAN / Interview).
+//   motivation      — toggles a "Motivation & fit" interview criterion on/off. `weight` is
+//                      its share of the WHOLE criteria set (e.g. 0.08 = 8%), carved out of
+//                      the interview criteria proportionally so the total stays 100%.
+// Re-scores every already-scored candidate for this role afterward — recombining their
+// EXISTING sub-scores at the new weights, never re-interviewing anyone.
+router.patch("/jobs/:jobId/scoring-weights", async (req, res) => {
+  try {
+    const { score_weights, motivation } = req.body || {};
+    const jobs = await readTable("jobs");
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+    const job = jobs[idx];
+
+    if (score_weights) {
+      const { profile, ocean, interview } = score_weights;
+      if (![profile, ocean, interview].every((n) => typeof n === "number" && n > 0)) {
+        return res.status(400).json({ error: "profile, ocean and interview must all be positive numbers." });
+      }
+      const sum = profile + ocean + interview;
+      job.score_weights = {
+        profile: Math.round((profile / sum) * 1000) / 1000,
+        ocean: Math.round((ocean / sum) * 1000) / 1000,
+        interview: Math.round((interview / sum) * 1000) / 1000,
+      };
+    }
+
+    if (motivation) {
+      const criteria = job.criteria || [];
+      const existing = criteria.find((c) => c.id === "i_motivation");
+      const otherInterview = criteria.filter((c) => c.source === "interview" && c.id !== "i_motivation");
+      const nonInterview = criteria.filter((c) => c.source !== "interview");
+      const S = otherInterview.reduce((a, c) => a + (c.weight || 0), 0);
+
+      if (motivation.enabled) {
+        const M = Number(motivation.weight) || 0.08;
+        if (S <= 0) return res.status(400).json({ error: "This role has no interview criteria yet — generate criteria first." });
+        if (M <= 0 || M >= S) return res.status(400).json({ error: "Motivation's weight must leave room for the existing interview criteria." });
+        const factor = (S - M) / S;
+        const rescaled = otherInterview.map((c) => ({ ...c, weight: Math.round(c.weight * factor * 1000) / 1000 }));
+        const motivationCriterion = {
+          id: "i_motivation",
+          name: "Motivation & fit",
+          source: "interview",
+          weight: Math.round(M * 1000) / 1000,
+          description: "Genuine interest in this specific role and commitment to it — scored on evidence of researched, specific reasons, not on affinity or \"culture fit\".",
+        };
+        job.criteria = [...nonInterview, ...rescaled, motivationCriterion];
+      } else if (existing) {
+        const M = existing.weight || 0;
+        const factor = S > 0 ? (S + M) / S : 1;
+        const rescaled = otherInterview.map((c) => ({ ...c, weight: Math.round(c.weight * factor * 1000) / 1000 }));
+        job.criteria = [...nonInterview, ...rescaled];
+      }
+    }
+
+    jobs[idx] = job;
+    await writeTable("jobs", jobs);
+
+    const rescored = await rescoreJobCandidates(job);
+    res.json({ job, rescored_candidates: rescored });
+  } catch (err) {
+    console.error("scoring-weights error:", err);
+    res.status(500).json({ error: "Failed to update scoring weights." });
   }
 });
 

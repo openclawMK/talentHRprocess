@@ -20,6 +20,7 @@ export default function InterviewScoring() {
   const [job, setJob] = useState(null);
   const [mode, setMode] = useState(null);
   const [criteria, setCriteria] = useState(null);
+  const [discussion, setDiscussion] = useState(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [ratings, setRatings] = useState({});
   const [notes, setNotes] = useState({});
@@ -38,7 +39,7 @@ export default function InterviewScoring() {
 
   async function chooseAi() {
     setMode("ai"); setLoadingAi(true); setError(null);
-    try { const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep?count=${questionCount}`); setCriteria(r.data.criteria); seedRatings(r.data.criteria); }
+    try { const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep?count=${questionCount}`); setCriteria(r.data.criteria); setDiscussion(r.data.discussion || null); seedRatings(r.data.criteria); }
     catch { setError("Couldn't generate AI questions. Switch to Manual instead."); setCriteria([]); }
     finally { setLoadingAi(false); }
   }
@@ -47,7 +48,7 @@ export default function InterviewScoring() {
     const list = interviewDefs.map((c) => ({ id: c.id, name: c.name, description: c.description }));
     setCriteria(list); seedRatings(list);
   }
-  function resetMode() { setMode(null); setCriteria(null); setRatings({}); setNotes({}); setManualQ({}); setError(null); }
+  function resetMode() { setMode(null); setCriteria(null); setDiscussion(null); setRatings({}); setNotes({}); setManualQ({}); setError(null); }
   async function submit() {
     setSaving(true); setError(null);
     try {
@@ -241,6 +242,18 @@ export default function InterviewScoring() {
           );
         })}
       </div>
+
+      {/* Motivation & fit — discussion prompts, NOT scored (kept out of the rating loop) */}
+      {mode === "ai" && discussion && (discussion.questions || []).length > 0 && (
+        <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: "22px 24px", marginTop: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 6 }}>
+            <div style={{ fontSize: 16.5, fontWeight: 700, letterSpacing: "-.2px", color: D.text }}>{discussion.label || "Motivation & fit"}</div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: D.text4, background: D.inset, border: `0.5px solid ${D.border}`, padding: "3px 10px", borderRadius: 20, whiteSpace: "nowrap" }}>Discussion · not scored</span>
+          </div>
+          <div style={{ fontSize: 13, color: D.text4, marginBottom: 14 }}>Open prompts to gauge genuine interest and values fit. Use them to inform your read of the candidate — they don't feed the score.</div>
+          <div style={{ background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 11, padding: "14px 16px", fontSize: 14, color: D.text2, lineHeight: 1.8, whiteSpace: "pre-line" }}>{(discussion.questions || []).join("\n")}</div>
+        </div>
+      )}
 
       {/* sticky bar */}
       <div style={{ position: "sticky", bottom: 0, marginTop: 20, background: D.cardBg, backdropFilter: "blur(8px)", border: `0.5px solid ${D.border}`, borderRadius: 14, padding: "14px 18px", display: "flex", alignItems: "center", gap: 16 }} className="flex-wrap">

@@ -784,6 +784,8 @@ Generate EXACTLY ${count} interview questions in TOTAL across all criteria combi
 
 For EACH criterion, also generate a scoring rubric with what a LOW (0-40), MID (41-70), and HIGH (71-100) score looks like.
 
+Separately, generate 3 "Motivation & fit" questions — open, conversational prompts exploring the candidate's genuine interest in THIS specific role and how their values align with the team (e.g. why they applied, what motivates them, how they handle the kind of environment this role sits in). These are for discussion only and are NOT scored — do not attach a rubric to them.
+
 Criteria (with weight):
 ${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}" weight=${Math.round((c.weight || 0) * 100)}%${c.description ? " — " + c.description : ""}`).join("\n")}
 
@@ -799,13 +801,25 @@ Return:
         "high": "<what a 71-100 answer looks like — 1 sentence>"
       }
     }
-  ]
+  ],
+  "motivation_questions": ["question 1", "question 2", "question 3"]
 }`;
 
     const result = await chatJSON({ system, user, temperature: 0.5 });
     const qMap = Object.fromEntries(
       (result.criteria_questions || []).map((cq) => [cq.criterion_id, cq])
     );
+
+    // Motivation & fit — exploratory discussion prompts, NOT part of scoring.
+    // Kept separate from `criteria` so the composite score only ever reflects
+    // the role's real interview criteria and their weights.
+    const motivationQuestions = Array.isArray(result.motivation_questions) && result.motivation_questions.length
+      ? result.motivation_questions.slice(0, 3)
+      : [
+          `Why did you apply for this ${job.role_title} role in particular?`,
+          "What kind of work environment brings out your best?",
+          "What would you want to be doing more of a year from now?",
+        ];
 
     const FALLBACK_TEMPLATES = [
       (n) => `Tell me about a time you demonstrated ${n}.`,
@@ -857,7 +871,7 @@ Return:
       }
     }
 
-    res.json({ criteria });
+    res.json({ criteria, discussion: { label: "Motivation & fit", scored: false, questions: motivationQuestions } });
   } catch (err) {
     console.error("interview-prep error:", err);
     res.status(500).json({ error: "Failed to generate interview questions." });

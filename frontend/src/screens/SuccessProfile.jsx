@@ -41,9 +41,23 @@ export default function SuccessProfile() {
   const [salLevel, setSalLevel] = useState("mid");
   const [salSuggesting, setSalSuggesting] = useState(false);
   const [salNote, setSalNote] = useState("");
+  const [weights, setWeights] = useState({ profile: 35, ocean: 15, interview: 50 });
+  const [motivationOn, setMotivationOn] = useState(false);
+  const [motivationPct, setMotivationPct] = useState(8);
+  const [weightsSaving, setWeightsSaving] = useState(false);
 
   useEffect(() => {
-    axios.get("/api/jobs").then((r) => setJob(r.data.find((j) => j.job_id === jobId) || null));
+    axios.get("/api/jobs").then((r) => {
+      const j = r.data.find((x) => x.job_id === jobId) || null;
+      setJob(j);
+      if (j) {
+        const w = j.score_weights || { profile: 0.35, ocean: 0.15, interview: 0.5 };
+        setWeights({ profile: Math.round(w.profile * 100), ocean: Math.round(w.ocean * 100), interview: Math.round(w.interview * 100) });
+        const mot = (j.criteria || []).find((c) => c.id === "i_motivation");
+        setMotivationOn(!!mot);
+        if (mot) setMotivationPct(Math.round(mot.weight * 100));
+      }
+    });
     axios.get(`/api/jobs/${jobId}/success-profile`).then((r) => {
       const has = r.data && Object.keys(r.data).length;
       setProfile(has ? { ...EMPTY, ...r.data } : { ...EMPTY });
@@ -78,6 +92,23 @@ export default function SuccessProfile() {
     finally { setSaving(false); }
   }
   function flash(m) { setToast(m); setTimeout(() => setToast(""), 2500); }
+
+  const interviewCriteriaCount = (job?.criteria || []).filter((c) => c.source === "interview" && c.id !== "i_motivation").length;
+  const weightsSum = weights.profile + weights.ocean + weights.interview;
+
+  async function saveWeights() {
+    setWeightsSaving(true);
+    try {
+      const body = {
+        score_weights: { profile: weights.profile / 100, ocean: weights.ocean / 100, interview: weights.interview / 100 },
+        motivation: { enabled: motivationOn, weight: motivationPct / 100 },
+      };
+      const r = await axios.patch(`/api/jobs/${jobId}/scoring-weights`, body);
+      setJob(r.data.job);
+      flash(r.data.rescored_candidates > 0 ? `Saved — ${r.data.rescored_candidates} candidate${r.data.rescored_candidates === 1 ? "" : "s"} re-scored at the new weights.` : "Scoring weights saved.");
+    } catch (e) { flash(e.response?.data?.error || "Couldn't save scoring weights."); }
+    finally { setWeightsSaving(false); }
+  }
 
   if (!profile) return <div style={{ ...card, height: 280 }} className="animate-pulse" />;
 
@@ -148,6 +179,52 @@ export default function SuccessProfile() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* Scoring weights */}
+      <div style={{ ...card, marginBottom: 22 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, color: D.text }}>Scoring weights</div>
+        <div style={{ fontSize: 13, color: D.text4, marginBottom: 20 }}>How the three layers combine into the composite score. Saving re-scores every already-scored candidate for this role at the new weights — no re-interview needed.</div>
+
+        <div className="grid grid-cols-3 gap-4" style={{ marginBottom: 10 }}>
+          {[["profile", "Success Profile fit"], ["ocean", "Personality (OCEAN)"], ["interview", "Interview"]].map(([k, lbl]) => (
+            <div key={k}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: D.text3, marginBottom: 6 }}>{lbl}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <input type="number" min="0" max="100" value={weights[k]} onChange={(e) => setWeights((w) => ({ ...w, [k]: Number(e.target.value) }))} style={{ ...benchInput, width: 70 }} />
+                <span style={{ fontSize: 13, color: D.text4 }}>%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ fontSize: 12.5, color: weightsSum === 100 ? D.text4 : "#B91C1C", marginBottom: 18 }}>
+          Total: {weightsSum}% {weightsSum !== 100 && "— should sum to 100% (values will be auto-normalized either way)"}
+        </div>
+
+        <div style={{ height: 1, background: D.border, margin: "0 0 18px" }} />
+
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14 }} className="flex-wrap">
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: D.text2, marginBottom: 3 }}>Motivation & fit</div>
+            <div style={{ fontSize: 12.5, color: D.text4, lineHeight: 1.5 }}>Score genuine interest and commitment to this specific role, as its own interview criterion — never scored as "culture fit" or affinity. Weight is carved out of the interview criteria proportionally.</div>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: interviewCriteriaCount > 0 ? "pointer" : "not-allowed", flexShrink: 0 }}>
+            <input type="checkbox" checked={motivationOn} disabled={interviewCriteriaCount === 0} onChange={(e) => setMotivationOn(e.target.checked)} style={{ width: 18, height: 18, accentColor: "#7C3AED", cursor: "inherit" }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: D.text2 }}>Score it</span>
+          </label>
+        </div>
+        {interviewCriteriaCount === 0 && <div style={{ fontSize: 12, color: D.text4, marginTop: 8 }}>This role has no interview criteria yet — generate criteria first.</div>}
+        {motivationOn && (
+          <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 12.5, color: D.text3, whiteSpace: "nowrap" }}>Weight (share of total)</span>
+            <input type="range" min="2" max="20" value={motivationPct} onChange={(e) => setMotivationPct(Number(e.target.value))} style={{ flex: 1, accentColor: "#7C3AED", cursor: "pointer" }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#6D28D9", minWidth: 34, textAlign: "right" }}>{motivationPct}%</span>
+          </div>
+        )}
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
+          <button onClick={saveWeights} disabled={weightsSaving} style={{ padding: "10px 18px", background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 10, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: weightsSaving ? 0.7 : 1 }}>{weightsSaving ? "Saving & re-scoring…" : "Save scoring weights"}</button>
         </div>
       </div>
 

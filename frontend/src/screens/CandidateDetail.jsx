@@ -200,6 +200,8 @@ export default function CandidateDetail() {
   const oceanLink = `${window.location.origin}/assessment/${candidateId}`;
   const budget = candidate.budget_fit;
   const interviewDone = criteria.some((m) => m.source === "interview" && m.scored && !m.not_applicable);
+  const interviewWeak = interviewDone && !interviewPending && (s.lane === "red" || ["HOLD", "REJECT"].includes(rec?.recommendation));
+  const history = candidate.interview_history || [];
   const screenV = status === "screening" ? screeningVerdict(screeningScore(s)) : null;
   const { stages } = candidateStages(candidate, job);
 
@@ -637,6 +639,35 @@ export default function CandidateDetail() {
           {candidate.outcome && (
             <div style={{ borderRadius: 12, padding: "10px 14px", fontSize: 13, fontWeight: 600, background: candidate.outcome === "offer" ? D.greenBg : D.redBg, color: candidate.outcome === "offer" ? D.green : D.red }}>
               Marked as {candidate.outcome === "offer" ? "OFFER" : "REJECTED"}{candidate.outcome_date ? ` on ${candidate.outcome_date}` : ""} — candidate notified via WhatsApp.
+            </div>
+          )}
+
+          {/* Re-interview — a second chance for a weak/borderline result. Overwrites
+              the current interview score; the previous attempt is kept in history below. */}
+          {interviewWeak && (
+            <div style={{ ...cardBox, borderColor: D.amberBorder, background: D.amberBg, marginBottom: 4 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }} className="flex-wrap">
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: D.amber }}>Give this candidate a second interview?</div>
+                  <div style={{ fontSize: 12.5, color: D.text3, marginTop: 3 }}>The current result is weak — a re-interview replaces the score with the new attempt. The earlier attempt is kept below for reference.</div>
+                </div>
+                <button onClick={() => navigate(`/jobs/${jobId}/candidate/${candidateId}/interview`)} style={{ padding: "10px 16px", background: D.amber, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13.5, cursor: "pointer", whiteSpace: "nowrap" }}>🔁 Re-interview</button>
+              </div>
+            </div>
+          )}
+
+          {history.length > 0 && (
+            <div style={cardBox}>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: D.text }}>Interview history</div>
+              <div style={{ fontSize: 13, color: D.text4, marginBottom: 14 }}>Earlier attempts — only the latest interview score counts toward the current result.</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {history.map((h, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: D.inset, borderRadius: 10, padding: "10px 14px" }}>
+                    <span style={{ fontSize: 13, color: D.text3 }}>Attempt {i + 1} · {h.date}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: D.text2 }}>{round(h.combined_score)} / 100</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
