@@ -43,7 +43,8 @@ export default function SuccessProfile() {
   const [salNote, setSalNote] = useState("");
   const [weights, setWeights] = useState({ profile: 35, ocean: 15, interview: 50 });
   const [motivationOn, setMotivationOn] = useState(false);
-  const [motivationPct, setMotivationPct] = useState(8);
+  const [critWeights, setCritWeights] = useState({}); // { criterion_id: pct } — every interview-source criterion
+  const [critOrder, setCritOrder] = useState([]); // [{id, name}] for stable display order
   const [weightsSaving, setWeightsSaving] = useState(false);
 
   useEffect(() => {
@@ -53,9 +54,10 @@ export default function SuccessProfile() {
       if (j) {
         const w = j.score_weights || { profile: 0.35, ocean: 0.15, interview: 0.5 };
         setWeights({ profile: Math.round(w.profile * 100), ocean: Math.round(w.ocean * 100), interview: Math.round(w.interview * 100) });
-        const mot = (j.criteria || []).find((c) => c.id === "i_motivation");
-        setMotivationOn(!!mot);
-        if (mot) setMotivationPct(Math.round(mot.weight * 100));
+        const interviewCrit = (j.criteria || []).filter((c) => c.source === "interview");
+        setMotivationOn(interviewCrit.some((c) => c.id === "i_motivation"));
+        setCritOrder(interviewCrit.map((c) => ({ id: c.id, name: c.name })));
+        setCritWeights(Object.fromEntries(interviewCrit.map((c) => [c.id, Math.round(c.weight * 100)])));
       }
     });
     axios.get(`/api/jobs/${jobId}/success-profile`).then((r) => {
@@ -95,16 +97,34 @@ export default function SuccessProfile() {
 
   const interviewCriteriaCount = (job?.criteria || []).filter((c) => c.source === "interview" && c.id !== "i_motivation").length;
   const weightsSum = weights.profile + weights.ocean + weights.interview;
+  const critSum = critOrder.reduce((a, c) => a + (critWeights[c.id] || 0), 0);
+
+  function toggleMotivation(checked) {
+    setMotivationOn(checked);
+    if (checked && !critWeights.i_motivation) {
+      setCritOrder((o) => [...o, { id: "i_motivation", name: "Motivation & fit" }]);
+      setCritWeights((w) => ({ ...w, i_motivation: 8 }));
+    } else if (!checked) {
+      setCritOrder((o) => o.filter((c) => c.id !== "i_motivation"));
+      setCritWeights((w) => { const n = { ...w }; delete n.i_motivation; return n; });
+    }
+  }
 
   async function saveWeights() {
     setWeightsSaving(true);
     try {
       const body = {
         score_weights: { profile: weights.profile / 100, ocean: weights.ocean / 100, interview: weights.interview / 100 },
-        motivation: { enabled: motivationOn, weight: motivationPct / 100 },
+        motivation: { enabled: motivationOn, weight: (critWeights.i_motivation || 8) / 100 },
       };
+      if (critOrder.length) {
+        body.interview_weights = Object.fromEntries(critOrder.map((c) => [c.id, (critWeights[c.id] || 0) / 100]));
+      }
       const r = await axios.patch(`/api/jobs/${jobId}/scoring-weights`, body);
       setJob(r.data.job);
+      const interviewCrit = (r.data.job.criteria || []).filter((c) => c.source === "interview");
+      setCritOrder(interviewCrit.map((c) => ({ id: c.id, name: c.name })));
+      setCritWeights(Object.fromEntries(interviewCrit.map((c) => [c.id, Math.round(c.weight * 100)])));
       flash(r.data.rescored_candidates > 0 ? `Saved — ${r.data.rescored_candidates} candidate${r.data.rescored_candidates === 1 ? "" : "s"} re-scored at the new weights.` : "Scoring weights saved.");
     } catch (e) { flash(e.response?.data?.error || "Couldn't save scoring weights."); }
     finally { setWeightsSaving(false); }
@@ -207,19 +227,32 @@ export default function SuccessProfile() {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14 }} className="flex-wrap">
           <div style={{ flex: 1, minWidth: 220 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: D.text2, marginBottom: 3 }}>Motivation & fit</div>
-            <div style={{ fontSize: 12.5, color: D.text4, lineHeight: 1.5 }}>Score genuine interest and commitment to this specific role, as its own interview criterion — never scored as "culture fit" or affinity. Weight is carved out of the interview criteria proportionally.</div>
+            <div style={{ fontSize: 12.5, color: D.text4, lineHeight: 1.5 }}>Score genuine interest and commitment to this specific role, as its own interview criterion — never scored as "culture fit" or affinity.</div>
           </div>
           <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: interviewCriteriaCount > 0 ? "pointer" : "not-allowed", flexShrink: 0 }}>
-            <input type="checkbox" checked={motivationOn} disabled={interviewCriteriaCount === 0} onChange={(e) => setMotivationOn(e.target.checked)} style={{ width: 18, height: 18, accentColor: "#7C3AED", cursor: "inherit" }} />
+            <input type="checkbox" checked={motivationOn} disabled={interviewCriteriaCount === 0} onChange={(e) => toggleMotivation(e.target.checked)} style={{ width: 18, height: 18, accentColor: "#7C3AED", cursor: "inherit" }} />
             <span style={{ fontSize: 13, fontWeight: 600, color: D.text2 }}>Score it</span>
           </label>
         </div>
         {interviewCriteriaCount === 0 && <div style={{ fontSize: 12, color: D.text4, marginTop: 8 }}>This role has no interview criteria yet — generate criteria first.</div>}
-        {motivationOn && (
-          <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 12.5, color: D.text3, whiteSpace: "nowrap" }}>Weight (share of total)</span>
-            <input type="range" min="2" max="20" value={motivationPct} onChange={(e) => setMotivationPct(Number(e.target.value))} style={{ flex: 1, accentColor: "#7C3AED", cursor: "pointer" }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#6D28D9", minWidth: 34, textAlign: "right" }}>{motivationPct}%</span>
+
+        {critOrder.length > 0 && (
+          <div style={{ marginTop: 18 }}>
+            <div style={{ fontSize: 12.5, fontWeight: 600, color: D.text3, marginBottom: 10 }}>How the {weights.interview}% Interview share splits across its criteria</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {critOrder.map((c) => (
+                <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: D.inset, borderRadius: 10, padding: "9px 13px" }}>
+                  <span style={{ fontSize: 13.5, color: D.text2 }}>{c.name}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+                    <input type="number" min="0" max="100" value={critWeights[c.id] ?? 0} onChange={(e) => setCritWeights((w) => ({ ...w, [c.id]: Number(e.target.value) }))} style={{ ...benchInput, width: 60 }} />
+                    <span style={{ fontSize: 13, color: D.text4 }}>%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 12.5, color: Math.abs(critSum - weights.interview) <= 1 ? D.text4 : "#B91C1C", marginTop: 10 }}>
+              Criteria total: {critSum}% {Math.abs(critSum - weights.interview) > 1 && `— must equal the Interview share (${weights.interview}%)`}
+            </div>
           </div>
         )}
 

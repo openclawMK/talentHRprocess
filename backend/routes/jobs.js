@@ -787,16 +787,25 @@ router.patch("/jobs/:jobId/criteria", async (req, res) => {
 });
 
 // PATCH /api/jobs/:jobId/scoring-weights
-// Body: { score_weights?: { profile, ocean, interview }, motivation?: { enabled, weight } }
-//   score_weights   — the top-level model split (Success-Profile-fit / OCEAN / Interview).
-//   motivation      — toggles a "Motivation & fit" interview criterion on/off. `weight` is
-//                      its share of the WHOLE criteria set (e.g. 0.08 = 8%), carved out of
-//                      the interview criteria proportionally so the total stays 100%.
+// Body: { score_weights?: { profile, ocean, interview }, motivation?: { enabled, weight },
+//          interview_weights?: { [criterion_id]: weight } }
+//   score_weights      — the top-level model split (Success-Profile-fit / OCEAN / Interview).
+//   motivation         — toggles a "Motivation & fit" interview criterion on/off. `weight` is
+//                         its share of the WHOLE criteria set (e.g. 0.08 = 8%), carved out of
+//                         the interview criteria proportionally so the total stays 100%.
+//   interview_weights  — direct per-criterion overrides for every interview-source criterion
+//                         (including "i_motivation" if enabled), each a share of the WHOLE
+//                         criteria set. Applied AFTER motivation, so HR can enable Motivation
+//                         and immediately set exact shares in one save. Their sum must land
+//                         within 1% of score_weights.interview (existing value if not also
+//                         being changed in this same request) — same tolerance the general
+//                         criteria editor already uses, so this role's "interview" share
+//                         and its criteria never quietly drift apart.
 // Re-scores every already-scored candidate for this role afterward — recombining their
 // EXISTING sub-scores at the new weights, never re-interviewing anyone.
 router.patch("/jobs/:jobId/scoring-weights", async (req, res) => {
   try {
-    const { score_weights, motivation } = req.body || {};
+    const { score_weights, motivation, interview_weights } = req.body || {};
     const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
     if (idx === -1) return res.status(404).json({ error: "Job not found." });
@@ -842,6 +851,26 @@ router.patch("/jobs/:jobId/scoring-weights", async (req, res) => {
         const rescaled = otherInterview.map((c) => ({ ...c, weight: Math.round(c.weight * factor * 1000) / 1000 }));
         job.criteria = [...nonInterview, ...rescaled];
       }
+    }
+
+    if (interview_weights) {
+      const entries = Object.entries(interview_weights);
+      if (!entries.every(([, w]) => typeof w === "number" && w > 0)) {
+        return res.status(400).json({ error: "Every interview criterion weight must be a positive number." });
+      }
+      const interviewIds = new Set((job.criteria || []).filter((c) => c.source === "interview").map((c) => c.id));
+      if (!entries.every(([id]) => interviewIds.has(id))) {
+        return res.status(400).json({ error: "Unknown interview criterion in interview_weights." });
+      }
+      const targetInterview = job.score_weights?.interview ?? 0.5;
+      const sum = entries.reduce((a, [, w]) => a + w, 0);
+      if (Math.abs(sum - targetInterview) > 0.01) {
+        return res.status(400).json({ error: `Interview criteria must sum to ${Math.round(targetInterview * 100)}% (the Interview share above) — currently ${Math.round(sum * 100)}%.` });
+      }
+      const weightById = Object.fromEntries(entries);
+      job.criteria = (job.criteria || []).map((c) =>
+        c.source === "interview" && weightById[c.id] != null ? { ...c, weight: Math.round(weightById[c.id] * 1000) / 1000 } : c
+      );
     }
 
     jobs[idx] = job;
