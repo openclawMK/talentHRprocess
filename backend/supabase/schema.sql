@@ -31,7 +31,8 @@ create table if not exists jobs (
   success_profile jsonb,
   score_weights jsonb,
   pipeline_stages jsonb,
-  interview_slots jsonb
+  interview_slots jsonb,
+  application_form jsonb
 );
 
 create table if not exists candidates (

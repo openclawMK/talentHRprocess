@@ -36,6 +36,12 @@ const today = () => new Date().toISOString().slice(0, 10);
 const findJobByToken = async (token) =>
   (await readTable("jobs")).find((j) => j.portal_token === token);
 
+// Defaults match today's fixed behaviour exactly (phone/salary optional, no
+// cover letter) so existing roles are unaffected until HR explicitly changes
+// them on the Success Profile screen.
+const APPLICATION_FORM_DEFAULTS = { phone: "optional", expected_salary: "optional", cover_letter: "off" };
+const applicationFormFor = (job) => ({ ...APPLICATION_FORM_DEFAULTS, ...(job.application_form || {}) });
+
 // --- multer: temp storage, keep original extension ---
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOADS_DIR),
@@ -195,6 +201,7 @@ router.get("/portal/:token", async (req, res) => {
     location: job.location,
     role_level: job.role_level || "entry",
     key_responsibilities: job.requirements?.key_responsibilities || [],
+    application_form: applicationFormFor(job),
   });
 });
 
@@ -208,7 +215,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     const job = await findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
 
-    const { name, email, phone, expected_salary, consent } = req.body;
+    const { name, email, phone, expected_salary, cover_letter, consent } = req.body;
     if (!req.file) return res.status(400).json({ error: "Please attach your CV." });
     if (!name?.trim() || !email?.trim())
       return res.status(400).json({ error: "Name and email are required." });
@@ -216,6 +223,17 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     // record (not just gated client-side) so we can demonstrate it was captured.
     if (consent !== "true" && consent !== true)
       return res.status(400).json({ error: "Please provide consent to data processing before submitting." });
+
+    // Per-role configurable fields — re-validated server-side, never trusting
+    // the client to have enforced "mandatory" itself.
+    const appForm = applicationFormFor(job);
+    const FIELD_LABEL = { phone: "Phone number", expected_salary: "Expected salary", cover_letter: "Cover letter" };
+    const values = { phone, expected_salary, cover_letter };
+    for (const key of ["phone", "expected_salary", "cover_letter"]) {
+      if (appForm[key] === "mandatory" && !String(values[key] ?? "").trim()) {
+        return res.status(400).json({ error: `${FIELD_LABEL[key]} is required for this role.` });
+      }
+    }
 
     const extracted = await extractText(tempPath);
     if (extracted.unsupported) return res.status(400).json({ error: extracted.message });
@@ -241,6 +259,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
       parse_confidence_overall: parseOverall,
       low_confidence_warning: parseOverall < 70,
       pdpa_consent: { given: true, at: new Date().toISOString() },
+      cover_letter: cover_letter?.trim() || null,
       profile,
       score: null,
       hr_notes_list: [],

@@ -46,6 +46,8 @@ export default function SuccessProfile() {
   const [critWeights, setCritWeights] = useState({}); // { criterion_id: pct } — every interview-source criterion
   const [critOrder, setCritOrder] = useState([]); // [{id, name}] for stable display order
   const [weightsSaving, setWeightsSaving] = useState(false);
+  const [appForm, setAppForm] = useState({ phone: "optional", expected_salary: "optional", cover_letter: "off" });
+  const [appFormSaving, setAppFormSaving] = useState(false);
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => {
@@ -58,6 +60,7 @@ export default function SuccessProfile() {
         setMotivationOn(interviewCrit.some((c) => c.id === "i_motivation"));
         setCritOrder(interviewCrit.map((c) => ({ id: c.id, name: c.name })));
         setCritWeights(Object.fromEntries(interviewCrit.map((c) => [c.id, Math.round(c.weight * 100)])));
+        setAppForm({ phone: "optional", expected_salary: "optional", cover_letter: "off", ...(j.application_form || {}) });
       }
     });
     axios.get(`/api/jobs/${jobId}/success-profile`).then((r) => {
@@ -128,6 +131,16 @@ export default function SuccessProfile() {
       flash(r.data.rescored_candidates > 0 ? `Saved — ${r.data.rescored_candidates} candidate${r.data.rescored_candidates === 1 ? "" : "s"} re-scored at the new weights.` : "Scoring weights saved.");
     } catch (e) { flash(e.response?.data?.error || "Couldn't save scoring weights."); }
     finally { setWeightsSaving(false); }
+  }
+
+  async function saveAppForm() {
+    setAppFormSaving(true);
+    try {
+      const r = await axios.patch(`/api/jobs/${jobId}/application-form`, appForm);
+      setJob((j) => ({ ...j, application_form: r.data.application_form }));
+      flash("Application form saved.");
+    } catch (e) { flash(e.response?.data?.error || "Couldn't save the application form."); }
+    finally { setAppFormSaving(false); }
   }
 
   if (!profile) return <div style={{ ...card, height: 280 }} className="animate-pulse" />;
@@ -258,6 +271,31 @@ export default function SuccessProfile() {
 
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
           <button onClick={saveWeights} disabled={weightsSaving} style={{ padding: "10px 18px", background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 10, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: weightsSaving ? 0.7 : 1 }}>{weightsSaving ? "Saving & re-scoring…" : "Save scoring weights"}</button>
+        </div>
+      </div>
+
+      {/* Application form */}
+      <div style={{ ...card, marginBottom: 22 }}>
+        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, color: D.text }}>Application form</div>
+        <div style={{ fontSize: 13, color: D.text4, marginBottom: 18 }}>What candidates fill in when applying for this role. Name, email, CV and consent are always required — everything below is up to you.</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {[["phone", "Phone number"], ["expected_salary", "Expected salary"], ["cover_letter", "Cover letter"]].map(([key, label]) => (
+            <div key={key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, background: D.inset, borderRadius: 10, padding: "11px 14px" }} className="flex-wrap">
+              <span style={{ fontSize: 13.5, fontWeight: 600, color: D.text2 }}>{label}</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                {["mandatory", "optional", "off"].map((mode) => {
+                  const active = appForm[key] === mode;
+                  const activeStyle = mode === "mandatory" ? { color: "#047857", bg: "#ECFDF5", border: "#A7F3D0" } : mode === "optional" ? { color: "#4338CA", bg: "#EEF2FF", border: "#C7D2FE" } : { color: D.text4, bg: D.cardBg, border: D.border };
+                  return (
+                    <span key={mode} onClick={() => setAppForm((f) => ({ ...f, [key]: mode }))} style={{ fontSize: 12, fontWeight: 700, textTransform: "capitalize", padding: "5px 11px", borderRadius: 20, cursor: "pointer", color: active ? activeStyle.color : D.text4, background: active ? activeStyle.bg : D.cardBg, border: `1px solid ${active ? activeStyle.border : D.border}` }}>{mode}</span>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
+          <button onClick={saveAppForm} disabled={appFormSaving} style={{ padding: "10px 18px", background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE", borderRadius: 10, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: appFormSaving ? 0.7 : 1 }}>{appFormSaving ? "Saving…" : "Save application form"}</button>
         </div>
       </div>
 

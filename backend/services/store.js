@@ -63,6 +63,7 @@ function jobToApi(r, companiesById) {
     score_weights: r.score_weights,
     pipeline_stages: r.pipeline_stages,
     interview_slots: r.interview_slots,
+    application_form: r.application_form,
   };
 }
 function jobToRow(o) {
@@ -87,6 +88,7 @@ function jobToRow(o) {
     score_weights: o.score_weights ?? null,
     pipeline_stages: o.pipeline_stages ?? null,
     interview_slots: o.interview_slots ?? null,
+    application_form: o.application_form ?? null,
   };
 }
 

@@ -884,6 +884,37 @@ router.patch("/jobs/:jobId/scoring-weights", async (req, res) => {
   }
 });
 
+// PATCH /api/jobs/:jobId/application-form
+// Body: { phone?, expected_salary?, cover_letter? } — each "mandatory" | "optional" | "off".
+// Controls the public apply form (CandidatePortal) for this role. Name, email, CV and PDPA
+// consent are never configurable — they're structurally required to create a candidate at all.
+const APPLICATION_FORM_FIELDS = ["phone", "expected_salary", "cover_letter"];
+const APPLICATION_FORM_MODES = ["mandatory", "optional", "off"];
+router.patch("/jobs/:jobId/application-form", async (req, res) => {
+  try {
+    const jobs = await readTable("jobs");
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+
+    const updates = {};
+    for (const field of APPLICATION_FORM_FIELDS) {
+      const mode = req.body?.[field];
+      if (mode == null) continue;
+      if (!APPLICATION_FORM_MODES.includes(mode)) {
+        return res.status(400).json({ error: `${field} must be one of: ${APPLICATION_FORM_MODES.join(", ")}` });
+      }
+      updates[field] = mode;
+    }
+
+    jobs[idx].application_form = { ...(jobs[idx].application_form || {}), ...updates };
+    await writeTable("jobs", jobs);
+    res.json({ application_form: jobs[idx].application_form });
+  } catch (err) {
+    console.error("application-form error:", err);
+    res.status(500).json({ error: "Failed to update the application form." });
+  }
+});
+
 // POST /api/jobs — create a new role (with AI or supplied criteria)
 router.post("/jobs", async (req, res) => {
   try {
