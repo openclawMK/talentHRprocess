@@ -18,6 +18,7 @@ import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
 import { generateSuccessProfileForJob } from "./successProfile.js";
 import { readTable, writeTable, insertRow, deleteRow } from "../services/store.js";
 import { rescoreJobCandidates } from "../services/rescoring.js";
+import { computeSuccessFit } from "../services/successFit.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -597,6 +598,63 @@ router.get("/jobs/:jobId/analytics", async (req, res) => {
   } catch (err) {
     console.error("analytics error:", err);
     res.status(500).json({ error: "Failed to load analytics." });
+  }
+});
+
+// GET /api/jobs/:jobId/insights — "why candidates fall short" for this role:
+// the most common missing must-have, most-triggered dealbreaker, most-frequent
+// OCEAN mismatch, and outstanding assessments. Pure aggregation over each
+// candidate's already-computed Success Profile fit — no new scoring logic,
+// just rolling up per-candidate results across the whole applicant pool so HR
+// can see whether the Success Profile is miscalibrated or sourcing is off.
+router.get("/jobs/:jobId/insights", async (req, res) => {
+  try {
+    const job = (await readTable("jobs")).find((j) => j.job_id === req.params.jobId);
+    if (!job) return res.status(404).json({ error: "Job not found." });
+
+    const candidates = (await readTable("candidates")).filter((c) => c.job_id === job.job_id);
+    const hasProfile = !!(job.successProfile && Object.keys(job.successProfile).length);
+
+    const missCounts = new Map(); // must-have text -> count not met
+    const dealbreakerCounts = new Map(); // dealbreaker text -> count triggered
+    const oceanCounts = new Map(); // trait label -> count mismatched
+    let fitScored = 0;
+    let awaitingOcean = [];
+    let awaitingInterview = [];
+
+    for (const c of candidates) {
+      if (!c.ocean_completed) awaitingOcean.push({ candidate_id: c.candidate_id, name: c.profile?.name || "Candidate" });
+      if (!c.interview_completed) awaitingInterview.push({ candidate_id: c.candidate_id, name: c.profile?.name || "Candidate" });
+
+      if (!hasProfile) continue;
+      const fit = computeSuccessFit(c, job);
+      if (!fit) continue;
+      fitScored += 1;
+
+      for (const m of fit.must_haves) if (!m.met) missCounts.set(m.text, (missCounts.get(m.text) || 0) + 1);
+      for (const d of fit.dealbreakers) if (d.triggered) dealbreakerCounts.set(d.text, (dealbreakerCounts.get(d.text) || 0) + 1);
+      if (fit.has_ocean) for (const o of fit.ocean || []) if (!o.match) oceanCounts.set(o.trait, (oceanCounts.get(o.trait) || 0) + 1);
+    }
+
+    const rank = (map) => [...map.entries()]
+      .map(([text, count]) => ({ text, count, pct: fitScored ? Math.round((count / fitScored) * 100) : 0 }))
+      .sort((a, b) => b.count - a.count);
+
+    res.json({
+      job_id: job.job_id,
+      role_title: job.role_title,
+      total_applicants: candidates.length,
+      fit_scored: fitScored,
+      has_profile: hasProfile,
+      missing_must_haves: rank(missCounts),
+      dealbreakers: rank(dealbreakerCounts),
+      ocean_mismatches: rank(oceanCounts),
+      awaiting_ocean: awaitingOcean,
+      awaiting_interview: awaitingInterview,
+    });
+  } catch (err) {
+    console.error("job insights error:", err);
+    res.status(500).json({ error: "Failed to load insights." });
   }
 });
 

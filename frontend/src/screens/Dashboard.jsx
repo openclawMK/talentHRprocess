@@ -73,6 +73,8 @@ export default function Dashboard() {
   const [hrPhone, setHrPhone] = useState("");
   const [hrSaved, setHrSaved] = useState(false);
   const [analytics, setAnalytics] = useState(null);
+  const [insights, setInsights] = useState(null);
+  const [showInsights, setShowInsights] = useState(false);
   const [salary, setSalary] = useState(null);
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkSelected, setBulkSelected] = useState([]);
@@ -110,6 +112,9 @@ export default function Dashboard() {
   }, [jobId]);
   const loadAnalytics = useCallback(() => {
     axios.get(`/api/jobs/${jobId}/analytics`).then((r) => setAnalytics(r.data?.empty ? null : r.data)).catch(() => setAnalytics(null));
+  }, [jobId]);
+  const loadInsights = useCallback(() => {
+    axios.get(`/api/jobs/${jobId}/insights`).then((r) => setInsights(r.data)).catch(() => setInsights(null));
   }, [jobId]);
   const loadSlots = useCallback(() => {
     axios.get(`/api/jobs/${jobId}/interview-slots`).then((r) => setSlots(r.data?.slots || [])).catch(() => setSlots([]));
@@ -149,6 +154,7 @@ export default function Dashboard() {
     axios.get(`/api/jobs/${jobId}/salary-benchmark`).then((r) => setSalary(r.data?.available ? r.data : null)).catch(() => setSalary(null));
   }, [jobId]);
   useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
+  useEffect(() => { loadInsights(); }, [loadInsights]);
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, [load]);
   useEffect(() => { if (showSlots) loadSlots(); }, [showSlots, loadSlots]);
 
@@ -353,6 +359,63 @@ export default function Dashboard() {
           })}
         </div>
       </div>
+
+      {/* why candidates fall short */}
+      {insights && insights.total_applicants > 0 && (
+        <div style={{ ...cardBox, borderRadius: 14, padding: 22, marginBottom: 20 }}>
+          <div onClick={() => setShowInsights((v) => !v)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 9 }}><span style={{ color: "#7C3AED", fontSize: 16 }}>🔍</span><span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Why candidates fall short</span></div>
+            <span style={{ fontSize: 12, color: D.text5 }}>{showInsights ? "▲" : "▼"}</span>
+          </div>
+          {showInsights && (
+            <div style={{ marginTop: 16 }}>
+              {!insights.has_profile ? (
+                <div style={{ fontSize: 13.5, color: D.text4 }}>
+                  Define a Success Profile for this role to see the most common missing must-have, dealbreaker, and personality mismatch across applicants. <span onClick={() => navigate(`/jobs/${jobId}/success-profile`)} style={{ color: "#6D28D9", fontWeight: 600, cursor: "pointer" }}>Set it up →</span>
+                </div>
+              ) : (
+                <>
+                  <div style={{ fontSize: 13, color: D.text4, marginBottom: 16 }}>Across {insights.fit_scored} scored applicant{insights.fit_scored === 1 ? "" : "s"} for this role — a high hit rate here means the Success Profile may be miscalibrated, or sourcing isn't reaching the right candidates.</div>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    {[
+                      { title: "Missing must-haves", list: insights.missing_must_haves, empty: "No must-haves are commonly missing." },
+                      { title: "Dealbreakers triggered", list: insights.dealbreakers, empty: "No dealbreakers triggered." },
+                      { title: "Personality mismatches", list: insights.ocean_mismatches, empty: "No consistent personality mismatch." },
+                    ].map((sec) => (
+                      <div key={sec.title}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 10 }}>{sec.title}</div>
+                        {sec.list.length === 0 ? (
+                          <div style={{ fontSize: 13, color: D.text5 }}>{sec.empty}</div>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                            {sec.list.slice(0, 3).map((item) => (
+                              <div key={item.text}>
+                                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 13, color: D.text2, marginBottom: 4 }}>
+                                  <span>{item.text}</span>
+                                  <span style={{ fontWeight: 700, color: D.text, flexShrink: 0 }}>{item.count} · {item.pct}%</span>
+                                </div>
+                                <div style={{ height: 6, background: D.inset, borderRadius: 4, overflow: "hidden" }}>
+                                  <div style={{ height: "100%", width: `${item.pct}%`, background: "#7C3AED", borderRadius: 4 }} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              {(insights.awaiting_ocean.length > 0 || insights.awaiting_interview.length > 0) && (
+                <div style={{ display: "flex", gap: 20, marginTop: 18, paddingTop: 16, borderTop: `0.5px solid ${D.border}`, flexWrap: "wrap" }}>
+                  <div style={{ fontSize: 13, color: D.text3 }}><b style={{ color: D.amber }}>{insights.awaiting_ocean.length}</b> awaiting OCEAN</div>
+                  <div style={{ fontSize: 13, color: D.text3 }}><b style={{ color: "#8B5CF6" }}>{insights.awaiting_interview.length}</b> awaiting interview</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* pipeline setup */}
       {pipeline && (
