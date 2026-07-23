@@ -29,3 +29,20 @@ export function guardCompanyParam(router) {
     next();
   });
 }
+
+/**
+ * For handlers that take jobId/candidateId from the request BODY rather than
+ * the URL (router.param can't see those) — e.g. /upload-cv, /score-candidate,
+ * /ocean-assessment. Call after resolving the real job a candidate belongs to
+ * (never a client-supplied job_id override, which could otherwise be used to
+ * pass the check while still touching another company's candidate). Returns
+ * false and has already sent the 404 response if out of scope.
+ */
+export function assertJobInScope(req, res, job) {
+  if (!job) return false;
+  if (req.user?.company_id && job.company?.id !== req.user.company_id) {
+    res.status(404).json({ error: "Not found." });
+    return false;
+  }
+  return true;
+}

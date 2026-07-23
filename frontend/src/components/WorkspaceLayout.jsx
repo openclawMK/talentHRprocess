@@ -21,6 +21,15 @@ export default function WorkspaceLayout({ children }) {
   const location = useLocation();
   const { user, logout } = useAuth();
   const { theme, palette: D, toggle: toggleTheme } = useTheme();
+  // A client login only manages its own company's roles — role/CV creation
+  // and the cross-company "Companies" list don't apply to them; they land
+  // straight on their own company's roles page instead.
+  const isPlatformAdmin = user?.role === "admin" && !user?.company_id;
+  const navItems = NAV
+    .filter((item) => isPlatformAdmin || !["/upload", "/jobs/new"].includes(item.to))
+    .map((item) => (item.to === "/companies" && !isPlatformAdmin && user?.company_id
+      ? { ...item, to: `/companies/${user.company_id}`, label: "Firm", fullLabel: "My Company" }
+      : item));
   const LANE_DOT = { green: D.green, amber: D.amber, red: D.red };
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -84,7 +93,7 @@ export default function WorkspaceLayout({ children }) {
     .join("")
     .toUpperCase();
 
-  const currentLabel = NAV.find((n) => n.match(location.pathname))?.fullLabel || "Dashboard";
+  const currentLabel = navItems.find((n) => n.match(location.pathname))?.fullLabel || "Dashboard";
 
   // Mobile drawer body — full labels, dark palette matching the rail.
   const MobileSidebarBody = () => (
@@ -102,7 +111,7 @@ export default function WorkspaceLayout({ children }) {
 
       <div className="px-3 pb-2 text-[11px] font-bold tracking-[1px]" style={{ color: D.text5 }}>WORKSPACE</div>
       <nav className="flex flex-col gap-1">
-        {NAV.map((item) => {
+        {navItems.map((item) => {
           const active = item.match(location.pathname);
           const Icon = item.icon;
           return (
@@ -120,7 +129,7 @@ export default function WorkspaceLayout({ children }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold" style={{ color: D.text }}>{user?.name || "HR Manager"}</div>
-          <div className="text-[11px]" style={{ color: D.text4 }}>{user?.role === "admin" ? "HR Manager" : user?.role}</div>
+          <div className="text-[11px]" style={{ color: D.text4 }}>{isPlatformAdmin ? "HR Manager" : "Client account"}</div>
         </div>
         <button onClick={signOut} title="Sign out" style={{ color: D.text4 }}>
           <Power size={16} />
@@ -135,7 +144,7 @@ export default function WorkspaceLayout({ children }) {
       <aside className="fixed inset-y-0 left-0 hidden w-[72px] flex-col items-center py-[18px] lg:flex" style={{ backgroundColor: D.page, borderRight: `0.5px solid ${D.hair}` }}>
         <Link to="/" className="mb-4 flex h-9 w-9 items-center justify-center rounded-[11px] text-[13px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</Link>
         <nav className="flex flex-col gap-1.5">
-          {NAV.map((item) => {
+          {navItems.map((item) => {
             const active = item.match(location.pathname);
             const Icon = item.icon;
             return (
@@ -250,7 +259,7 @@ export default function WorkspaceLayout({ children }) {
             </div>
             <div className="hidden text-left sm:block">
               <div className="text-[13px] font-semibold" style={{ color: D.text }}>{user?.name || "HR Manager"}</div>
-              <div className="text-[11px]" style={{ color: D.text4 }}>{user?.role === "admin" ? "HR Manager" : user?.role}</div>
+              <div className="text-[11px]" style={{ color: D.text4 }}>{isPlatformAdmin ? "HR Manager" : "Client account"}</div>
             </div>
           </button>
         </header>

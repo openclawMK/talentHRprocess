@@ -22,7 +22,7 @@ import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
 import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra } from "../services/store.js";
-import { guardJobParam } from "../middleware/companyScope.js";
+import { guardJobParam, assertJobInScope } from "../middleware/companyScope.js";
 
 const router = Router();
 guardJobParam(router);
@@ -123,6 +123,7 @@ router.post("/upload-cv", upload.single("file"), async (req, res) => {
 
     const job = await findJob(jobId);
     if (!job) return res.status(400).json({ error: `Unknown jobId: ${jobId}` });
+    if (!assertJobInScope(req, res, job)) return;
 
     const extracted = await extractText(tempPath);
     if (extracted.unsupported) {
@@ -180,6 +181,10 @@ router.post("/score-candidate", async (req, res) => {
     const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === candidate_id);
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    // Scope check against the candidate's OWN job — never the caller-supplied
+    // job_id override, which could otherwise pass the check while a client
+    // still rescored another company's candidate against their own criteria.
+    if (!assertJobInScope(req, res, await findJob(candidates[idx].job_id))) return;
 
     const job = await findJob(job_id || candidates[idx].job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
@@ -204,6 +209,7 @@ router.post("/interview-questions", async (req, res) => {
     const { candidate_id, job_id } = req.body;
     const candidate = await findCandidate(candidate_id);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    if (!assertJobInScope(req, res, await findJob(candidate.job_id))) return;
     const job = await findJob(job_id || candidate.job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
@@ -255,6 +261,8 @@ router.post("/compare-candidates", async (req, res) => {
     const a = await findCandidate(candidate_id_1);
     const b = await findCandidate(candidate_id_2);
     if (!a || !b) return res.status(404).json({ error: "Candidate not found." });
+    if (!assertJobInScope(req, res, await findJob(a.job_id))) return;
+    if (!assertJobInScope(req, res, await findJob(b.job_id))) return;
     const job = await findJob(job_id || a.job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
@@ -309,6 +317,7 @@ router.post("/ocean-assessment", async (req, res) => {
     if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
     const job = await findJob(candidates[idx].job_id);
     if (!job) return res.status(400).json({ error: "Unknown job." });
+    if (!assertJobInScope(req, res, job)) return;
 
     const traits = computeTraits(responses);
     applyOceanScores(candidates[idx], job, traits);
