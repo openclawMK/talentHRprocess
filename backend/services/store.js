@@ -154,11 +154,15 @@ function candidateToRow(o) {
 const userToApi = (r) => ({ id: r.id, name: r.name, email: r.email, password_hash: r.password_hash, role: r.role, company_id: r.company_id ?? null, created_at: r.created_at });
 const userToRow = (o) => ({ id: o.id, name: o.name, email: o.email, password_hash: o.password_hash, role: o.role, company_id: o.company_id ?? null, created_at: o.created_at });
 
+const apiKeyToApi = (r) => ({ id: r.id, company_id: r.company_id, name: r.name, key_prefix: r.key_prefix, key_hash: r.key_hash, created_at: r.created_at });
+const apiKeyToRow = (o) => ({ id: o.id, company_id: o.company_id, name: o.name, key_prefix: o.key_prefix, key_hash: o.key_hash, created_at: o.created_at });
+
 const TABLES = {
   companies: { key: "id", toApi: companyToApi, toRow: companyToRow },
   jobs: { key: "job_id", toApi: jobToApi, toRow: jobToRow, needsCompanies: true },
   candidates: { key: "candidate_id", toApi: candidateToApi, toRow: candidateToRow },
   users: { key: "id", toApi: userToApi, toRow: userToRow },
+  api_keys: { key: "id", toApi: apiKeyToApi, toRow: apiKeyToRow },
 };
 
 export async function readTable(name) {

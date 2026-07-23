@@ -33,6 +33,13 @@ export default function JobSelector() {
   const [loginForm, setLoginForm] = useState({ name: "", email: "", password: "" });
   const [loginBusy, setLoginBusy] = useState(false);
   const [loginError, setLoginError] = useState("");
+  const [apiKeys, setApiKeys] = useState(null);
+  const [showApiKeys, setShowApiKeys] = useState(false);
+  const [keyName, setKeyName] = useState("");
+  const [keyBusy, setKeyBusy] = useState(false);
+  const [keyError, setKeyError] = useState("");
+  const [revealedKey, setRevealedKey] = useState(null);
+  const [keyCopied, setKeyCopied] = useState(false);
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJobs(r.data)).catch(() => setJobs([]));
@@ -65,6 +72,33 @@ export default function JobSelector() {
     if (!window.confirm("Remove this login? They'll no longer be able to sign in.")) return;
     try { await axios.delete(`/api/companies/${companyId}/users/${userId}`); loadLogins(); }
     catch { /* ignore */ }
+  }
+
+  // API keys for this company — the machine-facing equivalent of a client
+  // login. Same company scoping, used by the client's own system instead of
+  // a person in a browser. The raw key is only ever shown once, right here.
+  function loadApiKeys() {
+    axios.get(`/api/companies/${companyId}/api-keys`).then((r) => setApiKeys(r.data)).catch(() => setApiKeys([]));
+  }
+  async function createKey() {
+    setKeyError(""); setRevealedKey(null);
+    if (!keyName.trim()) { setKeyError("Give this key a name (e.g. \"HRIS integration\")."); return; }
+    setKeyBusy(true);
+    try {
+      const res = await axios.post(`/api/companies/${companyId}/api-keys`, { name: keyName.trim() });
+      setRevealedKey(res.data.key);
+      setKeyName("");
+      loadApiKeys();
+    } catch (e) { setKeyError(e.response?.data?.error || "Couldn't create this key."); }
+    finally { setKeyBusy(false); }
+  }
+  async function deleteKey(keyId) {
+    if (!window.confirm("Revoke this API key? Any system using it will stop working immediately.")) return;
+    try { await axios.delete(`/api/companies/${companyId}/api-keys/${keyId}`); loadApiKeys(); }
+    catch { /* ignore */ }
+  }
+  function copyKey() {
+    navigator.clipboard?.writeText(revealedKey).then(() => { setKeyCopied(true); setTimeout(() => setKeyCopied(false), 1800); });
   }
 
   // Cross-role candidate view — scoped to THIS company only. The backend
@@ -157,6 +191,9 @@ export default function JobSelector() {
           {companyId && isPlatformAdmin && (
             <button onClick={() => { setShowLogins((v) => !v); if (!logins) loadLogins(); }} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: D.cardBg, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>🔑 Client logins</button>
           )}
+          {companyId && isPlatformAdmin && (
+            <button onClick={() => { setShowApiKeys((v) => !v); if (!apiKeys) loadApiKeys(); }} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: D.cardBg, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>⚙ API keys</button>
+          )}
           <button onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create role</button>
         </div>
       </div>
@@ -193,6 +230,52 @@ export default function JobSelector() {
                 <button onClick={createLogin} disabled={loginBusy} style={{ padding: "10px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: loginBusy ? 0.6 : 1 }}>{loginBusy ? "Creating…" : "Add login"}</button>
               </div>
               {loginError && <div style={{ fontSize: 12.5, color: D.red, marginTop: 10 }}>{loginError}</div>}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* API keys — the machine-facing equivalent of a client login. Same
+          isolation, used by the client's own system instead of a person. */}
+      {showApiKeys && companyId && isPlatformAdmin && (
+        <div style={{ background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 22, marginBottom: 22 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 4 }}>API keys for {company?.name || "this company"}</div>
+          <div style={{ fontSize: 13, color: D.text4, marginBottom: 16 }}>For {company?.name || "this company"}'s own system to push roles and candidates to us directly — scoped to their data only, same as a login.</div>
+
+          {revealedKey && (
+            <div style={{ background: D.amberBg, border: `1px solid ${D.amberBorder}`, borderRadius: 10, padding: "14px 16px", marginBottom: 16 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 700, color: D.amber, marginBottom: 8 }}>⚠ Copy this now — it won't be shown again</div>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <code style={{ flex: 1, fontSize: 12.5, background: D.page, border: `1px solid ${D.border}`, borderRadius: 7, padding: "8px 10px", overflowX: "auto", whiteSpace: "nowrap", color: D.text }}>{revealedKey}</code>
+                <button onClick={copyKey} style={{ padding: "8px 14px", background: D.text, color: D.page, border: "none", borderRadius: 7, fontWeight: 600, fontSize: 12.5, cursor: "pointer", whiteSpace: "nowrap" }}>{keyCopied ? "✓ Copied" : "Copy"}</button>
+              </div>
+            </div>
+          )}
+
+          {apiKeys === null ? (
+            <div style={{ fontSize: 13, color: D.text4 }}>Loading…</div>
+          ) : (
+            <>
+              {apiKeys.length === 0 ? (
+                <div style={{ fontSize: 13, color: D.text5, marginBottom: 16 }}>No API keys yet.</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 18 }}>
+                  {apiKeys.map((k) => (
+                    <div key={k.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", background: D.inset, borderRadius: 10 }}>
+                      <div>
+                        <span style={{ fontSize: 13.5, fontWeight: 600, color: D.text }}>{k.name}</span>
+                        <code style={{ fontSize: 12, color: D.text4, marginLeft: 8 }}>{k.key_prefix}…</code>
+                      </div>
+                      <span onClick={() => deleteKey(k.id)} style={{ fontSize: 12.5, color: D.red, cursor: "pointer", fontWeight: 600 }}>Revoke</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <input placeholder='Name this key, e.g. "HRIS integration"' value={keyName} onChange={(e) => setKeyName(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 12px", border: `1px solid ${D.border}`, borderRadius: 9, fontSize: 13.5, background: D.page, color: D.text }} />
+                <button onClick={createKey} disabled={keyBusy} style={{ padding: "10px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: keyBusy ? 0.6 : 1 }}>{keyBusy ? "Creating…" : "Generate key"}</button>
+              </div>
+              {keyError && <div style={{ fontSize: 12.5, color: D.red, marginTop: 10 }}>{keyError}</div>}
             </>
           )}
         </div>

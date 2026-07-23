@@ -65,6 +65,15 @@ create table if not exists users (
   created_at timestamptz default now()
 );
 
+create table if not exists api_keys (
+  id text primary key,
+  company_id text references companies(id) not null, -- every key belongs to exactly one company
+  name text,
+  key_prefix text not null, -- shown in the UI so a key can be identified without re-revealing it
+  key_hash text not null,   -- bcrypt hash; the raw key is only ever shown once, at creation
+  created_at timestamptz default now()
+);
+
 create table if not exists scores (
   score_id text primary key,
   candidate_id text references candidates(candidate_id) on delete cascade,

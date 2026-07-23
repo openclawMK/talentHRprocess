@@ -15,11 +15,11 @@ import {
 import { notify, whatsappConfigured } from "../services/whatsappService.js";
 import { getSalaryBenchmark, compareToMarket, listBenchmarks, benchmarkRegions, benchmarkIndustries, suggestSalary, regionMultiplier, rm } from "../services/salaryBenchmark.js";
 import { computeLiveAskingRate } from "../services/liveSalarySignal.js";
-import { generateSuccessProfileForJob } from "./successProfile.js";
 import { readTable, writeTable, insertRow, deleteRow } from "../services/store.js";
 import { rescoreJobCandidates } from "../services/rescoring.js";
 import { computeSuccessFit } from "../services/successFit.js";
 import { guardJobParam } from "../middleware/companyScope.js";
+import { createJobFromParams, weightsValid } from "../services/jobCreation.js";
 
 const router = Router();
 guardJobParam(router);
@@ -29,27 +29,11 @@ const TEMPLATES_PATH = path.join(DATA_DIR, "industry-templates.json");
 
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
 
-// weights must sum to ~1.0 (allow rounding tolerance)
-function weightsValid(criteria) {
-  const sum = (criteria || []).reduce((a, c) => a + (Number(c.weight) || 0), 0);
-  return Math.abs(sum - 1) <= 0.01;
-}
-
 // Adds RM-formatted labels to a live_asking_rate result, matching the
 // min_label/median_label/max_label convention the published benchmark uses.
 function withLabels(rate) {
   if (!rate || rate.confidence === "insufficient") return rate;
   return { ...rate, median_label: rm(rate.median), min_label: rm(rate.min), max_label: rm(rate.max) };
-}
-
-function nextJobId(jobs) {
-  let n = jobs.length + 1;
-  let id;
-  do {
-    id = `job_${String(n).padStart(3, "0")}`;
-    n += 1;
-  } while (jobs.some((j) => j.job_id === id));
-  return id;
 }
 
 // GET /api/jobs — all jobs
@@ -988,93 +972,11 @@ router.patch("/jobs/:jobId/application-form", async (req, res) => {
 // POST /api/jobs — create a new role (with AI or supplied criteria)
 router.post("/jobs", async (req, res) => {
   try {
-    const {
-      role_title,
-      industry,
-      location = "Kuala Lumpur",
-      role_level = "entry",
-      requirements = {},
-      key_responsibilities = [],
-      criteria: suppliedCriteria,
-      score_weights: suppliedWeights,
-      company_id: bodyCompanyId,
-      interview_criteria_count,
-    } = req.body;
     // A client login can only ever create roles under their own company —
     // scoped from the verified JWT, never the request body.
-    const company_id = req.user?.company_id || bodyCompanyId;
-
-    if (!role_title || !industry)
-      return res.status(400).json({ error: "role_title and industry are required." });
-
-    let company;
-    if (company_id) {
-      company = (await readTable("companies")).find((c) => c.id === company_id);
-      if (!company) return res.status(400).json({ error: "Unknown company." });
-    }
-
-    let criteria = suppliedCriteria;
-    if (!Array.isArray(criteria) || criteria.length === 0) {
-      criteria = await generateCriteria({ industry, role_title, key_responsibilities, role_level, interview_criteria_count });
-    } else if (!weightsValid(criteria)) {
-      return res.status(400).json({ error: "Criteria weights must sum to 100%" });
-    }
-
-    // The Create Job weight sliders set per-criterion cv/ocean/interview weights;
-    // their SUMS become the real top-level score_weights the composite engine
-    // uses (profile/ocean/interview), so what HR sees and edits is what scores.
-    let score_weights;
-    if (suppliedWeights && typeof suppliedWeights === "object") {
-      score_weights = suppliedWeights;
-    } else {
-      const sumBy = (src) => criteria.filter((c) => c.source === src).reduce((a, c) => a + (Number(c.weight) || 0), 0);
-      score_weights = { profile: sumBy("cv"), ocean: sumBy("ocean"), interview: sumBy("interview") };
-    }
-
-    const jobs = await readTable("jobs");
-    const job_id = nextJobId(jobs);
-
-    const expMin = Number(requirements.experience_years_min) || 0;
-    const newJob = {
-      job_id,
-      company,
-      role_title,
-      industry,
-      location,
-      requirements: {
-        experience_years_min: expMin,
-        experience_years_preferred: requirements.experience_years_preferred || expMin + 1,
-        education_level_min: requirements.education_level_min || "Any",
-        required_skills: requirements.required_skills || [],
-        preferred_skills: requirements.preferred_skills || [],
-        key_responsibilities: key_responsibilities,
-      },
-      age_band: requirements.age_band || { min: 18, ideal_min: 18, ideal_max: 45, max: 60 },
-      portal_token: `pq-${uuidv4().slice(0, 8)}`,
-      pipeline_stages: { ...DEFAULT_PIPELINE },
-      hr_whatsapp_alerts: false,
-      hr_contact_phone: "",
-      criteria,
-      score_weights,
-      thresholds: { green: 72, red: 45 },
-      benchmark: { maturity: "starter", avg_experience_years: expMin || 1, avg_team_size: 0 },
-      role_level,
-      criteria_generated_by: suppliedCriteria ? "edited" : "ai",
-      criteria_locked: false,
-    };
-
-    // Auto-generate the Success Profile so a new role is immediately scoreable —
-    // HR reviews/edits on the Success Profile screen rather than starting blank.
-    // Never blocks role creation if the AI call fails.
-    try {
-      newJob.successProfile = { ...(await generateSuccessProfileForJob(newJob)), created_at: new Date().toISOString(), last_updated: new Date().toISOString() };
-    } catch (spErr) {
-      console.error("auto success-profile generation failed:", spErr.message);
-    }
-
-    // insertRow (not writeTable) — safe under concurrent creates, see store.js.
-    await insertRow("jobs", newJob);
-    res.status(201).json(newJob);
+    const result = await createJobFromParams(req.body, req.user?.company_id);
+    if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    res.status(201).json(result.job);
   } catch (err) {
     console.error("create job error:", err);
     res.status(500).json({ error: "Failed to create job." });

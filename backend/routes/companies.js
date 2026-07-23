@@ -9,6 +9,7 @@ import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { readTable, insertRow, deleteRow, writeTable } from "../services/store.js";
 import { createUser } from "../services/authService.js";
+import { createApiKey, listApiKeys, deleteApiKey } from "../services/apiKeyService.js";
 import { guardCompanyParam } from "../middleware/companyScope.js";
 
 const router = Router();
@@ -143,6 +144,49 @@ router.delete("/companies/:companyId/users/:userId", async (req, res) => {
   } catch (err) {
     console.error("delete company user error:", err);
     res.status(500).json({ error: "Failed to delete the login." });
+  }
+});
+
+// --- API keys ---------------------------------------------------------
+// The machine-facing equivalent of a client login — same company scoping,
+// used by a client's own system instead of a person in a browser.
+
+// GET /api/companies/:companyId/api-keys — never returns the raw key or its hash.
+router.get("/companies/:companyId/api-keys", async (req, res) => {
+  try {
+    if (!requirePlatformAdmin(req, res)) return;
+    res.json(await listApiKeys(req.params.companyId));
+  } catch (err) {
+    console.error("list api keys error:", err);
+    res.status(500).json({ error: "Failed to load API keys." });
+  }
+});
+
+// POST /api/companies/:companyId/api-keys  { name }
+// Returns the raw key exactly once — only its hash is ever stored.
+router.post("/companies/:companyId/api-keys", async (req, res) => {
+  try {
+    if (!requirePlatformAdmin(req, res)) return;
+    const company = (await readTable("companies")).find((c) => c.id === req.params.companyId);
+    if (!company) return res.status(404).json({ error: "Company not found." });
+    const key = await createApiKey(req.params.companyId, req.body?.name);
+    res.status(201).json(key);
+  } catch (err) {
+    console.error("create api key error:", err);
+    res.status(500).json({ error: "Failed to create the API key." });
+  }
+});
+
+// DELETE /api/companies/:companyId/api-keys/:keyId
+router.delete("/companies/:companyId/api-keys/:keyId", async (req, res) => {
+  try {
+    if (!requirePlatformAdmin(req, res)) return;
+    const ok = await deleteApiKey(req.params.keyId, req.params.companyId);
+    if (!ok) return res.status(404).json({ error: "API key not found." });
+    res.json({ ok: true, id: req.params.keyId });
+  } catch (err) {
+    console.error("delete api key error:", err);
+    res.status(500).json({ error: "Failed to delete the API key." });
   }
 });
 
