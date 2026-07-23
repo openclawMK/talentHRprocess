@@ -21,6 +21,7 @@ export default function InterviewScoring() {
   const [mode, setMode] = useState(null);
   const [criteria, setCriteria] = useState(null);
   const [discussion, setDiscussion] = useState(null);
+  const [framing, setFraming] = useState(null);
   const [loadingAi, setLoadingAi] = useState(false);
   const [ratings, setRatings] = useState({});
   const [notes, setNotes] = useState({});
@@ -39,7 +40,7 @@ export default function InterviewScoring() {
 
   async function chooseAi() {
     setMode("ai"); setLoadingAi(true); setError(null);
-    try { const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep?count=${questionCount}`); setCriteria(r.data.criteria); setDiscussion(r.data.discussion || null); seedRatings(r.data.criteria); }
+    try { const r = await axios.get(`/api/candidates/${jobId}/${candidateId}/interview-prep?count=${questionCount}`); setCriteria(r.data.criteria); setDiscussion(r.data.discussion || null); setFraming(r.data.framing || null); seedRatings(r.data.criteria); }
     catch { setError("Couldn't generate AI questions. Switch to Manual instead."); setCriteria([]); }
     finally { setLoadingAi(false); }
   }
@@ -48,7 +49,7 @@ export default function InterviewScoring() {
     const list = interviewDefs.map((c) => ({ id: c.id, name: c.name, description: c.description }));
     setCriteria(list); seedRatings(list);
   }
-  function resetMode() { setMode(null); setCriteria(null); setDiscussion(null); setRatings({}); setNotes({}); setManualQ({}); setError(null); }
+  function resetMode() { setMode(null); setCriteria(null); setDiscussion(null); setFraming(null); setRatings({}); setNotes({}); setManualQ({}); setError(null); }
   async function submit() {
     setSaving(true); setError(null);
     try {
@@ -197,6 +198,18 @@ export default function InterviewScoring() {
 
       {error && <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 12, padding: "10px 14px", marginBottom: 14, fontSize: 14, color: "#B91C1C" }}>{error}</div>}
 
+      {/* Opener — a warm, specific line to start the conversation. Suggested
+          script only; never scored, never shown to the candidate directly. */}
+      {mode === "ai" && framing?.opener && (
+        <div style={{ background: D.greenBg, border: `0.5px solid ${D.greenBorder}`, borderRadius: 14, padding: "16px 20px", marginBottom: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <span style={{ fontSize: 18, flexShrink: 0 }}>👋</span>
+          <div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: D.green, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 4 }}>To open the interview</div>
+            <div style={{ fontSize: 14.5, color: D.text2, lineHeight: 1.5, fontStyle: "italic" }}>"{framing.opener}"</div>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
         {list.map((c, i) => {
           const rating = ratings[c.id] ?? 70;
@@ -252,6 +265,18 @@ export default function InterviewScoring() {
           </div>
           <div style={{ fontSize: 13, color: D.text4, marginBottom: 14 }}>Open prompts to gauge genuine interest and values fit. Use them to inform your read of the candidate — they don't feed the score.</div>
           <div style={{ background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 11, padding: "14px 16px", fontSize: 14, color: D.text2, lineHeight: 1.8, whiteSpace: "pre-line" }}>{(discussion.questions || []).join("\n")}</div>
+        </div>
+      )}
+
+      {/* Closer — sets clear, honest next-step expectations without promising
+          an outcome or timeline. */}
+      {mode === "ai" && framing?.closer && (
+        <div style={{ background: "#F5F3FF", border: "1px solid #E9E5FF", borderRadius: 14, padding: "16px 20px", marginTop: 16, display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <span style={{ fontSize: 18, flexShrink: 0 }}>🤝</span>
+          <div>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: "#6D28D9", textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 4 }}>To close the interview</div>
+            <div style={{ fontSize: 14.5, color: D.text2, lineHeight: 1.5, fontStyle: "italic" }}>"{framing.closer}"</div>
+          </div>
         </div>
       )}
 

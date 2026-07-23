@@ -786,6 +786,8 @@ For EACH criterion, also generate a scoring rubric with what a LOW (0-40), MID (
 
 Separately, generate 3 "Motivation & fit" questions — open, conversational prompts exploring the candidate's genuine interest in THIS specific role and how their values align with the team (e.g. why they applied, what motivates them, how they handle the kind of environment this role sits in). These are for discussion only and are NOT scored — do not attach a rubric to them.
 
+Also generate a one-line "opener" the interviewer can say to start the conversation warmly and put the candidate at ease — reference something specific and genuine from their CV (a role, employer, or skill), not a generic greeting. And a one-line "closer" the interviewer can say at the end, thanking them and telling them what happens next (e.g. "we'll be in touch within X days") — do not promise a specific outcome or timeline you can't know, keep it warm but non-committal.
+
 Criteria (with weight):
 ${interviewCriteria.map((c, i) => `${i + 1}. id="${c.id}" name="${c.name}" weight=${Math.round((c.weight || 0) * 100)}%${c.description ? " — " + c.description : ""}`).join("\n")}
 
@@ -802,7 +804,9 @@ Return:
       }
     }
   ],
-  "motivation_questions": ["question 1", "question 2", "question 3"]
+  "motivation_questions": ["question 1", "question 2", "question 3"],
+  "opener": "<one warm, specific sentence to open the interview>",
+  "closer": "<one warm, non-committal sentence to close the interview>"
 }`;
 
     const result = await chatJSON({ system, user, temperature: 0.5 });
@@ -820,6 +824,20 @@ Return:
           "What kind of work environment brings out your best?",
           "What would you want to be doing more of a year from now?",
         ];
+
+    // Framing — warms up the conversation and sets clear next-step expectations
+    // at the end. Purely candidate-experience polish; never scored, never
+    // implies a promised outcome or timeline.
+    const candidateFirstName = (candidate.profile?.name || "there").split(" ")[0];
+    const latestRole = candidate.profile?.work_history?.[0];
+    const opener = typeof result.opener === "string" && result.opener.trim()
+      ? result.opener.trim()
+      : latestRole
+        ? `Thanks for making the time, ${candidateFirstName} — I saw your work as ${latestRole.title} at ${latestRole.employer}, would love to hear more about that.`
+        : `Thanks for making the time today, ${candidateFirstName} — let's start with a bit about your background.`;
+    const closer = typeof result.closer === "string" && result.closer.trim()
+      ? result.closer.trim()
+      : `Thanks again for your time, ${candidateFirstName} — we'll review everything and be in touch on next steps soon.`;
 
     const FALLBACK_TEMPLATES = [
       (n) => `Tell me about a time you demonstrated ${n}.`,
@@ -871,7 +889,11 @@ Return:
       }
     }
 
-    res.json({ criteria, discussion: { label: "Motivation & fit", scored: false, questions: motivationQuestions } });
+    res.json({
+      criteria,
+      discussion: { label: "Motivation & fit", scored: false, questions: motivationQuestions },
+      framing: { opener, closer },
+    });
   } catch (err) {
     console.error("interview-prep error:", err);
     res.status(500).json({ error: "Failed to generate interview questions." });
