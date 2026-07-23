@@ -217,7 +217,9 @@ router.patch("/jobs/:jobId/whatsapp-settings", async (req, res) => {
 // GET /api/analytics — global, cross-role analytics for the workspace dashboard
 router.get("/analytics", async (req, res) => {
   try {
-    const jobs = await readTable("jobs");
+    const companyFilter = req.query.company || null;
+    let jobs = await readTable("jobs");
+    if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
     let candidates = [];
     try {
       candidates = await readTable("candidates");
@@ -387,8 +389,10 @@ router.get("/analytics", async (req, res) => {
 // for the global dashboard's cross-role candidate table.
 router.get("/candidates-recent", async (req, res) => {
   try {
-    const limit = Math.min(20, Math.max(1, Number(req.query.limit) || 8));
-    const jobs = await readTable("jobs");
+    const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 8));
+    const companyFilter = req.query.company || null;
+    let jobs = await readTable("jobs");
+    if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
     try { candidates = await readTable("candidates"); } catch { candidates = []; }
@@ -412,6 +416,7 @@ router.get("/candidates-recent", async (req, res) => {
           company_name: job.company?.name || null,
           score: c.score?.combined_score ?? null,
           lane: c.score?.lane || null,
+          recommendation: c.recommendation?.recommendation || null,
           stage,
           days_waiting,
           is_stale,

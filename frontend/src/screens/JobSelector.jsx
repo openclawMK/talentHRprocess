@@ -22,6 +22,9 @@ export default function JobSelector() {
   const [jobs, setJobs] = useState(null);
   const [a, setA] = useState(null);
   const [company, setCompany] = useState(null);
+  const [candPop, setCandPop] = useState(false);
+  const [candList, setCandList] = useState(null);
+  const [candFilter, setCandFilter] = useState(null);
 
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJobs(r.data)).catch(() => setJobs([]));
@@ -29,6 +32,50 @@ export default function JobSelector() {
     if (companyId) axios.get(`/api/companies/${companyId}`).then((r) => setCompany(r.data)).catch(() => setCompany(null));
     else setCompany(null);
   }, [companyId]);
+
+  // Cross-role candidate view — scoped to THIS company only. The backend
+  // filters jobs by company before ever touching candidates, so this can
+  // never surface another client's data.
+  function openCandidates() {
+    setCandPop(true);
+    setCandFilter(null);
+    if (!candList) {
+      axios.get(`/api/candidates-recent?company=${companyId}&limit=200`)
+        .then((r) => setCandList(r.data?.results || []))
+        .catch(() => setCandList([]));
+    }
+  }
+  const LANE = {
+    green: { label: "Strong", c: D.green, bg: D.greenBg, border: D.greenBorder },
+    amber: { label: "Review", c: D.amber, bg: D.amberBg, border: D.amberBorder },
+    red: { label: "Likely no", c: D.red, bg: D.redBg, border: D.redBorder },
+  };
+  const REC = {
+    HIRE: { label: "Hire", c: D.green, bg: D.greenBg, border: D.greenBorder },
+    HOLD: { label: "Hold", c: D.amber, bg: D.amberBg, border: D.amberBorder },
+    REJECT: { label: "Reject", c: D.red, bg: D.redBg, border: D.redBorder },
+  };
+  const CAND_FILTERS = [
+    { k: null, label: "All" },
+    { k: "green", label: "Strong fit" },
+    { k: "amber", label: "Review" },
+    { k: "red", label: "Likely no" },
+    { k: "HIRE", label: "Hire" },
+    { k: "HOLD", label: "Hold" },
+    { k: "REJECT", label: "Reject" },
+    { k: "no_assessment", label: "No assessment" },
+    { k: "dealbreaker", label: "Dealbreaker" },
+    { k: "missing_must_have", label: "Missing a must-have" },
+  ];
+  const candFiltered = (candList || []).filter((c) => {
+    if (!candFilter) return true;
+    if (["green", "amber", "red"].includes(candFilter)) return c.lane === candFilter;
+    if (["HIRE", "HOLD", "REJECT"].includes(candFilter)) return c.recommendation === candFilter;
+    if (candFilter === "no_assessment") return !c.ocean_completed;
+    if (candFilter === "dealbreaker") return c.dealbreaker;
+    if (candFilter === "missing_must_have") return c.missing_must_haves > 0;
+    return true;
+  });
 
   async function deleteJob(e, j, applicantCount) {
     e.stopPropagation();
@@ -69,7 +116,12 @@ export default function JobSelector() {
             <p style={{ fontSize: 15, color: D.text3, margin: 0 }}>{company ? `${company.industry} · ${(shown || []).length} open role${(shown || []).length === 1 ? "" : "s"}` : "Open a role to review applicants, or create a new one."}</p>
           </div>
         </div>
-        <button onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create role</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {companyId && (
+            <button onClick={openCandidates} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: D.cardBg, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>👥 View all candidates</button>
+          )}
+          <button onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create role</button>
+        </div>
       </div>
 
       {/* summary stat cards (workspace-wide; hidden inside a single company) */}
@@ -153,6 +205,74 @@ export default function JobSelector() {
           </div>
         )}
       </div>
+
+      {/* Cross-role candidate view — every candidate across this company's roles,
+          filterable by fit lane, HR recommendation, assessment status, and risk
+          flags. Scoped to companyId server-side, so it can never leak another
+          client's candidates. */}
+      {candPop && (
+        <div onClick={() => setCandPop(false)} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(3px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "5vh 16px", overflowY: "auto" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 1040, background: D.page, border: `0.5px solid ${D.border}`, borderRadius: 20, boxShadow: "0 30px 80px rgba(0,0,0,.5)", overflow: "hidden" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "18px 22px", borderBottom: `0.5px solid ${D.border}`, background: D.cardBg }}>
+              <span style={{ width: 4, height: 22, borderRadius: 3, background: D.amber }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 17, fontWeight: 800, letterSpacing: "-.3px", color: D.text }}>All candidates{company ? ` · ${company.name}` : ""}</div>
+                <div style={{ fontSize: 12.5, color: D.text4, marginTop: 1 }}>{candList ? `${candFiltered.length} shown across this company's roles` : "Loading…"}</div>
+              </div>
+              <button onClick={() => setCandPop(false)} style={{ fontSize: 22, color: D.text4, background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ padding: 22 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+                {CAND_FILTERS.map((f) => (
+                  <span key={String(f.k)} onClick={() => setCandFilter(f.k)} style={{ fontSize: 12.5, fontWeight: 600, padding: "7px 13px", borderRadius: 999, cursor: "pointer", color: candFilter === f.k ? "#fff" : D.text2, background: candFilter === f.k ? D.blue : D.inset, border: `0.5px solid ${candFilter === f.k ? D.blue : D.border}` }}>{f.label}</span>
+                ))}
+              </div>
+              {candList === null ? (
+                <div style={{ fontSize: 13, color: D.text4, padding: "26px 4px", textAlign: "center" }}>Loading…</div>
+              ) : candFiltered.length === 0 ? (
+                <div style={{ fontSize: 13, color: D.text4, padding: "26px 4px", textAlign: "center" }}>No candidates match this filter.</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div className="hidden md:grid" style={{ gridTemplateColumns: "1.6fr 70px 110px 110px 1fr 90px", gap: 12, padding: "10px 4px", fontSize: 10.5, fontWeight: 600, color: D.text5 }}>
+                    <div>Candidate</div><div>AI score</div><div>Lane</div><div>Rec.</div><div>Role</div><div>Action</div>
+                  </div>
+                  {candFiltered.map((c, i) => {
+                    const lane = LANE[c.lane] || null;
+                    const rec = REC[c.recommendation] || null;
+                    return (
+                      <div key={c.candidate_id} className="grid items-center md:!grid-cols-[1.6fr_70px_110px_110px_1fr_90px]" style={{ gridTemplateColumns: "1fr auto", gap: 12, padding: "12px 4px", borderTop: `0.5px solid ${D.hair}` }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                          <span style={{ width: 30, height: 30, borderRadius: "50%", background: avColor(c.name), color: "#fff", fontSize: 10.5, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{c.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}</span>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: D.text }}>
+                              {c.name}
+                              {c.dealbreaker && <span style={{ fontSize: 10, fontWeight: 700, color: D.red, background: D.redBg, border: `0.5px solid ${D.redBorder}`, padding: "1px 6px", borderRadius: 20, marginLeft: 8 }}>dealbreaker</span>}
+                              {c.missing_must_haves > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: D.amber, background: D.amberBg, border: `0.5px solid ${D.amberBorder}`, padding: "1px 6px", borderRadius: 20, marginLeft: 6 }}>missing must-have</span>}
+                            </div>
+                            <div style={{ fontSize: 11, color: D.text4 }}>
+                              {c.experience_years != null ? `${c.experience_years} yrs` : "—"}{c.location ? ` · ${c.location}` : ""}
+                              {!c.ocean_completed && <span style={{ color: D.text5 }}> · no assessment</span>}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="hidden md:block" style={{ fontSize: 14, fontWeight: 700, color: lane ? lane.c : D.text4 }}>{c.score ?? "—"}</div>
+                        <div className="hidden md:block">
+                          {lane && <span style={{ fontSize: 11, fontWeight: 600, color: lane.c, background: lane.bg, border: `0.5px solid ${lane.border}`, padding: "4px 10px", borderRadius: 999 }}>{lane.label}</span>}
+                        </div>
+                        <div className="hidden md:block">
+                          {rec && <span style={{ fontSize: 11, fontWeight: 600, color: rec.c, background: rec.bg, border: `0.5px solid ${rec.border}`, padding: "4px 10px", borderRadius: 999 }}>{rec.label}</span>}
+                        </div>
+                        <div className="hidden md:block" style={{ fontSize: 12.5, color: D.text2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.role_title}</div>
+                        <button onClick={() => navigate(`/jobs/${c.job_id}/candidate/${c.candidate_id}`)} style={{ fontSize: 12, fontWeight: 700, background: D.text, color: D.page, border: "none", borderRadius: 999, padding: "7px 15px", cursor: "pointer", justifySelf: "start" }}>Open</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
