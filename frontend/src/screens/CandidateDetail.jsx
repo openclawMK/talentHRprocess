@@ -83,6 +83,7 @@ export default function CandidateDetail() {
   const [oceanResult, setOceanResult] = useState(null);
   const [copied, setCopied] = useState(false);
   const [checks, setChecks] = useState({});
+  const [verdictSaving, setVerdictSaving] = useState(false);
 
   useEffect(() => {
     axios.get(`/api/candidates/${jobId}/${candidateId}`).then((r) => setCandidate(r.data)).catch(() => setCandidate(false));
@@ -158,6 +159,13 @@ export default function CandidateDetail() {
     setRegenLoading(true);
     try { setCandidate((await axios.post(`/api/candidates/${jobId}/${candidateId}/regenerate-recommendation`)).data); }
     catch { /* ignore */ } finally { setRegenLoading(false); }
+  }
+  async function saveVerdict(verdict) {
+    setVerdictSaving(true);
+    try {
+      const res = await axios.post(`/api/candidates/${jobId}/${candidateId}/hr-verdict`, { verdict });
+      setCandidate((prev) => ({ ...prev, hr_verdict: res.data.hr_verdict }));
+    } catch { /* ignore */ } finally { setVerdictSaving(false); }
   }
   async function saveNote() {
     if (!note.trim()) return;
@@ -303,6 +311,19 @@ export default function CandidateDetail() {
                     <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Confidence</div>
                     <div style={{ fontSize: 20, fontWeight: 800, color: "#111827" }}>{rec.confidence}</div>
                     <div style={{ fontSize: 12, color: "#9AA0AE" }}>{CONF_PCT[rec.confidence] ?? 60}% certainty</div>
+                  </div>
+                </div>
+                <div style={{ background: "rgba(255,255,255,.7)", borderRadius: 12, padding: "12px 16px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }} className="flex-wrap">
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                    Your verdict{candidate.hr_verdict && <span style={{ fontWeight: 500, textTransform: "none", letterSpacing: 0, opacity: 0.8 }}> · saved {new Date(candidate.hr_verdict.at).toLocaleDateString("en-MY", { day: "numeric", month: "short" })}</span>}
+                  </span>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[["no", "No"], ["yes", "Yes"], ["definitely", "Definitely"]].map(([v, label]) => {
+                      const active = candidate.hr_verdict?.verdict === v;
+                      return (
+                        <span key={v} onClick={() => !verdictSaving && saveVerdict(v)} style={{ fontSize: 12.5, fontWeight: 700, padding: "6px 14px", borderRadius: 999, cursor: verdictSaving ? "default" : "pointer", color: active ? "#fff" : "#4B5563", background: active ? r.color : "#fff", border: `1px solid ${active ? r.color : "#DDE0E9"}`, opacity: verdictSaving ? 0.6 : 1 }}>{label}</span>
+                      );
+                    })}
                   </div>
                 </div>
                 {(rec.reasons || []).length > 0 && (

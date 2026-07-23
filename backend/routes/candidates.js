@@ -1006,4 +1006,34 @@ router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
   }
 });
 
+/**
+ * POST /api/candidates/:jobId/:candidateId/hr-verdict
+ * One-tap human verdict (no / yes / definitely) sitting beside the AI
+ * recommendation. Single-row patch on `extra` — no full-table write, so it
+ * stays a true one-tap action. Also snapshots the AI recommendation at the
+ * moment of the tap, so agreement/override rate can be measured later
+ * without re-deriving history from the recommendation's current value.
+ */
+router.post("/candidates/:jobId/:candidateId/hr-verdict", async (req, res) => {
+  try {
+    const { verdict } = req.body;
+    if (!["no", "yes", "definitely"].includes(verdict)) return res.status(400).json({ error: "Invalid verdict." });
+
+    const candidate = await findCandidate(req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+
+    const hr_verdict = {
+      verdict,
+      ai_recommendation: candidate.recommendation?.recommendation || null,
+      by: req.user?.name || "HR",
+      at: new Date().toISOString(),
+    };
+    await patchCandidateExtra(candidate.candidate_id, { hr_verdict });
+    res.json({ hr_verdict });
+  } catch (err) {
+    console.error("hr-verdict error:", err);
+    res.status(500).json({ error: "Failed to save your verdict." });
+  }
+});
+
 export default router;
