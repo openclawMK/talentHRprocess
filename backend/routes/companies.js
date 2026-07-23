@@ -7,7 +7,7 @@
  */
 import { Router } from "express";
 import { v4 as uuidv4 } from "uuid";
-import { readTable, insertRow, deleteRow, writeTable } from "../services/store.js";
+import { readTable, insertRow, deleteRow, writeTable, readAuditLog } from "../services/store.js";
 import { createUser } from "../services/authService.js";
 import { createApiKey, listApiKeys, deleteApiKey } from "../services/apiKeyService.js";
 import { guardCompanyParam } from "../middleware/companyScope.js";
@@ -187,6 +187,24 @@ router.delete("/companies/:companyId/api-keys/:keyId", async (req, res) => {
   } catch (err) {
     console.error("delete api key error:", err);
     res.status(500).json({ error: "Failed to delete the API key." });
+  }
+});
+
+// GET /api/audit-log?limit= — PeopleQuest staff see everything (optionally
+// filtered by ?company=); a Level 1 user is force-scoped to their own
+// company regardless of any query param, same defense-in-depth as the
+// analytics/candidates-recent endpoints.
+router.get("/audit-log", async (req, res) => {
+  try {
+    const companyFilter = req.user?.company_id || req.query.company || null;
+    if (req.user?.company_id && req.user?.management_level !== 1) {
+      return res.status(403).json({ error: "Only a Level 1 user can view the activity log." });
+    }
+    const limit = Math.min(500, Math.max(1, Number(req.query.limit) || 100));
+    res.json(await readAuditLog(companyFilter, limit));
+  } catch (err) {
+    console.error("read audit log error:", err);
+    res.status(500).json({ error: "Failed to load the activity log." });
   }
 });
 

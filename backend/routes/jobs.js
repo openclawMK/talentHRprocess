@@ -20,6 +20,9 @@ import { rescoreJobCandidates } from "../services/rescoring.js";
 import { computeSuccessFit } from "../services/successFit.js";
 import { guardJobParam } from "../middleware/companyScope.js";
 import { createJobFromParams, weightsValid } from "../services/jobCreation.js";
+import { resolvePermissions, canSeeJob, canEditJob } from "../services/permissions.js";
+import { requirePermission, requireLevel1, requireEditJob } from "../middleware/requirePermission.js";
+import { logAction } from "../services/auditLog.js";
 
 const router = Router();
 guardJobParam(router);
@@ -41,8 +44,17 @@ router.get("/jobs", async (req, res) => {
   try {
     let jobs = await readTable("jobs");
     if (req.user?.company_id) jobs = jobs.filter((j) => j.company?.id === req.user.company_id);
+    // Archived jobs are soft-removed — hide them from the normal list
+    // unless explicitly asked for (?archived=true), same idea as most
+    // "trash" views.
+    if (req.query.archived !== "true") jobs = jobs.filter((j) => !j.archived);
+    if (req.user?.company_id) {
+      const permissions = await resolvePermissions(req.user);
+      jobs = jobs.filter((j) => canSeeJob(req.user, permissions, j));
+    }
     res.json(jobs);
-  } catch {
+  } catch (err) {
+    console.error("list jobs error:", err);
     res.status(500).json({ error: "Failed to load jobs." });
   }
 });
@@ -662,7 +674,7 @@ router.get("/jobs/:jobId/pipeline", async (req, res) => {
 });
 
 // PATCH /api/jobs/:jobId/pipeline — toggle optional stages, recompute candidate scores
-router.patch("/jobs/:jobId/pipeline", async (req, res) => {
+router.patch("/jobs/:jobId/pipeline", requireEditJob, async (req, res) => {
   try {
     const { stages } = req.body; // { ocean_assessment: bool, interview: bool }
     const jobs = await readTable("jobs");
@@ -818,7 +830,7 @@ router.get("/jobs/:jobId/criteria", async (req, res) => {
 });
 
 // PATCH /api/jobs/:jobId/criteria — replace a job's criteria
-router.patch("/jobs/:jobId/criteria", async (req, res) => {
+router.patch("/jobs/:jobId/criteria", requireEditJob, async (req, res) => {
   try {
     const { criteria } = req.body;
     if (!Array.isArray(criteria) || criteria.length === 0)
@@ -857,7 +869,7 @@ router.patch("/jobs/:jobId/criteria", async (req, res) => {
 //                         and its criteria never quietly drift apart.
 // Re-scores every already-scored candidate for this role afterward — recombining their
 // EXISTING sub-scores at the new weights, never re-interviewing anyone.
-router.patch("/jobs/:jobId/scoring-weights", async (req, res) => {
+router.patch("/jobs/:jobId/scoring-weights", requireEditJob, async (req, res) => {
   try {
     const { score_weights, motivation, interview_weights } = req.body || {};
     const jobs = await readTable("jobs");
@@ -944,7 +956,7 @@ router.patch("/jobs/:jobId/scoring-weights", async (req, res) => {
 // consent are never configurable — they're structurally required to create a candidate at all.
 const APPLICATION_FORM_FIELDS = ["phone", "expected_salary", "cover_letter"];
 const APPLICATION_FORM_MODES = ["mandatory", "optional", "off"];
-router.patch("/jobs/:jobId/application-form", async (req, res) => {
+router.patch("/jobs/:jobId/application-form", requireEditJob, async (req, res) => {
   try {
     const jobs = await readTable("jobs");
     const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
@@ -970,12 +982,14 @@ router.patch("/jobs/:jobId/application-form", async (req, res) => {
 });
 
 // POST /api/jobs — create a new role (with AI or supplied criteria)
-router.post("/jobs", async (req, res) => {
+router.post("/jobs", requirePermission("create_job"), async (req, res) => {
   try {
     // A client login can only ever create roles under their own company —
     // scoped from the verified JWT, never the request body.
-    const result = await createJobFromParams(req.body, req.user?.company_id);
+    const createdBy = req.user?.company_id ? req.user.id : null;
+    const result = await createJobFromParams(req.body, req.user?.company_id, createdBy);
     if (result.error) return res.status(result.status || 400).json({ error: result.error });
+    await logAction(req, { action: "job.created", target_type: "job", target_id: result.job.job_id, after: { role_title: result.job.role_title } });
     res.status(201).json(result.job);
   } catch (err) {
     console.error("create job error:", err);
@@ -983,15 +997,52 @@ router.post("/jobs", async (req, res) => {
   }
 });
 
-// DELETE /api/jobs/:jobId — removes the role. The DB cascades this to its
+// POST /api/jobs/:jobId/archive — soft-removes the role. Level 1 (or staff)
+// only; Level 2 can never archive, per spec. Candidates/interviews/comments
+// stay fully intact — it just drops out of the normal role list.
+router.post("/jobs/:jobId/archive", requireLevel1, async (req, res) => {
+  try {
+    const jobs = await readTable("jobs");
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+    jobs[idx] = { ...jobs[idx], archived: true, archived_at: new Date().toISOString() };
+    await writeTable("jobs", jobs);
+    await logAction(req, { action: "job.archived", target_type: "job", target_id: req.params.jobId });
+    res.json({ ok: true, job_id: req.params.jobId });
+  } catch (err) {
+    console.error("archive job error:", err);
+    res.status(500).json({ error: "Failed to archive the role." });
+  }
+});
+
+// POST /api/jobs/:jobId/unarchive — reverses an archive.
+router.post("/jobs/:jobId/unarchive", requireLevel1, async (req, res) => {
+  try {
+    const jobs = await readTable("jobs");
+    const idx = jobs.findIndex((j) => j.job_id === req.params.jobId);
+    if (idx === -1) return res.status(404).json({ error: "Job not found." });
+    jobs[idx] = { ...jobs[idx], archived: false, archived_at: null };
+    await writeTable("jobs", jobs);
+    await logAction(req, { action: "job.unarchived", target_type: "job", target_id: req.params.jobId });
+    res.json({ ok: true, job_id: req.params.jobId });
+  } catch (err) {
+    console.error("unarchive job error:", err);
+    res.status(500).json({ error: "Failed to restore the role." });
+  }
+});
+
+// DELETE /api/jobs/:jobId — PERMANENT removal. The DB cascades this to its
 // candidates and their scores automatically (foreign keys ON DELETE CASCADE).
-router.delete("/jobs/:jobId", async (req, res) => {
+// Level 1 (or staff) only — Level 2 can never permanently delete, per spec.
+// Archiving is the reversible default; this is a one-way door.
+router.delete("/jobs/:jobId", requireLevel1, async (req, res) => {
   try {
     const { jobId } = req.params;
     const job = (await readTable("jobs")).find((j) => j.job_id === jobId);
     if (!job) return res.status(404).json({ error: "Job not found." });
 
     await deleteRow("jobs", jobId);
+    await logAction(req, { action: "job.deleted", target_type: "job", target_id: jobId, before: { role_title: job.role_title } });
     res.json({ ok: true, job_id: jobId });
   } catch (err) {
     console.error("delete job error:", err);

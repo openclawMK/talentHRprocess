@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import {
-  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet, Sun, Moon, Settings as SettingsIcon,
+  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet, Sun, Moon, Settings as SettingsIcon, Users,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
@@ -15,19 +15,27 @@ const NAV = [
   { to: "/jobs/new", label: "Create", fullLabel: "Create job", icon: Plus, match: (p) => p === "/jobs/new" },
   { to: "/salary-center", label: "Salary", fullLabel: "Salary Center", icon: Wallet, match: (p) => p.startsWith("/salary-center") },
   { to: "/settings", label: "Settings", fullLabel: "Settings", icon: SettingsIcon, match: (p) => p.startsWith("/settings") },
+  { to: "/team", label: "Team", fullLabel: "Team", icon: Users, match: (p) => p.startsWith("/team") },
 ];
 
 export default function WorkspaceLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, permissions, isLevel1, logout } = useAuth();
   const { theme, palette: D, toggle: toggleTheme } = useTheme();
   // A client login only manages its own company's roles — role/CV creation
   // and the cross-company "Companies" list don't apply to them; they land
   // straight on their own company's roles page instead.
   const isPlatformAdmin = user?.role === "admin" && !user?.company_id;
+  const isCompanyLevel1 = !!user?.company_id && isLevel1;
   const navItems = NAV
-    .filter((item) => isPlatformAdmin || !["/upload", "/jobs/new", "/settings"].includes(item.to))
+    .filter((item) => {
+      if (item.to === "/upload") return isPlatformAdmin;
+      if (item.to === "/jobs/new") return isPlatformAdmin || permissions?.create_job;
+      if (item.to === "/settings") return isPlatformAdmin;
+      if (item.to === "/team") return isCompanyLevel1;
+      return true;
+    })
     .map((item) => (item.to === "/companies" && !isPlatformAdmin && user?.company_id
       ? { ...item, to: `/companies/${user.company_id}`, label: "Firm", fullLabel: "My Company" }
       : item));

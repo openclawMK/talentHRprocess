@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { usePalette } from "../context/ThemeContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
 const ACCENTS = [
@@ -18,6 +19,9 @@ export default function JobSelector() {
   const navigate = useNavigate();
   const { companyId } = useParams();
   const D = usePalette();
+  const { user, permissions, isLevel1 } = useAuth();
+  const canCreateJob = !user?.company_id || permissions?.create_job;
+  const canArchiveJob = !user?.company_id || isLevel1; // Level 2 can never archive/delete, per spec
   const avgColor = (v) => (v >= 70 ? D.green : v >= 40 ? D.amber : D.red);
   const [jobs, setJobs] = useState(null);
   const [a, setA] = useState(null);
@@ -76,15 +80,17 @@ export default function JobSelector() {
     return true;
   });
 
-  async function deleteJob(e, j, applicantCount) {
+  // Archives (never permanently deletes) — the safe, reversible default.
+  // Candidates/interviews/comments stay fully intact; it just drops off this
+  // list. Level 1 (or staff) only — Level 2 never sees this button at all.
+  async function archiveJob(e, j) {
     e.stopPropagation();
-    const warn = applicantCount > 0 ? `This role has ${applicantCount} candidate${applicantCount === 1 ? "" : "s"} — deleting it will also delete them and their scores. ` : "";
-    if (!window.confirm(`${warn}Delete ${j.role_title}? This can't be undone.`)) return;
+    if (!window.confirm(`Archive ${j.role_title}? It'll drop off this list — nothing is deleted, and it can be restored later.`)) return;
     try {
-      await axios.delete(`/api/jobs/${j.job_id}`);
+      await axios.post(`/api/jobs/${j.job_id}/archive`);
       setJobs((js) => js.filter((x) => x.job_id !== j.job_id));
     } catch (err) {
-      window.alert(err?.response?.data?.error || "Couldn't delete this role.");
+      window.alert(err?.response?.data?.error || "Couldn't archive this role.");
     }
   }
 
@@ -119,7 +125,9 @@ export default function JobSelector() {
           {companyId && (
             <button onClick={openCandidates} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: D.cardBg, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>👥 View all candidates</button>
           )}
-          <button onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create role</button>
+          {canCreateJob && (
+            <button onClick={() => navigate(companyId ? `/jobs/new?company=${companyId}` : "/jobs/new")} style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 18px", background: GRAD, color: "#fff", border: "none", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer", boxShadow: "0 8px 20px rgba(99,102,241,.28)" }}>＋ Create role</button>
+          )}
         </div>
       </div>
 
@@ -146,13 +154,13 @@ export default function JobSelector() {
               return (
                 <div key={j.job_id} onClick={() => navigate(`/jobs/${j.job_id}/dashboard`)} style={{ position: "relative", background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 18, cursor: "pointer", overflow: "hidden" }} className="transition-all hover:-translate-y-0.5 hover:shadow-lg group">
                   <div style={{ height: 4, background: acc.color }} />
-                  <button
-                    onClick={(e) => deleteJob(e, j, r.applicants)}
-                    title="Delete role"
+                  {canArchiveJob && <button
+                    onClick={(e) => archiveJob(e, j)}
+                    title="Archive role"
                     style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, borderRadius: 8, background: D.cardBg, border: `0.5px solid ${D.border}`, color: D.text4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, cursor: "pointer", transition: "color .15s, border-color .15s", zIndex: 1 }}
                     onMouseEnter={(e) => { e.currentTarget.style.color = D.red; e.currentTarget.style.borderColor = D.red; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = D.text4; e.currentTarget.style.borderColor = D.border; }}
-                  >✕</button>
+                  >✕</button>}
                   <div style={{ padding: "22px 24px 24px" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 20 }}>
                       <div style={{ width: 46, height: 46, borderRadius: 13, background: acc.bg, color: acc.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, flexShrink: 0 }}>{mono}</div>

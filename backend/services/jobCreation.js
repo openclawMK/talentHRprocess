@@ -34,9 +34,11 @@ function nextJobId(jobs) {
  * @param {string|null} companyIdOverride - forces the role's company, ignoring
  *   body.company_id — pass req.user.company_id so a client login/API key can
  *   never create a role under a company that isn't their own.
+ * @param {string|null} createdBy - the user id who created it, if any — drives
+ *   a Level 2 user's default "jobs they created" visibility/edit rights.
  * @returns {Promise<{job:object}|{error:string, status:number}>}
  */
-export async function createJobFromParams(body, companyIdOverride) {
+export async function createJobFromParams(body, companyIdOverride, createdBy = null) {
   const {
     role_title,
     industry,
@@ -105,6 +107,9 @@ export async function createJobFromParams(body, companyIdOverride) {
     role_level,
     criteria_generated_by: suppliedCriteria ? "edited" : "ai",
     criteria_locked: false,
+    created_by: createdBy,
+    assigned_users: [],
+    archived: false,
   };
 
   // Auto-generate the Success Profile so a new role is immediately scoreable —

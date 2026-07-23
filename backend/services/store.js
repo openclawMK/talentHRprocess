@@ -64,6 +64,10 @@ function jobToApi(r, companiesById) {
     pipeline_stages: r.pipeline_stages,
     interview_slots: r.interview_slots,
     application_form: r.application_form,
+    archived: !!r.archived,
+    archived_at: r.archived_at,
+    created_by: r.created_by,
+    assigned_users: r.assigned_users || [],
   };
 }
 function jobToRow(o) {
@@ -89,6 +93,10 @@ function jobToRow(o) {
     pipeline_stages: o.pipeline_stages ?? null,
     interview_slots: o.interview_slots ?? null,
     application_form: o.application_form ?? null,
+    archived: !!o.archived,
+    archived_at: o.archived_at ?? null,
+    created_by: o.created_by ?? null,
+    assigned_users: o.assigned_users ?? [],
   };
 }
 
@@ -151,11 +159,14 @@ function candidateToRow(o) {
 // candidateToApi reads `r.extra` back and spreads it — but `r` from Supabase
 // has a real `extra` jsonb column, so this round-trips transparently.
 
-const userToApi = (r) => ({ id: r.id, name: r.name, email: r.email, password_hash: r.password_hash, role: r.role, company_id: r.company_id ?? null, created_at: r.created_at });
-const userToRow = (o) => ({ id: o.id, name: o.name, email: o.email, password_hash: o.password_hash, role: o.role, company_id: o.company_id ?? null, created_at: o.created_at });
+const userToApi = (r) => ({ id: r.id, name: r.name, email: r.email, password_hash: r.password_hash, role: r.role, company_id: r.company_id ?? null, management_level: r.management_level ?? null, created_at: r.created_at });
+const userToRow = (o) => ({ id: o.id, name: o.name, email: o.email, password_hash: o.password_hash, role: o.role, company_id: o.company_id ?? null, management_level: o.management_level ?? null, created_at: o.created_at });
 
 const apiKeyToApi = (r) => ({ id: r.id, company_id: r.company_id, name: r.name, key_prefix: r.key_prefix, key_hash: r.key_hash, created_at: r.created_at });
 const apiKeyToRow = (o) => ({ id: o.id, company_id: o.company_id, name: o.name, key_prefix: o.key_prefix, key_hash: o.key_hash, created_at: o.created_at });
+
+const companyPermissionsToApi = (r) => ({ company_id: r.company_id, level2_permissions: r.level2_permissions || {}, updated_at: r.updated_at });
+const companyPermissionsToRow = (o) => ({ company_id: o.company_id, level2_permissions: o.level2_permissions || {}, updated_at: o.updated_at || new Date().toISOString() });
 
 const TABLES = {
   companies: { key: "id", toApi: companyToApi, toRow: companyToRow },
@@ -163,6 +174,7 @@ const TABLES = {
   candidates: { key: "candidate_id", toApi: candidateToApi, toRow: candidateToRow },
   users: { key: "id", toApi: userToApi, toRow: userToRow },
   api_keys: { key: "id", toApi: apiKeyToApi, toRow: apiKeyToRow },
+  company_permissions: { key: "company_id", toApi: companyPermissionsToApi, toRow: companyPermissionsToRow },
 };
 
 export async function readTable(name) {
@@ -267,6 +279,28 @@ export async function readWhatsappLog() {
 
 export async function appendWhatsappLog(entry) {
   await appendRow("whatsapp_log", { payload: entry, created_at: entry.timestamp || new Date().toISOString() });
+}
+
+export async function appendAuditLog(entry) {
+  await appendRow("audit_log", {
+    company_id: entry.company_id ?? null,
+    user_id: entry.user_id ?? null,
+    user_name: entry.user_name ?? null,
+    action: entry.action,
+    target_type: entry.target_type ?? null,
+    target_id: entry.target_id ?? null,
+    before: entry.before ?? null,
+    after: entry.after ?? null,
+  });
+}
+
+/** Most recent first. companyId filters to one company; omit for PeopleQuest staff's full view. */
+export async function readAuditLog(companyId, limit = 100) {
+  let query = supabase.from("audit_log").select("*").order("created_at", { ascending: false }).limit(limit);
+  if (companyId) query = query.eq("company_id", companyId);
+  const { data, error } = await query;
+  if (error) throw new Error(`readAuditLog: ${error.message}`);
+  return data;
 }
 
 export async function appendWhatsappReply(entry) {

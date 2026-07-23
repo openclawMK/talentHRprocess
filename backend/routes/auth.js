@@ -4,6 +4,7 @@
 import { Router } from "express";
 import { login } from "../services/authService.js";
 import { authenticateHR } from "../middleware/auth.js";
+import { resolvePermissions } from "../services/permissions.js";
 
 const router = Router();
 
@@ -20,6 +21,9 @@ router.post("/login", async (req, res) => {
 router.post("/logout", (req, res) => res.json({ ok: true }));
 
 // GET /api/auth/me — protected
-router.get("/me", authenticateHR, (req, res) => res.json({ user: req.user }));
+router.get("/me", authenticateHR, async (req, res) => {
+  const permissions = await resolvePermissions(req.user);
+  res.json({ user: req.user, permissions });
+});
 
 export default router;

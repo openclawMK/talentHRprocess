@@ -14,7 +14,9 @@ export async function authenticateApiKey(req, res, next) {
   try {
     const match = await findApiKeyMatch(key);
     if (!match) return res.status(401).json({ error: "Invalid API key." });
-    req.user = { company_id: match.company_id, role: "client", api_key_id: match.id };
+    // Full Level 1 authority for its own company — an API key represents
+    // the company's own trusted system, not a permission-restricted seat.
+    req.user = { company_id: match.company_id, role: "client", management_level: 1, api_key_id: match.id };
     next();
   } catch (err) {
     console.error("api key auth error:", err);

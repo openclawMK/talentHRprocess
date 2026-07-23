@@ -23,6 +23,8 @@ import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/wh
 import { chatJSON, chatText } from "../services/aiClient.js";
 import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra } from "../services/store.js";
 import { guardJobParam, assertJobInScope } from "../middleware/companyScope.js";
+import { requireCandidateAccess } from "../middleware/requirePermission.js";
+import { logAction } from "../services/auditLog.js";
 
 const router = Router();
 guardJobParam(router);
@@ -35,6 +37,16 @@ const DEMO_PATH = path.join(DATA_DIR, "demo-candidates.json");
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
 const today = () => new Date().toISOString().slice(0, 10);
 const findJob = async (jobId) => (await readTable("jobs")).find((j) => j.job_id === jobId);
+
+// Hides direct contact details from a candidate payload for a Level 2 user
+// without view_contact_info — everything else (score, CV content, notes)
+// stays visible; this is specifically about phone/email/address.
+function stripContact(candidate) {
+  if (!candidate?.profile?.contact) return candidate;
+  const { name, ...restContact } = candidate.profile.contact;
+  const hidden = Object.fromEntries(Object.keys(restContact).map((k) => [k, null]));
+  return { ...candidate, profile: { ...candidate.profile, contact: { name, ...hidden } } };
+}
 
 // Read-only lookup across live candidates + demo fallback data.
 async function findCandidate(candidateId) {
@@ -451,14 +463,15 @@ router.get("/demo-candidates", (req, res) => {
 /**
  * GET /api/candidates/:jobId — all candidates for a role, sorted by combined score.
  */
-router.get("/candidates/:jobId", async (req, res) => {
+router.get("/candidates/:jobId", requireCandidateAccess(), async (req, res) => {
   try {
-    const list = (await readTable("candidates"))
+    let list = (await readTable("candidates"))
       .filter((c) => c.job_id === req.params.jobId)
       .sort(
         (x, y) =>
           (y.score?.combined_score ?? -1) - (x.score?.combined_score ?? -1)
       );
+    if (!req.permissions.view_contact_info) list = list.map(stripContact);
     res.json(list);
   } catch (err) {
     res.status(500).json({ error: "Failed to load candidates." });
@@ -620,7 +633,7 @@ router.post("/candidates/:jobId/:candidateId/send-ocean-test", async (req, res) 
  * POST /api/candidates/:jobId/:candidateId/outcome  { outcome: "offer" | "rejected" }
  * Records the outcome and sends the candidate the matching WhatsApp message.
  */
-router.post("/candidates/:jobId/:candidateId/outcome", async (req, res) => {
+router.post("/candidates/:jobId/:candidateId/outcome", requireCandidateAccess("approve_reject_cv"), async (req, res) => {
   try {
     const { outcome } = req.body;
     if (!["offer", "rejected"].includes(outcome))
@@ -636,6 +649,7 @@ router.post("/candidates/:jobId/:candidateId/outcome", async (req, res) => {
     cand.outcome = outcome;
     cand.outcome_date = today();
     await writeTable("candidates", candidates);
+    await logAction(req, { action: "candidate.final_decision", target_type: "candidate", target_id: cand.candidate_id, after: { outcome, role_title: job.role_title } });
 
     const template = outcome === "offer" ? "outcome_successful" : "outcome_unsuccessful";
     const result = await notify(cand.profile?.contact?.phone, template, {
@@ -657,7 +671,7 @@ router.post("/candidates/:jobId/:candidateId/outcome", async (req, res) => {
  * and reports a per-candidate result so a bad phone number on one candidate
  * doesn't block the rest.
  */
-router.post("/candidates/:jobId/bulk-outcome", async (req, res) => {
+router.post("/candidates/:jobId/bulk-outcome", requireCandidateAccess("approve_reject_cv"), async (req, res) => {
   try {
     const { candidate_ids, outcome } = req.body;
     if (!["offer", "rejected"].includes(outcome))
@@ -747,10 +761,11 @@ router.get("/candidates/:jobId/:candidateId/success-fit", async (req, res) => {
 /**
  * GET /api/candidates/:jobId/:candidateId — single candidate with score.
  */
-router.get("/candidates/:jobId/:candidateId", async (req, res) => {
+router.get("/candidates/:jobId/:candidateId", requireCandidateAccess("review_cv"), async (req, res) => {
   try {
-    const candidate = await findCandidate(req.params.candidateId);
+    let candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
+    if (!req.permissions.view_contact_info) candidate = stripContact(candidate);
     const job = await findJob(req.params.jobId);
     let market = null;
     if (job) {
@@ -998,10 +1013,13 @@ router.post("/candidates/:jobId/:candidateId/final-analysis", async (req, res) =
  * the AI judges whether the note raises a serious concern; if so it can hold
  * back an automatic HIRE (never auto-reject on unverified free text).
  */
-router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
+router.post("/candidates/:jobId/:candidateId/hr-notes", requireCandidateAccess("add_comment"), async (req, res) => {
   try {
-    const { notes } = req.body;
+    const { notes, recommendation } = req.body;
     if (!notes?.trim()) return res.status(400).json({ error: "Missing notes." });
+    if (recommendation && !["approve", "reject", "hold"].includes(recommendation)) {
+      return res.status(400).json({ error: "recommendation must be 'approve', 'reject' or 'hold'." });
+    }
 
     const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
@@ -1009,10 +1027,11 @@ router.post("/candidates/:jobId/:candidateId/hr-notes", async (req, res) => {
     const job = await findJob(req.params.jobId);
     if (!job) return res.status(400).json({ error: "Unknown job." });
 
-    const result = await applyHrNotes(candidates[idx], notes.trim());
+    const result = await applyHrNotes(candidates[idx], notes.trim(), { by: req.user?.name, by_id: req.user?.id, recommendation });
     try { candidates[idx].recommendation = await generateRecommendation(candidates[idx], job); }
     catch (e) { console.error("recommendation refresh failed:", e.message); }
     await writeTable("candidates", candidates);
+    await logAction(req, { action: "candidate.comment_added", target_type: "candidate", target_id: candidates[idx].candidate_id, after: { recommendation: recommendation || null } });
     res.json({ candidate: candidates[idx], saved: result.saved, date: result.date, recommendation: candidates[idx].recommendation });
   } catch (err) {
     console.error("hr-notes error:", err);

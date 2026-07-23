@@ -32,7 +32,11 @@ create table if not exists jobs (
   score_weights jsonb,
   pipeline_stages jsonb,
   interview_slots jsonb,
-  application_form jsonb
+  application_form jsonb,
+  archived boolean default false,  -- soft-removed, not deleted — candidates/interviews/comments stay intact
+  archived_at timestamptz,
+  created_by text references users(id), -- the Level 2 user who created it, if any; drives "jobs they created" default visibility
+  assigned_users jsonb default '[]'::jsonb -- extra Level 2 user ids a Level 1 user explicitly gave visibility into this role
 );
 
 create table if not exists candidates (
@@ -62,8 +66,36 @@ create table if not exists users (
   password_hash text not null,
   role text,
   company_id text references companies(id), -- set = client login scoped to that company only; null = PeopleQuest staff
+  management_level int,                      -- 1 = full control of own company; 2 = limited, permissions from company_permissions; null = PeopleQuest staff
   created_at timestamptz default now()
 );
+
+-- One row per company: which of the configurable permissions its Level 2
+-- users have. Level 1 always has every permission (not configurable, so
+-- they can't lock themselves out). A missing row = all-defaults-off, so a
+-- brand-new company's Level 2 users start maximally restricted, not open.
+create table if not exists company_permissions (
+  company_id text primary key references companies(id),
+  level2_permissions jsonb not null default '{}'::jsonb,
+  updated_at timestamptz default now()
+);
+
+-- Append-only. Every sensitive action gets one row here — never edited in
+-- place, mirroring the scores/whatsapp_log append-only tables below.
+create table if not exists audit_log (
+  id uuid primary key default gen_random_uuid(),
+  company_id text,
+  user_id text,
+  user_name text,
+  action text not null,
+  target_type text,
+  target_id text,
+  before jsonb,
+  after jsonb,
+  created_at timestamptz default now()
+);
+create index if not exists idx_audit_log_company_id on audit_log(company_id);
+create index if not exists idx_audit_log_created_at on audit_log(created_at desc);
 
 create table if not exists api_keys (
   id text primary key,

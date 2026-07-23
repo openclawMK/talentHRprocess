@@ -11,6 +11,7 @@ import exportRouter from "./routes/export.js";
 import portalRouter from "./routes/portal.js";
 import webhookRouter from "./routes/webhook.js";
 import apiV1Router from "./routes/apiV1.js";
+import teamRouter from "./routes/team.js";
 import { authenticateHR } from "./middleware/auth.js";
 import { authenticateApiKey } from "./middleware/apiKeyAuth.js";
 
@@ -46,6 +47,7 @@ app.use("/api", authenticateHR, jobsRouter);
 app.use("/api", authenticateHR, candidatesRouter);
 app.use("/api", authenticateHR, successProfileRouter);
 app.use("/api", authenticateHR, exportRouter);
+app.use("/api", authenticateHR, teamRouter);
 
 app.listen(PORT, () => {
   console.log(`PeopleQuest Talent AI backend running on http://localhost:${PORT}`);

@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { generateCandidateReport } from "../services/pdfExporter.js";
 import { readTable } from "../services/store.js";
 import { guardJobParam } from "../middleware/companyScope.js";
+import { requireCandidateAccess } from "../middleware/requirePermission.js";
 
 const router = Router();
 guardJobParam(router);
@@ -30,7 +31,7 @@ async function findCandidate(id) {
 const safe = (s) => String(s || "").replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "");
 
 // GET /api/candidates/:jobId/:candidateId/export/pdf
-router.get("/candidates/:jobId/:candidateId/export/pdf", async (req, res) => {
+router.get("/candidates/:jobId/:candidateId/export/pdf", requireCandidateAccess("export_data"), async (req, res) => {
   try {
     const candidate = await findCandidate(req.params.candidateId);
     if (!candidate) return res.status(404).json({ error: "Candidate not found." });
