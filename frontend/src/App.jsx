@@ -18,6 +18,7 @@ import SalaryCenter from "./screens/SalaryCenter.jsx";
 import CandidatePortal from "./screens/CandidatePortal.jsx";
 import CandidateAssessment from "./screens/CandidateAssessment.jsx";
 import InterviewBooking from "./screens/InterviewBooking.jsx";
+import Settings from "./screens/Settings.jsx";
 
 // Redirect to /login unless authenticated.
 function ProtectedRoute({ children }) {
@@ -48,6 +49,7 @@ function HRApp() {
         />
         <Route path="/jobs/:jobId/compare" element={<CompareView />} />
         <Route path="/salary-center" element={<SalaryCenter />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </WorkspaceLayout>

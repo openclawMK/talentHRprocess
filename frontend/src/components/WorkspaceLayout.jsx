@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import axios from "axios";
 import {
-  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet, Sun, Moon,
+  LayoutGrid, Briefcase, UploadCloud, Plus, Power, Search, Bell, Menu, X, Wallet, Sun, Moon, Settings as SettingsIcon,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useTheme } from "../context/ThemeContext.jsx";
@@ -14,6 +14,7 @@ const NAV = [
   { to: "/upload", label: "Upload", fullLabel: "Upload CV", icon: UploadCloud, match: (p) => p.startsWith("/upload") },
   { to: "/jobs/new", label: "Create", fullLabel: "Create job", icon: Plus, match: (p) => p === "/jobs/new" },
   { to: "/salary-center", label: "Salary", fullLabel: "Salary Center", icon: Wallet, match: (p) => p.startsWith("/salary-center") },
+  { to: "/settings", label: "Settings", fullLabel: "Settings", icon: SettingsIcon, match: (p) => p.startsWith("/settings") },
 ];
 
 export default function WorkspaceLayout({ children }) {
@@ -26,7 +27,7 @@ export default function WorkspaceLayout({ children }) {
   // straight on their own company's roles page instead.
   const isPlatformAdmin = user?.role === "admin" && !user?.company_id;
   const navItems = NAV
-    .filter((item) => isPlatformAdmin || !["/upload", "/jobs/new"].includes(item.to))
+    .filter((item) => isPlatformAdmin || !["/upload", "/jobs/new", "/settings"].includes(item.to))
     .map((item) => (item.to === "/companies" && !isPlatformAdmin && user?.company_id
       ? { ...item, to: `/companies/${user.company_id}`, label: "Firm", fullLabel: "My Company" }
       : item));
