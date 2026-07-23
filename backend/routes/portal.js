@@ -202,6 +202,7 @@ router.get("/portal/:token", async (req, res) => {
     role_level: job.role_level || "entry",
     key_responsibilities: job.requirements?.key_responsibilities || [],
     application_form: applicationFormFor(job),
+    screening_questions: job.successProfile?.must_haves || [],
   });
 });
 
@@ -215,7 +216,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     const job = await findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
 
-    const { name, email, phone, expected_salary, cover_letter, consent } = req.body;
+    const { name, email, phone, expected_salary, cover_letter, consent, self_declared } = req.body;
     if (!req.file) return res.status(400).json({ error: "Please attach your CV." });
     if (!name?.trim() || !email?.trim())
       return res.status(400).json({ error: "Name and email are required." });
@@ -233,6 +234,22 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
       if (appForm[key] === "mandatory" && !String(values[key] ?? "").trim()) {
         return res.status(400).json({ error: `${FIELD_LABEL[key]} is required for this role.` });
       }
+    }
+
+    // Screening self-declarations — candidate's own yes/no on the role's must-haves,
+    // sanitized against the job's actual list. Flag-only: surfaced to HR next to the
+    // CV-evidence check, never fed into the score, since candidates can self-report
+    // optimistically.
+    let selfDeclared = null;
+    if (self_declared) {
+      try {
+        const parsed = JSON.parse(self_declared);
+        const musts = job.successProfile?.must_haves || [];
+        selfDeclared = {};
+        for (const t of musts) {
+          if (Object.prototype.hasOwnProperty.call(parsed, t)) selfDeclared[t] = !!parsed[t];
+        }
+      } catch { /* malformed — ignore, leave unanswered */ }
     }
 
     const extracted = await extractText(tempPath);
@@ -260,6 +277,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
       low_confidence_warning: parseOverall < 70,
       pdpa_consent: { given: true, at: new Date().toISOString() },
       cover_letter: cover_letter?.trim() || null,
+      self_declared: selfDeclared,
       profile,
       score: null,
       hr_notes_list: [],

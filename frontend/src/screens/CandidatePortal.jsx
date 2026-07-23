@@ -20,6 +20,7 @@ export default function CandidatePortal() {
   const [step, setStep] = useState("landing");
   const [consent, setConsent] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", expected_salary: "", cover_letter: "" });
+  const [selfDeclared, setSelfDeclared] = useState({});
   const [file, setFile] = useState(null);
   const inputRef = useRef(null);
   const [applying, setApplying] = useState(false);
@@ -63,7 +64,7 @@ export default function CandidatePortal() {
     }
     setApplying(true); setError("");
     try {
-      const fd = new FormData(); fd.append("file", file); fd.append("name", form.name); fd.append("email", form.email); fd.append("phone", form.phone); fd.append("expected_salary", form.expected_salary); fd.append("cover_letter", form.cover_letter); fd.append("consent", "true");
+      const fd = new FormData(); fd.append("file", file); fd.append("name", form.name); fd.append("email", form.email); fd.append("phone", form.phone); fd.append("expected_salary", form.expected_salary); fd.append("cover_letter", form.cover_letter); fd.append("consent", "true"); fd.append("self_declared", JSON.stringify(selfDeclared));
       const res = await axios.post(`/api/portal/${token}/apply`, fd);
       setCandidateId(res.data.candidate_id); setParsed(res.data.parsed); setStep("assessment");
     } catch (e) { setError(e.response?.data?.error || "We couldn't process your CV. Please try again."); }
@@ -141,6 +142,25 @@ export default function CandidatePortal() {
               <>
                 <label style={lbl}>Cover letter{appForm.cover_letter === "mandatory" ? " *" : ""}</label>
                 <textarea style={{ ...inputStyle, minHeight: 110, resize: "vertical", fontFamily: "inherit" }} placeholder="A few sentences on why you're a good fit for this role…" value={form.cover_letter} onChange={(e) => setForm({ ...form, cover_letter: e.target.value })} />
+              </>
+            )}
+            {job.screening_questions?.length > 0 && (
+              <>
+                <label style={lbl}>A few quick checks</label>
+                <div style={{ fontSize: 13, color: "#9AA0AE", marginTop: -4, marginBottom: 14 }}>Your CV might not spell these out explicitly — let us know directly.</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 22 }}>
+                  {job.screening_questions.map((q, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, border: "1px solid #ECEDF2", borderRadius: 12, padding: "13px 16px" }}>
+                      <span style={{ fontSize: 14.5, color: "#374151", lineHeight: 1.4 }}>Do you have: {q}?</span>
+                      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                        {[["Yes", true], ["No", false]].map(([label, val]) => {
+                          const active = selfDeclared[q] === val;
+                          return <span key={label} onClick={() => setSelfDeclared((s) => ({ ...s, [q]: val }))} style={{ fontSize: 13.5, fontWeight: 600, borderRadius: 8, padding: "7px 14px", cursor: "pointer", border: `1px solid ${active ? "#7C3AED" : "#DDE0E9"}`, background: active ? "#7C3AED" : "#fff", color: active ? "#fff" : "#4B5563" }}>{label}</span>;
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
             <label style={lbl}>CV / Resume *</label>

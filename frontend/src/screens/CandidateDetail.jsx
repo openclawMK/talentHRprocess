@@ -392,10 +392,13 @@ export default function CandidateDetail() {
           {/* Success Profile fit */}
           {sfit?.configured && (() => {
             const fl = LANE[sfit.lane] || LANE.in_progress;
-            const Row = ({ ok, text, neutral }) => (
+            const Row = ({ ok, text, neutral, flag }) => (
               <div style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 13.5, color: D.text2, lineHeight: 1.45, padding: "5px 0" }}>
                 <span style={{ flexShrink: 0, width: 18, height: 18, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, marginTop: 1, color: ok ? D.green : neutral ? D.text3 : D.red, background: ok ? D.greenBg : neutral ? D.inset : D.redBg }}>{ok ? "✓" : neutral ? "•" : "✕"}</span>
-                <span>{text}</span>
+                <span>
+                  {text}
+                  {flag && <div style={{ fontSize: 12, color: "#B45309", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 7, padding: "3px 8px", marginTop: 4, display: "inline-block" }}>🏳️ Candidate self-declared yes on application — CV doesn't show it, worth probing in interview</div>}
+                </span>
               </div>
             );
             return (
@@ -425,7 +428,7 @@ export default function CandidateDetail() {
                   {sfit.must_haves.length > 0 && (
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Must-haves · {sfit.must_haves.filter((m) => m.met).length}/{sfit.must_haves.length}</div>
-                      {sfit.must_haves.map((m, i) => <Row key={i} ok={m.met} text={m.text} />)}
+                      {sfit.must_haves.map((m, i) => <Row key={i} ok={m.met} text={m.text} flag={m.self_declared === true && !m.met} />)}
                     </div>
                   )}
                   {sfit.nice_to_haves.length > 0 && (

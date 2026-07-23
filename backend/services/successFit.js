@@ -113,7 +113,10 @@ export function computeSuccessFit(candidate, job) {
   if (!sp || !Object.keys(sp).length) return null;
 
   const blob = evidenceBlob(candidate);
-  const must = (sp.must_haves || []).map((t) => ({ text: t, met: hasEvidence(blob, t, candidate.evidence_overrides) }));
+  const must = (sp.must_haves || []).map((t) => ({
+    text: t, met: hasEvidence(blob, t, candidate.evidence_overrides),
+    self_declared: candidate.self_declared?.[t] ?? null,
+  }));
   const nice = (sp.nice_to_haves || []).map((t) => ({ text: t, met: hasEvidence(blob, t, candidate.evidence_overrides) }));
   const evalSp = evaluateSuccessProfile(candidate, job);
   const dealbreakers = (sp.dealbreakers || []).map((t) => ({ text: t, triggered: evalSp.dealbreakers_hit.includes(t) }));
