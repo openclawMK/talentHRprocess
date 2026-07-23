@@ -61,6 +61,7 @@ create table if not exists users (
   email text unique not null,
   password_hash text not null,
   role text,
+  company_id text references companies(id), -- set = client login scoped to that company only; null = PeopleQuest staff
   created_at timestamptz default now()
 );
 

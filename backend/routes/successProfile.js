@@ -4,8 +4,10 @@
 import { Router } from "express";
 import { chatJSON } from "../services/aiClient.js";
 import { readTable, writeTable } from "../services/store.js";
+import { guardJobParam } from "../middleware/companyScope.js";
 
 const router = Router();
+guardJobParam(router);
 
 // GET /api/jobs/:jobId/success-profile
 router.get("/jobs/:jobId/success-profile", async (req, res) => {

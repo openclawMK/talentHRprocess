@@ -151,8 +151,8 @@ function candidateToRow(o) {
 // candidateToApi reads `r.extra` back and spreads it — but `r` from Supabase
 // has a real `extra` jsonb column, so this round-trips transparently.
 
-const userToApi = (r) => ({ id: r.id, name: r.name, email: r.email, password_hash: r.password_hash, role: r.role, created_at: r.created_at });
-const userToRow = (o) => ({ id: o.id, name: o.name, email: o.email, password_hash: o.password_hash, role: o.role, created_at: o.created_at });
+const userToApi = (r) => ({ id: r.id, name: r.name, email: r.email, password_hash: r.password_hash, role: r.role, company_id: r.company_id ?? null, created_at: r.created_at });
+const userToRow = (o) => ({ id: o.id, name: o.name, email: o.email, password_hash: o.password_hash, role: o.role, company_id: o.company_id ?? null, created_at: o.created_at });
 
 const TABLES = {
   companies: { key: "id", toApi: companyToApi, toRow: companyToRow },

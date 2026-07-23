@@ -7,8 +7,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { generateCandidateReport } from "../services/pdfExporter.js";
 import { readTable } from "../services/store.js";
+import { guardJobParam } from "../middleware/companyScope.js";
 
 const router = Router();
+guardJobParam(router);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
 const DEMO_PATH = path.join(DATA_DIR, "demo-candidates.json");

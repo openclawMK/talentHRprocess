@@ -22,8 +22,10 @@ import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
 import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra } from "../services/store.js";
+import { guardJobParam } from "../middleware/companyScope.js";
 
 const router = Router();
+guardJobParam(router);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
@@ -415,7 +417,10 @@ router.post("/assistant/ask", async (req, res) => {
   try {
     const { question, history, jobId, candidateId } = req.body || {};
     if (!question || !question.trim()) return res.status(400).json({ error: "Ask a question." });
-    const answer = await askPeopleQuest({ question: question.trim(), history: Array.isArray(history) ? history : [], jobId, candidateId });
+    // Scoped from the verified JWT, never the request body — a client login
+    // can't widen its own view by omitting/spoofing a companyId.
+    const companyId = req.user?.company_id || undefined;
+    const answer = await askPeopleQuest({ question: question.trim(), history: Array.isArray(history) ? history : [], jobId, candidateId, companyId });
     res.json({ answer });
   } catch (err) {
     console.error("assistant error:", err);

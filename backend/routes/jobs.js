@@ -19,8 +19,10 @@ import { generateSuccessProfileForJob } from "./successProfile.js";
 import { readTable, writeTable, insertRow, deleteRow } from "../services/store.js";
 import { rescoreJobCandidates } from "../services/rescoring.js";
 import { computeSuccessFit } from "../services/successFit.js";
+import { guardJobParam } from "../middleware/companyScope.js";
 
 const router = Router();
+guardJobParam(router);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, "..", "data");
 const TEMPLATES_PATH = path.join(DATA_DIR, "industry-templates.json");
@@ -53,7 +55,9 @@ function nextJobId(jobs) {
 // GET /api/jobs — all jobs
 router.get("/jobs", async (req, res) => {
   try {
-    res.json(await readTable("jobs"));
+    let jobs = await readTable("jobs");
+    if (req.user?.company_id) jobs = jobs.filter((j) => j.company?.id === req.user.company_id);
+    res.json(jobs);
   } catch {
     res.status(500).json({ error: "Failed to load jobs." });
   }
@@ -218,7 +222,7 @@ router.patch("/jobs/:jobId/whatsapp-settings", async (req, res) => {
 // GET /api/analytics — global, cross-role analytics for the workspace dashboard
 router.get("/analytics", async (req, res) => {
   try {
-    const companyFilter = req.query.company || null;
+    const companyFilter = req.user?.company_id || req.query.company || null;
     let jobs = await readTable("jobs");
     if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
     let candidates = [];
@@ -247,6 +251,7 @@ router.get("/analytics", async (req, res) => {
     };
 
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
+    if (companyFilter) candidates = candidates.filter((c) => jobById[c.job_id]);
     const perRole = {};
     for (const j of jobs) {
       perRole[j.job_id] = {
@@ -391,7 +396,7 @@ router.get("/analytics", async (req, res) => {
 router.get("/candidates-recent", async (req, res) => {
   try {
     const limit = Math.min(200, Math.max(1, Number(req.query.limit) || 8));
-    const companyFilter = req.query.company || null;
+    const companyFilter = req.user?.company_id || req.query.company || null;
     let jobs = await readTable("jobs");
     if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
@@ -482,7 +487,9 @@ router.get("/candidates-search", async (req, res) => {
 // action) and flagged pre-hire checks awaiting HR review. Powers the header bell.
 router.get("/alerts", async (req, res) => {
   try {
-    const jobs = await readTable("jobs");
+    const companyFilter = req.user?.company_id || req.query.company || null;
+    let jobs = await readTable("jobs");
+    if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
     try { candidates = await readTable("candidates"); } catch { candidates = []; }
@@ -990,9 +997,12 @@ router.post("/jobs", async (req, res) => {
       key_responsibilities = [],
       criteria: suppliedCriteria,
       score_weights: suppliedWeights,
-      company_id,
+      company_id: bodyCompanyId,
       interview_criteria_count,
     } = req.body;
+    // A client login can only ever create roles under their own company —
+    // scoped from the verified JWT, never the request body.
+    const company_id = req.user?.company_id || bodyCompanyId;
 
     if (!role_title || !industry)
       return res.status(400).json({ error: "role_title and industry are required." });

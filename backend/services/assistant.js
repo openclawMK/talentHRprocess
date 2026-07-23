@@ -13,9 +13,15 @@ import { readTable } from "./store.js";
 const years = (m) => (m != null ? Math.round((m / 12) * 10) / 10 : null);
 
 // Compact, token-efficient view of everything the assistant can reason over.
-async function buildSnapshot() {
-  const jobs = await readTable("jobs");
-  const cands = await readTable("candidates");
+// companyId scopes it to one company's roles/candidates only — required for
+// a client login, since this snapshot is otherwise handed straight to the
+// model and would leak other companies' candidates into the answer.
+async function buildSnapshot(companyId) {
+  let jobs = await readTable("jobs");
+  if (companyId) jobs = jobs.filter((j) => j.company?.id === companyId);
+  const jobIds = new Set(jobs.map((j) => j.job_id));
+  let cands = await readTable("candidates");
+  if (companyId) cands = cands.filter((c) => jobIds.has(c.job_id));
 
   const roles = jobs.map((j) => {
     const b = getSalaryBenchmark(j.role_title, j.location);
@@ -73,11 +79,11 @@ const SYSTEM =
   "If the answer is not in the data, say so plainly.";
 
 /**
- * @param {{question:string, history?:Array<{role:string,content:string}>, jobId?:string, candidateId?:string}} p
+ * @param {{question:string, history?:Array<{role:string,content:string}>, jobId?:string, candidateId?:string, companyId?:string}} p
  * @returns {Promise<string>} answer text
  */
-export async function askPeopleQuest({ question, history = [], jobId, candidateId }) {
-  const snapshot = await buildSnapshot();
+export async function askPeopleQuest({ question, history = [], jobId, candidateId, companyId }) {
+  const snapshot = await buildSnapshot(companyId);
 
   let focus = "";
   if (candidateId) {

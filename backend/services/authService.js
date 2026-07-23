@@ -18,7 +18,7 @@ export async function login(email, password) {
   const user = users.find((u) => u.email.toLowerCase() === String(email || "").toLowerCase());
   if (!user) return null;
   if (!bcrypt.compareSync(String(password || ""), user.password_hash)) return null;
-  const safe = { id: user.id, name: user.name, email: user.email, role: user.role };
+  const safe = { id: user.id, name: user.name, email: user.email, role: user.role, company_id: user.company_id ?? null };
   const token = jwt.sign(safe, JWT_SECRET, { expiresIn: TOKEN_TTL });
   return { token, user: safe };
 }
@@ -28,7 +28,10 @@ export function verifyToken(token) {
   return jwt.verify(token, JWT_SECRET);
 }
 
-export async function createUser(name, email, password) {
+// company_id set -> a client login, scoped to that company's own dashboard
+// and data only; company_id omitted -> internal PeopleQuest staff, with the
+// cross-company workspace view.
+export async function createUser(name, email, password, companyId = null) {
   const users = await readTable("users");
   if (users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
     throw new Error("A user with that email already exists.");
@@ -38,10 +41,11 @@ export async function createUser(name, email, password) {
     name,
     email,
     password_hash: hashPassword(password),
-    role: "admin",
+    role: companyId ? "client" : "admin",
+    company_id: companyId || null,
     created_at: new Date().toISOString(),
   };
   users.push(user);
   await writeTable("users", users);
-  return { id: user.id, name: user.name, email: user.email, role: user.role };
+  return { id: user.id, name: user.name, email: user.email, role: user.role, company_id: user.company_id };
 }
