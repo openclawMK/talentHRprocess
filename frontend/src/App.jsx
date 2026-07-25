@@ -32,7 +32,12 @@ function HRApp() {
   return (
     <WorkspaceLayout>
       <Routes>
-        <Route path="/" element={<GlobalDashboard />} />
+        {/* The dashboard can't live at "/" -- that path is hard-mapped to the
+            public marketing landing page at the Vercel level (see
+            frontend/vercel.json), so a logged-in user hitting refresh on
+            "/" would get bounced to the landing page instead of the app. */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        <Route path="/home" element={<GlobalDashboard />} />
         <Route path="/upload" element={<HRUpload />} />
         <Route path="/companies" element={<CompanySelector />} />
         <Route path="/companies/:companyId" element={<JobSelector />} />
@@ -52,7 +57,7 @@ function HRApp() {
         <Route path="/salary-center" element={<SalaryCenter />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/team" element={<Team />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
     </WorkspaceLayout>
   );

@@ -90,7 +90,7 @@ export default function Login() {
     try {
       const res = await axios.post("/api/auth/login", { email, password });
       login(res.data.token, res.data.user, remember, res.data.permissions);
-      navigate("/");
+      navigate("/home");
     } catch {
       setError("Invalid email or password");
     } finally {

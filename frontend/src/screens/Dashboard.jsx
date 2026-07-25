@@ -217,7 +217,7 @@ export default function Dashboard() {
 
   return (
     <div className="pb-8">
-      <div onClick={() => navigate("/")} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to dashboard</div>
+      <div onClick={() => navigate("/home")} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back to dashboard</div>
 
       {/* header */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, marginBottom: 22 }} className="flex-wrap">

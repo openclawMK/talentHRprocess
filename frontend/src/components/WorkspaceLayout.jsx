@@ -9,7 +9,7 @@ import { useTheme } from "../context/ThemeContext.jsx";
 import AskAssistant from "./AskAssistant.jsx";
 
 const NAV = [
-  { to: "/", label: "Home", fullLabel: "Dashboard", icon: LayoutGrid, section: "WORKSPACE", match: (p) => p === "/" },
+  { to: "/home", label: "Home", fullLabel: "Dashboard", icon: LayoutGrid, section: "WORKSPACE", match: (p) => p === "/home" },
   { to: "/companies", label: "Firms", fullLabel: "Companies", icon: Briefcase, match: (p) => p.startsWith("/companies") || (p.startsWith("/jobs") && p !== "/jobs/new") },
   { to: "/upload", label: "Upload", fullLabel: "Upload CV", icon: UploadCloud, match: (p) => p.startsWith("/upload") },
   { to: "/jobs/new", label: "Create", fullLabel: "Create job", icon: Plus, match: (p) => p === "/jobs/new" },
@@ -150,7 +150,7 @@ export default function WorkspaceLayout({ children }) {
     <div className="flex min-h-screen" style={{ backgroundColor: D.page, color: D.text, fontFamily: D.font }}>
       {/* Desktop icon rail */}
       <aside className="fixed inset-y-0 left-0 hidden w-[72px] flex-col items-center py-[18px] lg:flex" style={{ backgroundColor: D.page, borderRight: `0.5px solid ${D.hair}` }}>
-        <Link to="/" className="mb-4 flex h-9 w-9 items-center justify-center rounded-[11px] text-[13px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</Link>
+        <Link to="/home" className="mb-4 flex h-9 w-9 items-center justify-center rounded-[11px] text-[13px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</Link>
         <nav className="flex flex-col gap-1.5">
           {navItems.map((item) => {
             const active = item.match(location.pathname);
@@ -196,7 +196,7 @@ export default function WorkspaceLayout({ children }) {
             <Menu size={20} />
           </button>
           {/* mobile logo */}
-          <Link to="/" className="flex items-center gap-2 lg:hidden">
+          <Link to="/home" className="flex items-center gap-2 lg:hidden">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</div>
           </Link>
 
