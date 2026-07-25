@@ -26,14 +26,20 @@ export default function JobSelector() {
   const [jobs, setJobs] = useState(null);
   const [a, setA] = useState(null);
   const [company, setCompany] = useState(null);
+  const [billing, setBilling] = useState(null);
   const [candPop, setCandPop] = useState(false);
   const [candList, setCandList] = useState(null);
   const [candFilter, setCandFilter] = useState(null);
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJobs(r.data)).catch(() => setJobs([]));
     axios.get("/api/analytics").then((r) => setA(r.data)).catch(() => setA(null));
-    if (companyId) axios.get(`/api/companies/${companyId}`).then((r) => setCompany(r.data)).catch(() => setCompany(null));
-    else setCompany(null);
+    if (companyId) {
+      axios.get(`/api/companies/${companyId}`).then((r) => setCompany(r.data)).catch(() => setCompany(null));
+      axios.get(`/api/companies/${companyId}/billing`).then((r) => setBilling(r.data)).catch(() => setBilling(null));
+    } else {
+      setCompany(null);
+      setBilling(null);
+    }
   }, [companyId]);
 
   // Cross-role candidate view — scoped to THIS company only. The backend
@@ -130,6 +136,23 @@ export default function JobSelector() {
           )}
         </div>
       </div>
+
+      {/* Package/token summary — only shown once this company is actually on
+          the billing system (a null tier means unmetered/grandfathered in). */}
+      {billing?.tier && (() => {
+        const low = billing.token_balance <= 5;
+        return (
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", background: D.cardBg, border: `0.5px solid ${low ? D.redBorder : D.border}`, borderRadius: 14, padding: "14px 20px", marginBottom: 22 }}>
+            <span style={{ fontSize: 11.5, fontWeight: 700, color: D.blue, background: D.blueBg, padding: "4px 11px", borderRadius: 20, textTransform: "uppercase", letterSpacing: ".03em" }}>{billing.tier} plan</span>
+            <span style={{ fontSize: 13.5, color: low ? D.red : D.text2, fontWeight: low ? 700 : 500 }}>
+              <b>{billing.token_balance}</b> CV scan / AI assistant token{billing.token_balance === 1 ? "" : "s"} left
+            </span>
+            <span style={{ fontSize: 13.5, color: D.text4 }}>·</span>
+            <span style={{ fontSize: 13.5, color: D.text3 }}><b>{billing.users_count}</b> of <b>{billing.login_limit}</b> logins used</span>
+            {low && <span style={{ fontSize: 12.5, color: D.red, marginLeft: "auto", fontWeight: 600 }}>Running low — contact PeopleQuest to top up</span>}
+          </div>
+        );
+      })()}
 
       {/* summary stat cards (workspace-wide; hidden inside a single company) */}
       <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4" style={{ marginBottom: 26, display: companyId ? "none" : undefined }}>

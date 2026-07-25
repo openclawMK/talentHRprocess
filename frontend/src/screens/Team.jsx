@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { usePalette } from "../context/ThemeContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
 
@@ -23,6 +24,7 @@ const PERMISSION_LABELS = {
 // ever creates the first (Level 1) account per company.
 export default function Team() {
   const D = usePalette();
+  const { user } = useAuth();
   const cardBox = { background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 16, padding: 22 };
 
   const [users, setUsers] = useState(null);
@@ -34,16 +36,22 @@ export default function Team() {
   const [permKeys, setPermKeys] = useState([]);
   const [permSaving, setPermSaving] = useState(false);
 
+  const [billing, setBilling] = useState(null);
+
   const [log, setLog] = useState(null);
   const [showLog, setShowLog] = useState(false);
 
   useEffect(() => {
     loadUsers();
     axios.get("/api/team/permissions").then((r) => { setPermissions(r.data.permissions); setPermKeys(r.data.keys); }).catch(() => {});
-  }, []);
+    if (user?.company_id) axios.get(`/api/companies/${user.company_id}/billing`).then((r) => setBilling(r.data)).catch(() => setBilling(null));
+  }, [user?.company_id]);
 
   function loadUsers() {
     axios.get("/api/team/users").then((r) => setUsers(r.data)).catch(() => setUsers([]));
+  }
+  function reloadBilling() {
+    if (user?.company_id) axios.get(`/api/companies/${user.company_id}/billing`).then((r) => setBilling(r.data)).catch(() => {});
   }
   async function createLevel2() {
     setError("");
@@ -56,12 +64,13 @@ export default function Team() {
       await axios.post("/api/team/users", form);
       setForm({ name: "", email: "", password: "" });
       loadUsers();
+      reloadBilling();
     } catch (e) { setError(e.response?.data?.error || "Couldn't create this login."); }
     finally { setBusy(false); }
   }
   async function removeUser(userId) {
     if (!window.confirm("Remove this team member? They'll no longer be able to sign in.")) return;
-    try { await axios.delete(`/api/team/users/${userId}`); loadUsers(); }
+    try { await axios.delete(`/api/team/users/${userId}`); loadUsers(); reloadBilling(); }
     catch (e) { window.alert(e.response?.data?.error || "Couldn't remove this user."); }
   }
   async function togglePermission(key) {
@@ -87,7 +96,14 @@ export default function Team() {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Team members */}
         <div style={cardBox}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 4 }}>Team members</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Team members</div>
+            {billing?.login_limit != null && (
+              <span style={{ fontSize: 12, fontWeight: 700, color: billing.users_count >= billing.login_limit ? D.red : D.text3, background: billing.users_count >= billing.login_limit ? D.redBg : D.pillBg, padding: "3px 10px", borderRadius: 20 }}>
+                {billing.users_count} of {billing.login_limit} logins used
+              </span>
+            )}
+          </div>
           <div style={{ fontSize: 13, color: D.text4, marginBottom: 16 }}>Everyone with a login for your company.</div>
           {users === null ? (
             <div style={{ fontSize: 13, color: D.text4 }}>Loading…</div>
