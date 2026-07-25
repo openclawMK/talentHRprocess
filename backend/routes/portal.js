@@ -26,6 +26,7 @@ import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
 import { readTable, writeTable, insertRow, appendScore } from "../services/store.js";
+import { hasTokens, consumeToken } from "../services/billing.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -215,6 +216,12 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
   try {
     const job = await findJobByToken(req.params.token);
     if (!job) return res.status(404).json({ error: "This application link is invalid or has expired." });
+    // The company has exhausted their CV-scan tokens -- this is their problem
+    // to resolve with PeopleQuest, not the candidate's, but there's no clean
+    // way to accept the application without scoring it, so it's blocked here too.
+    if (!(await hasTokens(job.company?.id))) {
+      return res.status(503).json({ error: "This role isn't accepting new applications right now. Please try again later." });
+    }
 
     const { name, email, phone, expected_salary, cover_letter, consent, self_declared } = req.body;
     if (!req.file) return res.status(400).json({ error: "Please attach your CV." });
@@ -316,6 +323,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     await insertRow("candidates", candidate);
     // Candidate row now exists — safe to append the score (FK to candidates).
     await appendScore(scoreObj);
+    await consumeToken(job.company?.id);
 
     res.status(201).json({
       candidate_id: candidate.candidate_id,

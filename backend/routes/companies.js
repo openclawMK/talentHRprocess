@@ -11,6 +11,8 @@ import { readTable, insertRow, deleteRow, writeTable, readAuditLog } from "../se
 import { createUser } from "../services/authService.js";
 import { createApiKey, listApiKeys, deleteApiKey } from "../services/apiKeyService.js";
 import { guardCompanyParam } from "../middleware/companyScope.js";
+import { atLoginLimit, getCompanyBilling, setCompanyPackage, addTokens, countCompanyUsers, PACKAGES } from "../services/billing.js";
+import { logAction } from "../services/auditLog.js";
 
 const router = Router();
 guardCompanyParam(router);
@@ -48,6 +50,52 @@ router.get("/companies/:companyId", async (req, res) => {
   const c = (await readTable("companies")).find((x) => x.id === req.params.companyId);
   if (!c) return res.status(404).json({ error: "Company not found." });
   res.json(c);
+});
+
+// GET /api/companies/:companyId/billing — package tier, remaining tokens,
+// login limit, and current login count. A client's own Level 1 user can see
+// this for their own company; staff can see it for any company.
+router.get("/companies/:companyId/billing", async (req, res) => {
+  try {
+    const billing = await getCompanyBilling(req.params.companyId);
+    if (!billing) return res.status(404).json({ error: "Company not found." });
+    const users_count = await countCompanyUsers(req.params.companyId);
+    res.json({ ...billing, users_count });
+  } catch (err) {
+    console.error("get company billing error:", err);
+    res.status(500).json({ error: "Failed to load billing info." });
+  }
+});
+
+// PATCH /api/companies/:companyId/billing  { package_tier?, add_tokens? }
+// Staff-only: set/change a company's package (resets balance to that
+// package's full amount) and/or top up tokens after a client runs out.
+router.patch("/companies/:companyId/billing", async (req, res) => {
+  try {
+    if (!requirePlatformAdmin(req, res)) return;
+    const company = (await readTable("companies")).find((c) => c.id === req.params.companyId);
+    if (!company) return res.status(404).json({ error: "Company not found." });
+
+    const { package_tier, add_tokens } = req.body || {};
+    const before = await getCompanyBilling(req.params.companyId);
+
+    if (package_tier) {
+      if (!PACKAGES[package_tier]) return res.status(400).json({ error: `Unknown package tier: ${package_tier}` });
+      await setCompanyPackage(req.params.companyId, package_tier);
+    }
+    if (add_tokens) {
+      const amount = Number(add_tokens);
+      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: "add_tokens must be a positive number." });
+      await addTokens(req.params.companyId, amount);
+    }
+
+    const after = await getCompanyBilling(req.params.companyId);
+    await logAction(req, { action: "billing.updated", target_type: "company", target_id: req.params.companyId, before, after, companyId: req.params.companyId });
+    res.json(after);
+  } catch (err) {
+    console.error("update company billing error:", err);
+    res.status(500).json({ error: "Failed to update billing." });
+  }
 });
 
 // POST /api/companies  { name, industry }
@@ -122,6 +170,10 @@ router.post("/companies/:companyId/users", async (req, res) => {
     const { name, email, password } = req.body || {};
     if (!name?.trim() || !email?.trim() || !password || password.length < 8) {
       return res.status(400).json({ error: "Name, email and an 8+ character password are required." });
+    }
+    if (await atLoginLimit(req.params.companyId)) {
+      const billing = await getCompanyBilling(req.params.companyId);
+      return res.status(403).json({ error: `This company has reached its plan's limit of ${billing.login_limit} logins.` });
     }
     const user = await createUser(name.trim(), email.trim(), password, req.params.companyId);
     res.status(201).json(user);

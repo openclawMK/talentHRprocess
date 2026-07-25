@@ -20,6 +20,7 @@ import { scoreCandidate } from "../services/scorer.js";
 import { refreshEvidenceOverrides } from "../services/successFit.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
 import { readTable, insertRow, appendScore } from "../services/store.js";
+import { hasTokens, consumeToken } from "../services/billing.js";
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -110,6 +111,9 @@ router.post("/roles/:roleId/candidates", upload.single("file"), async (req, res)
   try {
     const job = await findOwnRole(req);
     if (!job) return res.status(404).json({ error: "Role not found." });
+    if (!(await hasTokens(req.user.company_id))) {
+      return res.status(402).json({ error: "This company has used all its CV scan tokens. Contact PeopleQuest to add more." });
+    }
 
     const { name, email, phone, expected_salary, cover_letter, consent_obtained, external_ref } = req.body || {};
 
@@ -199,6 +203,7 @@ router.post("/roles/:roleId/candidates", upload.single("file"), async (req, res)
     // insertRow (not writeTable) — safe under concurrent pushes, see store.js.
     await insertRow("candidates", candidate);
     await appendScore(scoreObj);
+    await consumeToken(req.user.company_id);
 
     // `combined_score` is points on the eventual 0-100 scale, but only the
     // stages actually assessed can contribute — a CV-only candidate can't

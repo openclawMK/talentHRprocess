@@ -11,6 +11,7 @@ import { readTable, writeTable } from "../services/store.js";
 import { createUser } from "../services/authService.js";
 import { PERMISSION_KEYS, getCompanyPermissions } from "../services/permissions.js";
 import { logAction } from "../services/auditLog.js";
+import { atLoginLimit, getCompanyBilling } from "../services/billing.js";
 
 const router = Router();
 
@@ -43,6 +44,12 @@ router.post("/team/users", async (req, res) => {
     const { name, email, password } = req.body || {};
     if (!name?.trim() || !email?.trim() || !password || password.length < 8) {
       return res.status(400).json({ error: "Name, email and an 8+ character password are required." });
+    }
+    if (await atLoginLimit(req.user.company_id)) {
+      const billing = await getCompanyBilling(req.user.company_id);
+      return res.status(403).json({
+        error: `You've reached your plan's limit of ${billing.login_limit} logins. Contact PeopleQuest to upgrade.`,
+      });
     }
     const user = await createUser(name.trim(), email.trim(), password, req.user.company_id, 2);
     await logAction(req, { action: "user.created", target_type: "user", target_id: user.id, after: { name: user.name, email: user.email, management_level: 2 } });

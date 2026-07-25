@@ -8,7 +8,9 @@ create table if not exists companies (
   name text not null,
   industry text,
   accent text,
-  initials text
+  initials text,
+  package_tier text,            -- 'basic' | 'intermediate' | 'pro'; null = not yet on the billing system (unmetered, nothing blocks them)
+  token_balance integer default 0 -- decremented per CV scan / AI assistant question; login_limit is derived from package_tier in code, not stored
 );
 
 create table if not exists jobs (
