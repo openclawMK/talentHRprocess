@@ -111,7 +111,7 @@ router.post("/roles/:roleId/candidates", upload.single("file"), async (req, res)
   try {
     const job = await findOwnRole(req);
     if (!job) return res.status(404).json({ error: "Role not found." });
-    if (!(await hasTokens(req.user.company_id))) {
+    if (!(await hasTokens(req.user.company_id, "cv"))) {
       return res.status(402).json({ error: "This company has used all its CV scan tokens. Contact PeopleQuest to add more." });
     }
 
@@ -203,7 +203,7 @@ router.post("/roles/:roleId/candidates", upload.single("file"), async (req, res)
     // insertRow (not writeTable) — safe under concurrent pushes, see store.js.
     await insertRow("candidates", candidate);
     await appendScore(scoreObj);
-    await consumeToken(req.user.company_id);
+    await consumeToken(req.user.company_id, "cv");
 
     // `combined_score` is points on the eventual 0-100 scale, but only the
     // stages actually assessed can contribute — a CV-only candidate can't

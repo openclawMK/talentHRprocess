@@ -140,16 +140,21 @@ export default function JobSelector() {
       {/* Package/token summary — only shown once this company is actually on
           the billing system (a null tier means unmetered/grandfathered in). */}
       {billing?.tier && (() => {
-        const low = billing.token_balance <= 5;
+        const cvLow = billing.cv_token_balance <= 5;
+        const assistantLow = billing.assistant_token_balance <= 10;
         return (
-          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", background: D.cardBg, border: `0.5px solid ${low ? D.redBorder : D.border}`, borderRadius: 14, padding: "14px 20px", marginBottom: 22 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap", background: D.cardBg, border: `0.5px solid ${(cvLow || assistantLow) ? D.redBorder : D.border}`, borderRadius: 14, padding: "14px 20px", marginBottom: 22 }}>
             <span style={{ fontSize: 11.5, fontWeight: 700, color: D.blue, background: D.blueBg, padding: "4px 11px", borderRadius: 20, textTransform: "uppercase", letterSpacing: ".03em" }}>{billing.tier} plan</span>
-            <span style={{ fontSize: 13.5, color: low ? D.red : D.text2, fontWeight: low ? 700 : 500 }}>
-              <b>{billing.token_balance}</b> CV scan / AI assistant token{billing.token_balance === 1 ? "" : "s"} left
+            <span style={{ fontSize: 13.5, color: cvLow ? D.red : D.text2, fontWeight: cvLow ? 700 : 500 }}>
+              <b>{billing.cv_token_balance}</b> CV scan{billing.cv_token_balance === 1 ? "" : "s"} left
+            </span>
+            <span style={{ fontSize: 13.5, color: D.text4 }}>·</span>
+            <span style={{ fontSize: 13.5, color: assistantLow ? D.red : D.text2, fontWeight: assistantLow ? 700 : 500 }}>
+              <b>{billing.assistant_token_balance}</b> AI assistant token{billing.assistant_token_balance === 1 ? "" : "s"} left
             </span>
             <span style={{ fontSize: 13.5, color: D.text4 }}>·</span>
             <span style={{ fontSize: 13.5, color: D.text3 }}><b>{billing.users_count}</b> of <b>{billing.login_limit}</b> logins used</span>
-            {low && <span style={{ fontSize: 12.5, color: D.red, marginLeft: "auto", fontWeight: 600 }}>Running low — contact PeopleQuest to top up</span>}
+            {(cvLow || assistantLow) && <span style={{ fontSize: 12.5, color: D.red, marginLeft: "auto", fontWeight: 600 }}>Running low — contact PeopleQuest to top up</span>}
           </div>
         );
       })()}

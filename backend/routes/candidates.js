@@ -137,7 +137,7 @@ router.post("/upload-cv", requirePermission("upload_cv"), upload.single("file"),
     const job = await findJob(jobId);
     if (!job) return res.status(400).json({ error: `Unknown jobId: ${jobId}` });
     if (!assertJobInScope(req, res, job)) return;
-    if (!(await hasTokens(req.user?.company_id))) {
+    if (!(await hasTokens(req.user?.company_id, "cv"))) {
       return res.status(402).json({ error: "You've used all your CV scan tokens. Contact PeopleQuest to add more." });
     }
 
@@ -175,7 +175,7 @@ router.post("/upload-cv", requirePermission("upload_cv"), upload.single("file"),
     await insertRow("candidates", candidate);
     // Candidate row now exists — safe to append the score (FK to candidates).
     await appendScore(candidate.score);
-    await consumeToken(req.user?.company_id);
+    await consumeToken(req.user?.company_id, "cv");
 
     return res.status(201).json(candidate);
   } catch (err) {
@@ -446,11 +446,11 @@ router.post("/assistant/ask", async (req, res) => {
     // Scoped from the verified JWT, never the request body — a client login
     // can't widen its own view by omitting/spoofing a companyId.
     const companyId = req.user?.company_id || undefined;
-    if (!(await hasTokens(companyId))) {
-      return res.status(402).json({ error: "You've used all your tokens. Contact PeopleQuest to add more." });
+    if (!(await hasTokens(companyId, "assistant"))) {
+      return res.status(402).json({ error: "You've used all your AI assistant tokens. Contact PeopleQuest to add more." });
     }
     const answer = await askPeopleQuest({ question: question.trim(), history: Array.isArray(history) ? history : [], jobId, candidateId, companyId });
-    await consumeToken(companyId);
+    await consumeToken(companyId, "assistant");
     res.json({ answer });
   } catch (err) {
     console.error("assistant error:", err);

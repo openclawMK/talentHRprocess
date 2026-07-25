@@ -67,26 +67,27 @@ router.get("/companies/:companyId/billing", async (req, res) => {
   }
 });
 
-// PATCH /api/companies/:companyId/billing  { package_tier?, add_tokens? }
-// Staff-only: set/change a company's package (resets balance to that
-// package's full amount) and/or top up tokens after a client runs out.
+// PATCH /api/companies/:companyId/billing  { package_tier?, add_cv_tokens?, add_assistant_tokens? }
+// Staff-only: set/change a company's package (resets both balances to that
+// package's full amounts) and/or top up either pool after a client runs out.
 router.patch("/companies/:companyId/billing", async (req, res) => {
   try {
     if (!requirePlatformAdmin(req, res)) return;
     const company = (await readTable("companies")).find((c) => c.id === req.params.companyId);
     if (!company) return res.status(404).json({ error: "Company not found." });
 
-    const { package_tier, add_tokens } = req.body || {};
+    const { package_tier, add_cv_tokens, add_assistant_tokens } = req.body || {};
     const before = await getCompanyBilling(req.params.companyId);
 
     if (package_tier) {
       if (!PACKAGES[package_tier]) return res.status(400).json({ error: `Unknown package tier: ${package_tier}` });
       await setCompanyPackage(req.params.companyId, package_tier);
     }
-    if (add_tokens) {
-      const amount = Number(add_tokens);
-      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: "add_tokens must be a positive number." });
-      await addTokens(req.params.companyId, amount);
+    for (const [kind, add] of [["cv", add_cv_tokens], ["assistant", add_assistant_tokens]]) {
+      if (!add) continue;
+      const amount = Number(add);
+      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: `add_${kind}_tokens must be a positive number.` });
+      await addTokens(req.params.companyId, kind, amount);
     }
 
     const after = await getCompanyBilling(req.params.companyId);

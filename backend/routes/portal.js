@@ -219,7 +219,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     // The company has exhausted their CV-scan tokens -- this is their problem
     // to resolve with PeopleQuest, not the candidate's, but there's no clean
     // way to accept the application without scoring it, so it's blocked here too.
-    if (!(await hasTokens(job.company?.id))) {
+    if (!(await hasTokens(job.company?.id, "cv"))) {
       return res.status(503).json({ error: "This role isn't accepting new applications right now. Please try again later." });
     }
 
@@ -323,7 +323,7 @@ router.post("/portal/:token/apply", upload.single("file"), async (req, res) => {
     await insertRow("candidates", candidate);
     // Candidate row now exists — safe to append the score (FK to candidates).
     await appendScore(scoreObj);
-    await consumeToken(job.company?.id);
+    await consumeToken(job.company?.id, "cv");
 
     res.status(201).json({
       candidate_id: candidate.candidate_id,
