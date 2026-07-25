@@ -82,10 +82,13 @@ export async function extractText(filePath) {
 
   text = text.trim();
 
-  // Confidence heuristic.
-  let confidence = 100;
-  if (text.length < 200) confidence -= 20;
-  if (!EMAIL_RE.test(text) && !PHONE_RE.test(text)) confidence -= 10;
+  // Confidence heuristic. Zero extracted text means a scanned/image-only PDF
+  // (or a genuinely empty file) — there's nothing for the AI to parse, so this
+  // must fail the confidence gate outright rather than limp through at 70 and
+  // produce a blank "Unnamed" candidate.
+  let confidence = text.length === 0 ? 0 : 100;
+  if (text.length > 0 && text.length < 200) confidence -= 20;
+  if (text.length > 0 && !EMAIL_RE.test(text) && !PHONE_RE.test(text)) confidence -= 10;
 
   return { text, confidence };
 }
