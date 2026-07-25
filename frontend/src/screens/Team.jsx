@@ -15,6 +15,7 @@ const PERMISSION_LABELS = {
   export_data: "Export candidate data (PDF reports)",
   view_reports: "View reports and analytics",
   view_contact_info: "See candidate contact details (phone/email)",
+  upload_cv: "Upload a CV directly (instead of only the public application form)",
 };
 
 // A company's own Level 1 user manages their Level 2 (Manager/Supervisor)

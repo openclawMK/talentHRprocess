@@ -23,7 +23,7 @@ import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/wh
 import { chatJSON, chatText } from "../services/aiClient.js";
 import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra } from "../services/store.js";
 import { guardJobParam, assertJobInScope } from "../middleware/companyScope.js";
-import { requireCandidateAccess } from "../middleware/requirePermission.js";
+import { requireCandidateAccess, requirePermission } from "../middleware/requirePermission.js";
 import { logAction } from "../services/auditLog.js";
 
 const router = Router();
@@ -126,7 +126,7 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
  * POST /api/upload-cv  (multipart: file, jobId)
  * Upload -> extract -> parse -> score -> persist fully scored candidate.
  */
-router.post("/upload-cv", upload.single("file"), async (req, res) => {
+router.post("/upload-cv", requirePermission("upload_cv"), upload.single("file"), async (req, res) => {
   const tempPath = req.file?.path;
   try {
     const { jobId } = req.body;

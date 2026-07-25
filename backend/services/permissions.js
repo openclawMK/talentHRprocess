@@ -30,6 +30,7 @@ export const PERMISSION_KEYS = [
   "export_data",
   "view_reports",
   "view_contact_info",
+  "upload_cv",
 ];
 
 // Matches the spec's "Default permissions include" list for Level 2.
@@ -44,6 +45,7 @@ export const DEFAULT_LEVEL2_PERMISSIONS = {
   export_data: false,
   view_reports: false,
   view_contact_info: false,
+  upload_cv: true,
 };
 
 const ALL_TRUE = Object.fromEntries(PERMISSION_KEYS.map((k) => [k, true]));

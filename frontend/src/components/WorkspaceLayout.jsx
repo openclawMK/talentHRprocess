@@ -30,7 +30,7 @@ export default function WorkspaceLayout({ children }) {
   const isCompanyLevel1 = !!user?.company_id && isLevel1;
   const navItems = NAV
     .filter((item) => {
-      if (item.to === "/upload") return isPlatformAdmin;
+      if (item.to === "/upload") return isPlatformAdmin || isCompanyLevel1 || permissions?.upload_cv;
       if (item.to === "/jobs/new") return isPlatformAdmin || permissions?.create_job;
       if (item.to === "/settings") return isPlatformAdmin;
       if (item.to === "/team") return isCompanyLevel1;
