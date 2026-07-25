@@ -237,7 +237,7 @@ export default function GlobalDashboard() {
       </div>
 
       {/* ===== Needs your attention (indigo) — AI-layer work only ===== */}
-      <Section color="#6366F1" title="Needs your attention" sub="Work owned by PeopleQuest — the hiring pipeline stays in your ATS" />
+      <Section color="#6366F1" title="Needs your attention" sub="Work owned by People Hire — the hiring pipeline stays in your ATS" />
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3" style={{ marginBottom: 30 }}>
         {TASKS.map((t) => (
           <div key={t.key} onClick={() => openCandidates(t.key)}
