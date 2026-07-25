@@ -26,6 +26,13 @@ export default function Settings() {
   const [revealedKey, setRevealedKey] = useState(null);
   const [keyCopied, setKeyCopied] = useState(false);
 
+  const [billing, setBilling] = useState(null);
+  const [tierPick, setTierPick] = useState("basic");
+  const [addCvTokens, setAddCvTokens] = useState("");
+  const [addAssistantTokens, setAddAssistantTokens] = useState("");
+  const [billingBusy, setBillingBusy] = useState(false);
+  const [billingError, setBillingError] = useState("");
+
   useEffect(() => {
     axios.get("/api/companies").then((r) => {
       setCompanies(r.data);
@@ -35,8 +42,8 @@ export default function Settings() {
 
   useEffect(() => {
     if (!companyId) return;
-    setLogins(null); setApiKeys(null); setRevealedKey(null);
-    loadLogins(); loadApiKeys();
+    setLogins(null); setApiKeys(null); setRevealedKey(null); setBilling(null); setBillingError("");
+    loadLogins(); loadApiKeys(); loadBilling();
   }, [companyId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function loadLogins() {
@@ -86,6 +93,34 @@ export default function Settings() {
     navigator.clipboard?.writeText(revealedKey).then(() => { setKeyCopied(true); setTimeout(() => setKeyCopied(false), 1800); });
   }
 
+  function loadBilling() {
+    axios.get(`/api/companies/${companyId}/billing`).then((r) => { setBilling(r.data); setTierPick(r.data.tier || "basic"); }).catch(() => setBilling(null));
+  }
+  async function setPlan() {
+    setBillingError(""); setBillingBusy(true);
+    try {
+      const res = await axios.patch(`/api/companies/${companyId}/billing`, { package_tier: tierPick });
+      setBilling((b) => ({ ...b, ...res.data }));
+    } catch (e) { setBillingError(e.response?.data?.error || "Couldn't set the plan."); }
+    finally { setBillingBusy(false); }
+  }
+  async function topUp() {
+    setBillingError("");
+    const cv = Number(addCvTokens) || 0;
+    const assistant = Number(addAssistantTokens) || 0;
+    if (cv <= 0 && assistant <= 0) { setBillingError("Enter an amount to add for at least one of the two."); return; }
+    setBillingBusy(true);
+    try {
+      const body = {};
+      if (cv > 0) body.add_cv_tokens = cv;
+      if (assistant > 0) body.add_assistant_tokens = assistant;
+      const res = await axios.patch(`/api/companies/${companyId}/billing`, body);
+      setBilling((b) => ({ ...b, ...res.data }));
+      setAddCvTokens(""); setAddAssistantTokens("");
+    } catch (e) { setBillingError(e.response?.data?.error || "Couldn't top up tokens."); }
+    finally { setBillingBusy(false); }
+  }
+
   const company = (companies || []).find((c) => c.id === companyId);
 
   return (
@@ -105,6 +140,54 @@ export default function Settings() {
           </select>
         )}
       </div>
+
+      {companyId && (
+        <div style={{ ...cardBox, marginBottom: 16 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 4 }}>💳 Package &amp; tokens</div>
+          <div style={{ fontSize: 13, color: D.text4, marginBottom: 16 }}>What {company?.name || "this company"} is on, and their remaining balances. No tier set means unmetered — nothing is enforced until you set one.</div>
+          {billing === null ? (
+            <div style={{ fontSize: 13, color: D.text4 }}>Loading…</div>
+          ) : (
+            <>
+              {billing.tier ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap", marginBottom: 18 }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: D.blue, background: D.blueBg, padding: "4px 11px", borderRadius: 20, textTransform: "uppercase", letterSpacing: ".03em" }}>{billing.tier} plan</span>
+                  <span style={{ fontSize: 13.5, color: D.text2 }}><b>{billing.cv_token_balance}</b> CV scans left</span>
+                  <span style={{ fontSize: 13.5, color: D.text2 }}><b>{billing.assistant_token_balance}</b> AI assistant tokens left</span>
+                  <span style={{ fontSize: 13.5, color: D.text3 }}><b>{billing.users_count}</b> of <b>{billing.login_limit}</b> logins used</span>
+                </div>
+              ) : (
+                <div style={{ fontSize: 13, color: D.text5, marginBottom: 18 }}>Not on the billing system yet — unmetered.</div>
+              )}
+
+              <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: D.text3, marginBottom: 8 }}>Set plan</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <select value={tierPick} onChange={(e) => setTierPick(e.target.value)} style={{ flex: 1, padding: "10px 12px", borderRadius: 9, border: `1px solid ${D.border}`, background: D.page, color: D.text, fontSize: 13.5 }}>
+                      <option value="basic">Basic — 50 CV / 100 assistant / 5 logins</option>
+                      <option value="intermediate">Intermediate — 100 CV / 200 assistant / 10 logins</option>
+                      <option value="pro">Pro — 200 CV / 500 assistant / 20 logins</option>
+                    </select>
+                    <button onClick={setPlan} disabled={billingBusy} style={{ padding: "10px 16px", background: GRAD, color: "#fff", border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: billingBusy ? 0.6 : 1, whiteSpace: "nowrap" }}>{billing.tier === tierPick ? "Reset balance" : "Set plan"}</button>
+                  </div>
+                  {billing.tier && <div style={{ fontSize: 11.5, color: D.text5, marginTop: 6 }}>Resets both balances to that plan's full amount.</div>}
+                </div>
+
+                <div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: D.text3, marginBottom: 8 }}>Top up (add to current balance)</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input type="number" min="1" placeholder="+ CV scans" value={addCvTokens} onChange={(e) => setAddCvTokens(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "10px 12px", border: `1px solid ${D.border}`, borderRadius: 9, fontSize: 13.5, background: D.page, color: D.text }} />
+                    <input type="number" min="1" placeholder="+ Assistant tokens" value={addAssistantTokens} onChange={(e) => setAddAssistantTokens(e.target.value)} style={{ flex: 1, minWidth: 0, padding: "10px 12px", border: `1px solid ${D.border}`, borderRadius: 9, fontSize: 13.5, background: D.page, color: D.text }} />
+                    <button onClick={topUp} disabled={billingBusy} style={{ padding: "10px 16px", background: D.text, color: D.page, border: "none", borderRadius: 9, fontWeight: 600, fontSize: 13.5, cursor: "pointer", opacity: billingBusy ? 0.6 : 1, whiteSpace: "nowrap" }}>Add</button>
+                  </div>
+                </div>
+              </div>
+              {billingError && <div style={{ fontSize: 12.5, color: D.red, marginTop: 12 }}>{billingError}</div>}
+            </>
+          )}
+        </div>
+      )}
 
       {companyId && (
         <div className="grid gap-4 lg:grid-cols-2">
