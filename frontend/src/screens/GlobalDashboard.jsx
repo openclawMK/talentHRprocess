@@ -42,7 +42,7 @@ export default function GlobalDashboard() {
   const companyQS = companyId ? `&company=${companyId}` : "";
   useEffect(() => {
     axios.get(`/api/analytics${companyId ? `?company=${companyId}` : ""}`).then((r) => setA(r.data)).catch(() => setA(false));
-    axios.get(`/api/candidates-recent?limit=20${companyQS}`).then((r) => setRecent(r.data?.results || [])).catch(() => setRecent([]));
+    axios.get(`/api/candidates-recent?limit=200${companyQS}`).then((r) => setRecent(r.data?.results || [])).catch(() => setRecent([]));
   }, [companyId, companyQS]);
 
   const fetchInsight = useCallback((idx) => {
