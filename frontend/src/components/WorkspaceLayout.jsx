@@ -108,7 +108,7 @@ export default function WorkspaceLayout({ children }) {
   const MobileSidebarBody = () => (
     <>
       <div className="flex items-center gap-2.5 px-2 pb-6 pt-1">
-        <div className="flex h-9 w-9 items-center justify-center rounded-[11px] text-[15px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-[11px] text-[15px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PH</div>
         <div className="flex-1">
           <div className="text-[15px] font-bold" style={{ color: D.text }}>People Hire</div>
         </div>
@@ -150,7 +150,7 @@ export default function WorkspaceLayout({ children }) {
     <div className="flex min-h-screen" style={{ backgroundColor: D.page, color: D.text, fontFamily: D.font }}>
       {/* Desktop icon rail */}
       <aside className="fixed inset-y-0 left-0 hidden w-[72px] flex-col items-center py-[18px] lg:flex" style={{ backgroundColor: D.page, borderRight: `0.5px solid ${D.hair}` }}>
-        <Link to="/home" className="mb-4 flex h-9 w-9 items-center justify-center rounded-[11px] text-[13px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</Link>
+        <Link to="/home" className="mb-4 flex h-9 w-9 items-center justify-center rounded-[11px] text-[13px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PH</Link>
         <nav className="flex flex-col gap-1.5">
           {navItems.map((item) => {
             const active = item.match(location.pathname);
@@ -197,7 +197,7 @@ export default function WorkspaceLayout({ children }) {
           </button>
           {/* mobile logo */}
           <Link to="/home" className="flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</div>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PH</div>
           </Link>
 
           <div className="hidden text-[17px] font-bold lg:block" style={{ color: D.text }}>{currentLabel}</div>
