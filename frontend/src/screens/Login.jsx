@@ -118,10 +118,10 @@ export default function Login() {
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 56 }}>
             <div style={{ width: 38, height: 38, borderRadius: 11, background: GRAD_BTN, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff" }}>P</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>PeopleQuest <span style={{ color: D.text4, fontWeight: 500 }}>Talent AI</span></div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>People Hire</div>
           </div>
 
-          <div style={{ fontSize: 11, letterSpacing: "0.14em", color: D.blue, fontWeight: 700, marginBottom: 16, textTransform: "uppercase" }}>Talent AI</div>
+          <div style={{ fontSize: 11, letterSpacing: "0.14em", color: D.blue, fontWeight: 700, marginBottom: 16, textTransform: "uppercase" }}>People Hire</div>
           <h1 style={{ fontSize: 38, fontWeight: 800, lineHeight: 1.15, letterSpacing: "-0.02em", margin: "0 0 16px", maxWidth: 460, color: "#fff" }}>
             Hire with confidence, not guesswork.
           </h1>

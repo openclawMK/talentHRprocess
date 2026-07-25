@@ -436,7 +436,7 @@ router.post("/candidates/:jobId/:candidateId/pre-hire-checks", async (req, res) 
 });
 
 /**
- * POST /api/assistant/ask — "Ask PeopleQuest" grounded hiring assistant.
+ * POST /api/assistant/ask — "Ask People Hire" grounded hiring assistant.
  * Body: { question, history?, jobId?, candidateId? } → { answer }.
  */
 router.post("/assistant/ask", async (req, res) => {

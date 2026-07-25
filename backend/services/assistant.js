@@ -1,5 +1,5 @@
 /**
- * "Ask PeopleQuest" — a grounded hiring assistant. Builds a compact snapshot of
+ * "Ask People Hire" — a grounded hiring assistant. Builds a compact snapshot of
  * the live hiring data (companies, roles, candidates, scores, salary) and asks
  * GPT-4o to answer the HR manager's question or draft a message from it.
  *
@@ -69,7 +69,7 @@ async function buildSnapshot(companyId) {
 }
 
 const SYSTEM =
-  "You are PeopleQuest's hiring assistant for a Malaysian HR manager (F&B, retail, hospitality and professional roles). " +
+  "You are People Hire's hiring assistant for a Malaysian HR manager (F&B, retail, hospitality and professional roles). " +
   "Answer ONLY from the DATA snapshot provided — never invent candidates, roles, scores or salary figures that are not in it. " +
   "Be concise and specific: use candidate names, scores, and RM figures. Reference the scoring model when explaining a score " +
   "(Profile-fit 35% / Personality 15% / Interview 50%; pre-interview is capped at 50, hire bar is 72). " +

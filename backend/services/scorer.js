@@ -1,5 +1,5 @@
 /**
- * Dynamic criteria scoring engine for PeopleQuest Talent AI (Session 6).
+ * Dynamic criteria scoring engine for People Hire (Session 6).
  *
  * Scores only the `cv`-source criteria from a job's criteria[] array, producing
  * a PARTIAL score. `interview` and `ocean` criteria stay pending until that data

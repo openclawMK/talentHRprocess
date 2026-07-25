@@ -88,7 +88,7 @@ const TEMPLATES = {
 
   hr_alert: (p) =>
     `⭐ Strong candidate alert: *${p.candidate}* scored ${p.score}% for *${p.role}*. ` +
-    `Review them in PeopleQuest when you get a chance.`,
+    `Review them in People Hire when you get a chance.`,
 
   portal_link: (p) =>
     `Hi ${p.name || "there"}! 👋 You're invited to apply for *${p.role}*. ` +

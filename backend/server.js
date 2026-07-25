@@ -26,7 +26,7 @@ app.use(express.urlencoded({ extended: false })); // Twilio webhook posts form-e
 
 // Health check (public)
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", service: "PeopleQuest Talent AI backend" });
+  res.json({ status: "ok", service: "People Hire backend" });
 });
 
 // --- Public routes (no auth) ---
@@ -50,5 +50,5 @@ app.use("/api", authenticateHR, exportRouter);
 app.use("/api", authenticateHR, teamRouter);
 
 app.listen(PORT, () => {
-  console.log(`PeopleQuest Talent AI backend running on http://localhost:${PORT}`);
+  console.log(`People Hire backend running on http://localhost:${PORT}`);
 });

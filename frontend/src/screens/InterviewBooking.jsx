@@ -45,7 +45,7 @@ export default function InterviewBooking() {
   return (
     <div style={{ minHeight: "100vh", background: "#F7F8FB" }}>
       <div style={{ background: "#fff", borderBottom: "1px solid #ECEDF2", padding: "20px 28px" }}>
-        <div style={{ maxWidth: 640, margin: "0 auto", fontSize: 20, fontWeight: 800, letterSpacing: "-.3px" }}><span style={{ color: "#6D28D9" }}>PeopleQuest</span> <span style={{ color: "#9AA0AE", fontWeight: 700 }}>Careers</span></div>
+        <div style={{ maxWidth: 640, margin: "0 auto", fontSize: 20, fontWeight: 800, letterSpacing: "-.3px" }}><span style={{ color: "#6D28D9" }}>People Hire</span> <span style={{ color: "#9AA0AE", fontWeight: 700 }}>Careers</span></div>
       </div>
       <div style={{ maxWidth: 640, margin: "0 auto", padding: 28 }}>
 

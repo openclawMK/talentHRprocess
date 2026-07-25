@@ -110,8 +110,7 @@ export default function WorkspaceLayout({ children }) {
       <div className="flex items-center gap-2.5 px-2 pb-6 pt-1">
         <div className="flex h-9 w-9 items-center justify-center rounded-[11px] text-[15px] font-extrabold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>PQ</div>
         <div className="flex-1">
-          <div className="text-[15px] font-bold" style={{ color: D.text }}>PeopleQuest</div>
-          <div className="text-[11px] tracking-wide" style={{ color: D.text4 }}>Talent AI</div>
+          <div className="text-[15px] font-bold" style={{ color: D.text }}>People Hire</div>
         </div>
         <button onClick={() => setMenuOpen(false)} title="Close menu" style={{ color: D.text4 }}>
           <X size={20} />
