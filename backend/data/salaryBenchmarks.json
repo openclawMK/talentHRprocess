@@ -6795,6 +6795,154 @@
         "Jobstore2023"
       ],
       "basis": "role-level"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "accounts assistant",
+        "accounts clerk"
+      ],
+      "category": "Accounts Assistant",
+      "min": 2200,
+      "median": 2600,
+      "max": 3100,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Accounting & finance",
+      "match": [
+        "account executive",
+        "accounts executive"
+      ],
+      "category": "Account Executive",
+      "min": 2800,
+      "median": 3400,
+      "max": 4200,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "frontline",
+      "industry": "F&B / Retail / Hospitality",
+      "match": [
+        "chef de partie",
+        "sous chef",
+        "line cook",
+        "cook",
+        "chef"
+      ],
+      "category": "Chef / Cook",
+      "min": 2200,
+      "median": 2900,
+      "max": 3800,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Other",
+      "match": [
+        "teacher",
+        "tutor"
+      ],
+      "category": "Teacher",
+      "min": 2800,
+      "median": 3800,
+      "max": 5500,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Other",
+      "match": [
+        "preschool teacher",
+        "kindergarten teacher",
+        "childcare teacher"
+      ],
+      "category": "Preschool Teacher",
+      "min": 1800,
+      "median": 2200,
+      "max": 2800,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Other",
+      "match": [
+        "security guard",
+        "security officer"
+      ],
+      "category": "Security Guard",
+      "min": 1700,
+      "median": 1900,
+      "max": 2300,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "driver",
+        "delivery rider",
+        "despatch"
+      ],
+      "category": "Driver",
+      "min": 1700,
+      "median": 2000,
+      "max": 2500,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "frontline",
+      "industry": "Logistics & warehousing",
+      "match": [
+        "store keeper",
+        "storekeeper"
+      ],
+      "category": "Store Keeper",
+      "min": 2000,
+      "median": 2400,
+      "max": 2900,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "IT & software",
+      "match": [
+        "it support executive",
+        "it support engineer",
+        "helpdesk executive",
+        "desktop support"
+      ],
+      "category": "IT Support Executive",
+      "min": 2500,
+      "median": 3000,
+      "max": 3800,
+      "sources": ["Industry"],
+      "basis": "estimate"
+    },
+    {
+      "sector": "professional",
+      "industry": "Marketing & creative",
+      "match": [
+        "content creator",
+        "content executive",
+        "social media executive"
+      ],
+      "category": "Content Creator",
+      "min": 2200,
+      "median": 2800,
+      "max": 3800,
+      "sources": ["Industry"],
+      "basis": "estimate"
     }
   ]
 }

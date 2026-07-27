@@ -133,15 +133,17 @@ export function suggestSalary(roleTitle, location, tier = "mid") {
 
 /**
  * Salary-vs-experience fit (0-100): does the candidate's expected pay match what
- * their experience warrants for this role? Within band = well-priced; below =
- * value/cheaper; well above = overpriced for experience. null when unknowable.
+ * their experience warrants for this role? Within band or below = well-priced
+ * (asking for less is never worse than asking for exactly market — this matches
+ * the direction Best Match's own budget/market nudges already reward affordable
+ * candidates, so the two signals don't quietly disagree); well above = overpriced
+ * for experience. null when unknowable.
  */
 export function salaryExperienceFit(expected, years, benchmark) {
   if (!expected || !benchmark) return null;
   const band = experienceBand(benchmark, experienceTier(years));
   if (!band) return null;
-  if (expected >= band.min && expected <= band.max) return 100;   // appropriately priced
-  if (expected < band.min) return 88;                             // cheaper than expected — fine
+  if (expected <= band.max) return 100;                           // at, within, or below band — well-priced
   if (expected <= band.max * 1.15) return 65;                     // a bit high for experience
   return 40;                                                       // well over what experience warrants
 }

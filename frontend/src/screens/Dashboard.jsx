@@ -76,6 +76,7 @@ export default function Dashboard() {
   const [insights, setInsights] = useState(null);
   const [showInsights, setShowInsights] = useState(false);
   const [salary, setSalary] = useState(null);
+  const [salaryUnavailable, setSalaryUnavailable] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkSelected, setBulkSelected] = useState([]);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -151,7 +152,10 @@ export default function Dashboard() {
     });
     axios.get(`/api/jobs/${jobId}/pipeline`).then((r) => setPipeline(r.data)).catch(() => setPipeline(null));
     axios.get("/api/whatsapp/status").then((r) => setWaStatus(r.data)).catch(() => setWaStatus(null));
-    axios.get(`/api/jobs/${jobId}/salary-benchmark`).then((r) => setSalary(r.data?.available ? r.data : null)).catch(() => setSalary(null));
+    axios.get(`/api/jobs/${jobId}/salary-benchmark`).then((r) => {
+      setSalary(r.data?.available ? r.data : null);
+      setSalaryUnavailable(r.data?.available === false); // explicit "no benchmark for this title", not just still-loading
+    }).catch(() => { setSalary(null); setSalaryUnavailable(false); });
   }, [jobId]);
   useEffect(() => { loadAnalytics(); }, [loadAnalytics]);
   useEffect(() => { loadInsights(); }, [loadInsights]);
@@ -337,6 +341,12 @@ export default function Dashboard() {
           </div>
         );
       })()}
+      {!salary && salaryUnavailable && (
+        <div style={{ ...cardBox, borderRadius: 14, padding: "12px 20px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }} className="flex-wrap">
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: D.inset, color: D.text4, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>💰</div>
+          <div style={{ fontSize: 12.5, color: D.text3 }}>No market salary data for &ldquo;{job?.role_title}&rdquo; yet — the salary lens is switched off for this role's scoring, and budget/market comparisons won't appear.</div>
+        </div>
+      )}
 
       {/* pipeline funnel */}
       <div style={{ ...cardBox, borderRadius: 14, padding: "18px 22px", marginBottom: 16 }}>
