@@ -8,6 +8,7 @@
 import { chatText } from "./aiClient.js";
 import { computeBudgetFit } from "./successFit.js";
 import { getSalaryBenchmark, compareToMarket } from "./salaryBenchmark.js";
+import { buildRoleComparison } from "./bestMatch.js";
 import { readTable } from "./store.js";
 
 const years = (m) => (m != null ? Math.round((m / 12) * 10) / 10 : null);
@@ -22,6 +23,19 @@ async function buildSnapshot(companyId) {
   const jobIds = new Set(jobs.map((j) => j.job_id));
   let cands = await readTable("candidates");
   if (companyId) cands = cands.filter((c) => jobIds.has(c.job_id));
+
+  // Best-match rank/composite per role, keyed by candidate_id — this is the SAME
+  // deterministic ranking the role's Best Match screen shows. Attaching it here
+  // (rather than letting the assistant re-derive "best" from raw combined_score)
+  // is what keeps this answer and the Best Match panel from naming different
+  // candidates as the top pick — see bestMatch.js for why that divergence bit us.
+  const rankByCandidateId = new Map();
+  for (const j of jobs) {
+    const jobCands = cands.filter((c) => c.job_id === j.job_id);
+    for (const row of buildRoleComparison(j, jobCands)) {
+      rankByCandidateId.set(row.candidate_id, { rank: row.rank, composite: row.composite });
+    }
+  }
 
   const roles = jobs.map((j) => {
     const b = getSalaryBenchmark(j.role_title, j.location);
@@ -44,12 +58,15 @@ async function buildSnapshot(companyId) {
     const bm = j ? getSalaryBenchmark(j.role_title, j.location) : null;
     const mkt = bm ? compareToMarket(c.profile?.expected_salary, bm) : null;
     const cs = c.score?.component_scores || {};
+    const rank = rankByCandidateId.get(c.candidate_id);
     return {
       name: c.profile?.name,
       company: j?.company?.name,
       role: j?.role_title,
       stage: c.interview_completed ? "interview done" : c.ocean_completed ? "screening (awaiting interview)" : "CV only",
       score: c.score?.combined_score,
+      best_match_rank_for_this_role: rank?.rank ?? null,
+      best_match_composite: rank?.composite ?? null,
       screening: c.score?.screening_score != null ? `${c.score.screening_score}/${c.score.pre_interview_max ?? 50}${c.score.screening_pass ? " pass" : " review"}` : null,
       components: { profile_fit: cs.profile_fit, personality: cs.ocean, interview: cs.interview },
       recommendation: c.recommendation?.recommendation,
@@ -73,6 +90,10 @@ const SYSTEM =
   "Answer ONLY from the DATA snapshot provided — never invent candidates, roles, scores or salary figures that are not in it. " +
   "Be concise and specific: use candidate names, scores, and RM figures. Reference the scoring model when explaining a score " +
   "(Profile-fit 35% / Personality 15% / Interview 50%; pre-interview is capped at 50, hire bar is 72). " +
+  "When asked which candidate is the best match, strongest, or top pick for a role, ALWAYS answer using that candidate's " +
+  "best_match_rank_for_this_role (rank 1 = best) — this is the same deterministic ranking the role's Best Match screen " +
+  "shows, and it already accounts for Success Profile fit plus salary/budget/market, not just the raw score. Never pick " +
+  "a 'best' candidate by comparing raw score alone; a lower-scored candidate can rank #1 by this measure and that is correct. " +
   "When asked to draft a WhatsApp or message, write it ready to send in a friendly Malaysian-professional tone. " +
   "You can advise and draft, but you cannot take actions (you never send messages or change data) — if asked, explain the HR manager does that. " +
   "Never consider or mention age, race, religion, gender, nationality or marital status. " +

@@ -4,14 +4,16 @@
  *   Combined = OCEAN·15% + Success-Profile-fit·35% + Interview·50%   (weights adjustable)
  *
  * The score ACCUMULATES: with only OCEAN + profile scored (pre-interview) the max
- * is 50/100; the interview unlocks the remaining 50. Screening pass ≥ 35/50,
- * final hire bar ≥ 72/100. Lane colour uses the score relative to what's been
- * scored so far, so candidates aren't shown "red" merely for being pre-interview.
+ * is 50/100; the interview unlocks the remaining 50. Screening pass and lane colour
+ * both judge the score RELATIVE to what's been scored so far (e.g. profile+ocean
+ * pre-interview), so candidates aren't penalised for being partially assessed —
+ * a flawless pre-interview candidate should be able to actually pass screening.
+ * Final hire bar ≥ 72/100 (that one is judged on the full absolute score).
  */
 import { computeProfileFit, computeOceanScore } from "./successFit.js";
 
 export const DEFAULT_WEIGHTS = { ocean: 0.15, profile: 0.35, interview: 0.5 };
-export const SCREENING_PASS = 35; // of the 50 available before the interview
+export const SCREENING_PASS = 70; // % of whatever's been scored so far (profile+ocean pre-interview)
 export const HIRE_THRESHOLD = 72;
 
 function avgBySource(criteria, src) {
@@ -50,10 +52,12 @@ export function composeScore(candidate, job, criteria) {
   const screening = Math.round(part(profileDone, W.profile, profile) + part(oceanDone, W.ocean, ocean));
   const preInterviewMax = Math.round((W.profile + W.ocean) * 100);
 
-  // Lane from the score relative to weights actually scored (so pre-interview
-  // candidates are coloured on quality-so-far, not penalised for being partial).
+  // Both screening pass and lane colour judge the score relative to weights
+  // actually scored so far, so candidates aren't penalised for being partial.
   const availW = part(profileDone, W.profile, 1) + part(oceanDone, W.ocean, 1) + part(interviewDone, W.interview, 1);
   const relative = availW > 0 ? combined / availW : 0;
+  const availPreInterviewW = part(profileDone, W.profile, 1) + part(oceanDone, W.ocean, 1);
+  const relativeScreening = availPreInterviewW > 0 ? (screening / availPreInterviewW) * 100 : 0;
   const green = job.thresholds?.green ?? HIRE_THRESHOLD;
   const red = job.thresholds?.red ?? 45;
   const lane = relative >= green ? "green" : relative < red ? "red" : "amber";
@@ -68,7 +72,7 @@ export function composeScore(candidate, job, criteria) {
       interview: interviewDone ? interview : null,
       weights: W,
     },
-    screening_pass: screening >= SCREENING_PASS,
+    screening_pass: availPreInterviewW > 0 && relativeScreening >= SCREENING_PASS,
     interview_done: interviewDone,
     ocean_done: oceanDone,
     lane,

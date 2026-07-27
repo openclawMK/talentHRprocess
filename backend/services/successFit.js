@@ -171,10 +171,11 @@ export function computeSuccessFit(candidate, job) {
 }
 
 /**
- * One-directional AI correction for hasEvidence()'s keyword matching: only
- * re-checks must-haves/nice-to-haves the keyword pass calls UNMET, and only
- * ever flips them to met if genuinely evidenced — it never revisits or
- * un-passes anything the keyword pass already got right. Result is cached on
+ * Two-directional AI correction for hasEvidence()'s keyword matching: re-checks
+ * EVERY must-have/nice-to-have the keyword pass hasn't already had reviewed,
+ * whether the keyword pass called it met or unmet — a keyword hit (e.g. two
+ * unrelated tokens both appearing in the CV) can be a false positive just as
+ * easily as a genuine requirement can be missed. Result is cached on
  * candidate.evidence_overrides (keyed by exact requirement text) so it's
  * computed once per requirement and reused on every future scoring pass —
  * this keeps repeated scoring deterministic instead of re-asking the AI (and
@@ -186,11 +187,8 @@ export async function refreshEvidenceOverrides(candidate, job) {
   const sp = job.successProfile;
   if (!sp) return;
   const overrides = candidate.evidence_overrides || {};
-  const blob = evidenceBlob(candidate);
   const allReqs = [...(sp.must_haves || []), ...(sp.nice_to_haves || [])];
-  const toCheck = allReqs.filter(
-    (t) => !Object.prototype.hasOwnProperty.call(overrides, t) && !hasEvidence(blob, t)
-  );
+  const toCheck = allReqs.filter((t) => !Object.prototype.hasOwnProperty.call(overrides, t));
   if (!toCheck.length) return;
 
   try {
