@@ -261,7 +261,7 @@ export default function WorkspaceLayout({ children }) {
             {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
           </button>
 
-          <button onClick={signOut} title="Sign out" className="flex items-center gap-2.5 rounded-[11px] py-1 pl-2 pr-1" style={{ color: D.text4 }}>
+          <div className="flex items-center gap-2.5 rounded-[11px] py-1 pl-2 pr-1" style={{ color: D.text4 }}>
             <div className="flex h-[34px] w-[34px] items-center justify-center rounded-full text-xs font-bold text-white" style={{ background: "linear-gradient(135deg,#6366F1,#7C3AED)" }}>
               {initials}
             </div>
@@ -269,7 +269,7 @@ export default function WorkspaceLayout({ children }) {
               <div className="text-[13px] font-semibold" style={{ color: D.text }}>{user?.name || "HR Manager"}</div>
               <div className="text-[11px]" style={{ color: D.text4 }}>{isPlatformAdmin ? "HR Manager" : "Client account"}</div>
             </div>
-          </button>
+          </div>
         </header>
 
         <main key={location.pathname} className="route-fade mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6">
