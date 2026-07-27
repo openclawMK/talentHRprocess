@@ -92,7 +92,7 @@ export default function JobBuilder() {
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <div onClick={() => navigate(companyId ? `/companies/${companyId}` : "/companies")} style={{ fontSize: 14, color: D.blue, fontWeight: 600, cursor: "pointer", marginBottom: 16, display: "inline-flex", alignItems: "center", gap: 6 }}>← Back</div>
-      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 6px", color: D.text }}>Create a new role</h1>
+      <h1 className="font-display" style={{ fontSize: 26, fontWeight: 800, letterSpacing: "-.6px", margin: "0 0 6px", color: D.text }}>Create a new position</h1>
       <p style={{ fontSize: 15, color: D.text3, margin: "0 0 26px" }}>Fill in the basics — next you'll define the Success Profile that scores every candidate.</p>
 
       {/* Company */}
