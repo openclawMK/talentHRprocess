@@ -176,10 +176,6 @@ export default function Login() {
           >
             {busy ? "Signing in…" : "Sign in"}
           </button>
-
-          <div style={{ background: D.inset, border: `0.5px solid ${D.border}`, borderRadius: 12, padding: "12px 14px", marginTop: 18, fontSize: 12, color: D.text3 }}>
-            <b style={{ color: D.text2 }}>Demo credentials</b><br />hr@peoplequest.my / peoplequest
-          </div>
         </form>
       </div>
     </div>
