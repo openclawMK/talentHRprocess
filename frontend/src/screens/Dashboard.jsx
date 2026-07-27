@@ -552,11 +552,14 @@ export default function Dashboard() {
           ) : (bm.rows || []).length < 2 ? (
             <div style={{ fontSize: 14, color: D.text3 }}>You need at least 2 scored candidates to run a best-match comparison.</div>
           ) : (() => {
-            const reasons = Object.fromEntries((bm.ai?.ranking || []).map((r) => [r.candidate_id, r.reason]));
-            const byId = Object.fromEntries(bm.rows.map((r) => [r.candidate_id, r]));
-            const aiOrder = (bm.ai?.ranking || []).map((r) => byId[r.candidate_id]).filter(Boolean);
-            const rows = aiOrder.length === bm.rows.length ? aiOrder : bm.rows;
-            const top = byId[bm.ai?.top_candidate_id] || rows[0];
+            // Always the deterministic composite order from the backend -- the AI
+            // call only explains this ranking (bm.ai.reasons), it never gets to
+            // pick a different "best" candidate or reorder the list. Letting a
+            // second, freeform LLM call override the actual scoring model was
+            // exactly the bug: a lower-scored candidate showing as "best match".
+            const reasons = Object.fromEntries((bm.ai?.reasons || []).map((r) => [r.candidate_id, r.reason]));
+            const rows = bm.rows;
+            const top = rows[0];
             return (
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 13, padding: "14px 16px", marginBottom: 12 }} className="flex-wrap">

@@ -361,13 +361,25 @@ router.get("/jobs/:jobId/best-match", async (req, res) => {
     let ai = null;
     try {
       const sp = job.successProfile || {};
+      // The candidates below are already ranked best-to-worst by a deterministic
+      // composite (55% AI score + 35% Success Profile fit, with budget/market
+      // nudges) -- that ranking is the ground truth. The model's job here is
+      // ONLY to explain it in plain English, never to re-rank or pick a
+      // different "best" candidate; letting a second, freeform LLM call
+      // silently override the actual scoring model produced exactly this bug:
+      // a lower-scored candidate got shown as "best match" while the
+      // AI assistant, answering from the same real data, correctly said the
+      // higher-scored one.
       const system =
-        "You are an expert Malaysian HR advisor. Compare candidates applying for one role against the role's " +
-        "Success Profile and salary budget. Never consider gender, race, religion, nationality, age or marital status. " +
-        "Return strict JSON: { top_candidate_id, summary, ranking: [{ candidate_id, reason }] } — ranking ordered " +
-        "best to worst, each reason ONE short sentence naming the deciding factor (fit, experience, salary, or risk). " +
-        "summary is 2-3 sentences for an HR manager explaining who to hire and why, mentioning salary vs budget where relevant.";
-      const user = `Role: ${job.role_title} (${job.industry}). Success profile: ${JSON.stringify({
+        "You are an expert Malaysian HR advisor. You are given candidates for one role, ALREADY RANKED best to worst " +
+        "by a scoring model (never consider gender, race, religion, nationality, age or marital status). " +
+        "Do not re-rank them or propose a different candidate as best -- the first candidate listed is the model's " +
+        "determined best match; your job is only to explain that ranking in plain English. " +
+        "Return strict JSON: { summary, reasons: [{ candidate_id, reason }] } — reasons in the SAME order given, " +
+        "each ONE short sentence naming the deciding factor (fit, experience, salary, or risk) for that candidate. " +
+        "summary is 2-3 sentences for an HR manager explaining why the FIRST candidate is the strongest choice, " +
+        "mentioning salary vs budget where relevant.";
+      const user = `Role: ${job.role_title} (${job.industry}). Candidates are listed best-to-worst by the scoring model -- explain this order, don't change it. Success profile: ${JSON.stringify({
         summary: sp.summary, must_haves: sp.must_haves, dealbreakers: sp.dealbreakers,
         benchmark_experience_years: sp.benchmark_experience_years,
         salary_budget_min: sp.salary_budget_min, salary_budget_max: sp.salary_budget_max,
