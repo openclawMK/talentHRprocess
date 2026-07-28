@@ -66,7 +66,7 @@ export default function Settings() {
   async function deleteLogin(userId) {
     if (!window.confirm("Remove this login? They'll no longer be able to sign in.")) return;
     try { await axios.delete(`/api/companies/${companyId}/users/${userId}`); loadLogins(); }
-    catch { /* ignore */ }
+    catch (err) { window.alert(err?.response?.data?.error || "Couldn't remove this login."); }
   }
 
   function loadApiKeys() {

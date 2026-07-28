@@ -209,8 +209,20 @@ router.delete("/companies/:companyId/users/:userId", async (req, res) => {
     const users = await readTable("users");
     const user = users.find((u) => u.id === req.params.userId && u.company_id === req.params.companyId);
     if (!user) return res.status(404).json({ error: "Login not found." });
+
+    // jobs.created_by has no cascade, so removing a login who created any
+    // role (even an archived one) would otherwise fail with a raw
+    // foreign-key error. Detach authorship rather than blocking the
+    // removal — this is a normal "offboard a departing employee" action,
+    // and their roles shouldn't be held hostage by it.
+    const jobs = await readTable("jobs");
+    const authored = jobs.filter((j) => j.created_by === req.params.userId);
+    if (authored.length) {
+      await writeTable("jobs", jobs.map((j) => (j.created_by === req.params.userId ? { ...j, created_by: null } : j)));
+    }
+
     await writeTable("users", users.filter((u) => u.id !== req.params.userId));
-    res.json({ ok: true, id: req.params.userId });
+    res.json({ ok: true, id: req.params.userId, roles_detached: authored.length });
   } catch (err) {
     console.error("delete company user error:", err);
     res.status(500).json({ error: "Failed to delete the login." });
