@@ -137,6 +137,23 @@ router.delete("/companies/:companyId", async (req, res) => {
       });
     }
 
+    // users.company_id and api_keys.company_id have no cascade delete — without
+    // this check the DB rejects the delete with a raw foreign-key error, which
+    // reads as an unexplained "Failed to delete company." Same pattern as the
+    // role check above: tell the caller exactly what to remove first.
+    const userCount = (await readTable("users")).filter((u) => u.company_id === companyId).length;
+    const keyCount = (await listApiKeys(companyId)).length;
+    if (userCount > 0 || keyCount > 0) {
+      const parts = [];
+      if (userCount > 0) parts.push(`${userCount} login${userCount === 1 ? "" : "s"}`);
+      if (keyCount > 0) parts.push(`${keyCount} API key${keyCount === 1 ? "" : "s"}`);
+      return res.status(409).json({
+        error: `Can't delete — ${company.name} still has ${parts.join(" and ")}. Remove them first (in this company's Logins / API keys settings).`,
+        user_count: userCount,
+        api_key_count: keyCount,
+      });
+    }
+
     await deleteRow("companies", companyId);
     res.json({ ok: true, id: companyId });
   } catch (err) {
