@@ -37,7 +37,7 @@ router.get("/companies", async (req, res) => {
   try {
     let companies = await readTable("companies");
     if (req.user?.company_id) companies = companies.filter((c) => c.id === req.user.company_id);
-    const jobs = await readTable("jobs");
+    const jobs = (await readTable("jobs")).filter((j) => !j.archived); // match the active-role count shown everywhere else
     res.json(companies.map((c) => ({ ...c, roles: jobs.filter((j) => j.company?.id === c.id).length })));
   } catch (err) {
     console.error("list companies error:", err);
