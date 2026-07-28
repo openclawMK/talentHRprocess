@@ -221,6 +221,11 @@ router.get("/analytics", async (req, res) => {
     const companyFilter = req.user?.company_id || req.query.company || null;
     let jobs = await readTable("jobs");
     if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
+    // Archived roles are soft-removed from the active pipeline (GET /jobs
+    // already excludes them by default) — without this, an archived role's
+    // candidates keep showing up in the dashboard's attention tiles and fit
+    // breakdown even though the role list correctly shows 0 open roles.
+    jobs = jobs.filter((j) => !j.archived);
     let candidates = [];
     try {
       candidates = await readTable("candidates");
@@ -395,6 +400,7 @@ router.get("/candidates-recent", async (req, res) => {
     const companyFilter = req.user?.company_id || req.query.company || null;
     let jobs = await readTable("jobs");
     if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
+    jobs = jobs.filter((j) => !j.archived); // archived roles' candidates shouldn't surface in the recent-candidates feed
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
     try { candidates = await readTable("candidates"); } catch { candidates = []; }
@@ -486,6 +492,7 @@ router.get("/alerts", async (req, res) => {
     const companyFilter = req.user?.company_id || req.query.company || null;
     let jobs = await readTable("jobs");
     if (companyFilter) jobs = jobs.filter((j) => j.company?.id === companyFilter);
+    jobs = jobs.filter((j) => !j.archived); // an archived role shouldn't keep nagging HR with attention alerts
     const jobById = Object.fromEntries(jobs.map((j) => [j.job_id, j]));
     let candidates = [];
     try { candidates = await readTable("candidates"); } catch { candidates = []; }
