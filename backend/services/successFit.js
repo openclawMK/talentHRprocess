@@ -3,7 +3,7 @@
  * definition (must-haves, nice-to-haves, dealbreakers, OCEAN, benchmarks) and
  * produce a single fit score + verdict.
  */
-import { evidenceBlob, hasEvidence, evaluateSuccessProfile } from "./scorer.js";
+import { evidenceBlob, hasEvidence, evaluateSuccessProfile, isStructuralCvCriterion, criterionEvidenceText, isAgeCriterion } from "./scorer.js";
 import { getSalaryBenchmark, salaryExperienceFit } from "./salaryBenchmark.js";
 import { chatJSON } from "./aiClient.js";
 
@@ -172,10 +172,14 @@ export function computeSuccessFit(candidate, job) {
 
 /**
  * Two-directional AI correction for hasEvidence()'s keyword matching: re-checks
- * EVERY must-have/nice-to-have the keyword pass hasn't already had reviewed,
- * whether the keyword pass called it met or unmet — a keyword hit (e.g. two
- * unrelated tokens both appearing in the CV) can be a false positive just as
- * easily as a genuine requirement can be missed. Result is cached on
+ * EVERY must-have/nice-to-have/cv-criterion the keyword pass hasn't already had
+ * reviewed, whether the keyword pass called it met or unmet — a keyword hit
+ * (e.g. two unrelated tokens both appearing in the CV) can be a false positive
+ * just as easily as a genuine requirement can be missed. Also covers every
+ * non-structural cv-source criterion (scorer.js's scoreCriterion() scores those
+ * generically via hasEvidence() too — see isStructuralCvCriterion) so a CV
+ * criterion's score gets the same AI-backed accuracy a Success Profile
+ * must-have already gets, not just a raw keyword match. Result is cached on
  * candidate.evidence_overrides (keyed by exact requirement text) so it's
  * computed once per requirement and reused on every future scoring pass —
  * this keeps repeated scoring deterministic instead of re-asking the AI (and
@@ -184,10 +188,12 @@ export function computeSuccessFit(candidate, job) {
  * candidate.evidence_overrides synchronously.
  */
 export async function refreshEvidenceOverrides(candidate, job) {
-  const sp = job.successProfile;
-  if (!sp) return;
+  const sp = job.successProfile || {};
   const overrides = candidate.evidence_overrides || {};
-  const allReqs = [...(sp.must_haves || []), ...(sp.nice_to_haves || [])];
+  const cvCriteriaTexts = (job.criteria || [])
+    .filter((c) => c.source === "cv" && !isAgeCriterion(c) && !isStructuralCvCriterion(c))
+    .map((c) => criterionEvidenceText(c));
+  const allReqs = [...(sp.must_haves || []), ...(sp.nice_to_haves || []), ...cvCriteriaTexts];
   const toCheck = allReqs.filter((t) => !Object.prototype.hasOwnProperty.call(overrides, t));
   if (!toCheck.length) return;
 

@@ -72,7 +72,7 @@ function stabilityScore(candidate) {
 
 // Age is deliberately NOT scored (anti-discrimination). A criterion counts as an
 // age criterion if "age" appears as a whole word — it is then excluded, never scored.
-const isAgeCriterion = (c) =>
+export const isAgeCriterion = (c) =>
   /\bage\b/.test(lc((c.name || "") + " " + (c.description || "")));
 
 function supervisionScore(candidate) {
@@ -85,50 +85,62 @@ function supervisionScore(candidate) {
   return 30;
 }
 
-function keywordScore(candidate, kws, hit = 82, miss = 48) {
-  const text = profileText(candidate);
-  return kws.some((k) => text.includes(k)) ? hit : miss;
-}
-
 function multilingualScore(candidate) {
   const n = (candidate.profile.languages || []).length;
   // Malaysian baseline is ~2 languages; reserve 100 for 4+.
   return n >= 4 ? 100 : n === 3 ? 88 : n === 2 ? 70 : n === 1 ? 40 : 25;
 }
 
+// Criteria matching one of these word groups are scored from a real parsed
+// profile field (language count, title/team-size, education level, tenure,
+// months of experience) — genuine regardless of industry. Everything else
+// is scored generically instead of against a hand-written, industry-flavoured
+// keyword list: no more list to accidentally match the wrong industry's
+// vocabulary (e.g. a software engineer's "Technical proficiency" used to
+// route into a forklift/machinery list and score 48).
+const STRUCTURAL_GROUPS = [
+  ["multilingual", "language"],
+  ["supervis", "leadership", "team "],
+  ["education", "qualification", "degree", "diploma", "ece", "dpke"],
+  ["reliab", "stability", "tenure", "attendance", "punctual"],
+  ["experience", "hospitality", "hotel", "warehouse", "logistics", "production", "factory", "retail", "childcare", "classroom"],
+];
+
+// Does this cv criterion get its score from a real profile field (true), or
+// from the generic evidence check (false)? Exported so successFit.js's AI
+// evidence-review pass knows which cv criteria need reviewing.
+export function isStructuralCvCriterion(criterion) {
+  const t = lc((criterion.name || "") + " " + (criterion.description || ""));
+  return STRUCTURAL_GROUPS.some((words) => words.some((w) => t.includes(w)));
+}
+
+// The free-text "requirement" a cv criterion is evidence-checked against —
+// same shape as a Success Profile must-have, just sourced from the
+// criterion's own name/description instead of a hand-typed list.
+export function criterionEvidenceText(criterion) {
+  return criterion.description ? `${criterion.name}: ${criterion.description}` : criterion.name;
+}
+
+// Generic evidence-based score for any non-structural cv criterion: does the
+// CV genuinely show evidence of what this criterion asks for? Same method
+// (and the same AI double-check pass, via `overrides`) that already drives
+// the real Success-Profile-fit score — so this is trusted like a genuine
+// measurement (estimated: false), not a guess.
+function genericEvidenceScore(candidate, criterion, overrides) {
+  const met = hasEvidence(evidenceBlob(candidate), criterionEvidenceText(criterion), overrides);
+  return { score: met ? 82 : 45, estimated: false };
+}
+
 // ---- route a single criterion to a sub-score ----
 function scoreCriterion(criterion, candidate, job) {
   const t = lc(criterion.name + " " + (criterion.description || ""));
   const has = (...words) => words.some((w) => t.includes(w));
-  if (has("multilingual", "language")) return { score: multilingualScore(candidate), estimated: false };
-  if (has("supervis", "leadership", "team ")) return { score: supervisionScore(candidate), estimated: false };
-  if (has("cash", "pos", "reconcil", "till", "payment"))
-    return { score: keywordScore(candidate, ["cash", "pos", "reconcil", "till", "payment"]), estimated: false };
-  if (has("pms", "opera", "property management"))
-    return { score: keywordScore(candidate, ["pms", "opera", "property management", "hotel system"], 90, 40), estimated: false };
-  if (has("education", "qualification", "degree", "diploma", "ece", "dpke"))
-    return { score: educationScore(candidate, job), estimated: false };
-  if (has("reliab", "stability", "tenure", "attendance", "punctual"))
-    return { score: stabilityScore(candidate), estimated: false };
-  if (has("experience", "hospitality", "hotel", "warehouse", "logistics", "production", "factory", "retail", "childcare", "classroom"))
-    return { score: experienceScore(candidate, job), estimated: false };
-  if (has("customer", "guest", "service", "interaction"))
-    return { score: keywordScore(candidate, ["customer", "guest", "service"], 85, 45), estimated: false };
-  if (has("accuracy", "attention to detail", "record", "audit"))
-    return { score: keywordScore(candidate, ["accuracy", "detail", "reconcil", "record", "audit"]), estimated: false };
-  if (has("safety", "haccp", "hygiene", "compliance"))
-    return { score: keywordScore(candidate, ["safety", "haccp", "hygiene", "compliance"]), estimated: false };
-  if (has("upsell", "revenue"))
-    return { score: keywordScore(candidate, ["upsell", "revenue", "sales"]), estimated: false };
-  if (has("operations", "opening", "closing", "inventory", "scheduling", "sop"))
-    return { score: keywordScore(candidate, ["opening", "closing", "inventory", "scheduling", "sop", "operations"]), estimated: false };
-  if (has("product knowledge")) return { score: keywordScore(candidate, ["product"]), estimated: false };
-  if (has("curriculum")) return { score: keywordScore(candidate, ["curriculum", "lesson", "syllabus"]), estimated: false };
-  if (has("technical", "machinery", "equipment", "forklift"))
-    return { score: keywordScore(candidate, ["machine", "technical", "equipment", "forklift", "operate"]), estimated: false };
-  if (has("target", "kpi")) return { score: keywordScore(candidate, ["target", "kpi", "sales"]), estimated: false };
-
-  return { score: 60, estimated: true }; // unknown cv criterion -> neutral estimate
+  if (has(...STRUCTURAL_GROUPS[0])) return { score: multilingualScore(candidate), estimated: false };
+  if (has(...STRUCTURAL_GROUPS[1])) return { score: supervisionScore(candidate), estimated: false };
+  if (has(...STRUCTURAL_GROUPS[2])) return { score: educationScore(candidate, job), estimated: false };
+  if (has(...STRUCTURAL_GROUPS[3])) return { score: stabilityScore(candidate), estimated: false };
+  if (has(...STRUCTURAL_GROUPS[4])) return { score: experienceScore(candidate, job), estimated: false };
+  return genericEvidenceScore(candidate, criterion, candidate.evidence_overrides);
 }
 
 function benchmarkScore(candidate, job) {
@@ -258,13 +270,17 @@ export function scoreCandidate(candidate, job) {
         };
       }
       const { score, estimated } = scoreCriterion(c, candidate, job);
+      // A criterion the router could only guess at (estimated: true) is
+      // reported as not genuinely scored — the UI shows it as pending rather
+      // than a fabricated, possibly-wrong number, and it's excluded from the
+      // cv-average below rather than diluting it with a guess.
       return {
         criterion_id: c.id,
         criterion_name: c.name,
         source: "cv",
         weight: c.weight,
         score,
-        scored: true,
+        scored: !estimated,
         estimated: !!estimated,
       };
     }
@@ -280,7 +296,7 @@ export function scoreCandidate(candidate, job) {
     };
   });
 
-  const cvItems = criteria_scores.filter((c) => c.source === "cv" && !c.not_applicable);
+  const cvItems = criteria_scores.filter((c) => c.source === "cv" && !c.not_applicable && c.scored);
   const cvWeight = cvItems.reduce((a, c) => a + c.weight, 0);
   const rawCv = cvWeight
     ? Math.round(cvItems.reduce((a, c) => a + c.score * c.weight, 0) / cvWeight)

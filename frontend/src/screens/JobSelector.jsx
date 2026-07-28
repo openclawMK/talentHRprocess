@@ -30,15 +30,25 @@ export default function JobSelector() {
   const [candPop, setCandPop] = useState(false);
   const [candList, setCandList] = useState(null);
   const [candFilter, setCandFilter] = useState(null);
+  const [archivedJobs, setArchivedJobs] = useState(null);
+  const [showArchived, setShowArchived] = useState(false);
+  const loadArchived = () => {
+    if (!companyId) return;
+    axios.get("/api/jobs?archived=true")
+      .then((r) => setArchivedJobs((r.data || []).filter((j) => (j.company?.id || "other") === companyId && j.archived)))
+      .catch(() => setArchivedJobs([]));
+  };
   useEffect(() => {
     axios.get("/api/jobs").then((r) => setJobs(r.data)).catch(() => setJobs([]));
     axios.get("/api/analytics").then((r) => setA(r.data)).catch(() => setA(null));
     if (companyId) {
       axios.get(`/api/companies/${companyId}`).then((r) => setCompany(r.data)).catch(() => setCompany(null));
       axios.get(`/api/companies/${companyId}/billing`).then((r) => setBilling(r.data)).catch(() => setBilling(null));
+      loadArchived();
     } else {
       setCompany(null);
       setBilling(null);
+      setArchivedJobs(null);
     }
   }, [companyId]);
 
@@ -95,8 +105,33 @@ export default function JobSelector() {
     try {
       await axios.post(`/api/jobs/${j.job_id}/archive`);
       setJobs((js) => js.filter((x) => x.job_id !== j.job_id));
+      loadArchived();
     } catch (err) {
       window.alert(err?.response?.data?.error || "Couldn't archive this role.");
+    }
+  }
+
+  // Restores an archived role back to the active list — the reverse of archiveJob.
+  async function unarchiveJob(j) {
+    try {
+      await axios.post(`/api/jobs/${j.job_id}/unarchive`);
+      setArchivedJobs((js) => (js || []).filter((x) => x.job_id !== j.job_id));
+      axios.get("/api/jobs").then((r) => setJobs(r.data));
+    } catch (err) {
+      window.alert(err?.response?.data?.error || "Couldn't restore this role.");
+    }
+  }
+
+  // PERMANENT — cascades to the role's candidates and their scores. Only
+  // reachable from the archived list, so a role has to be archived first;
+  // this is the one-way door archiveJob's confirm message refers to.
+  async function deleteJobPermanently(j) {
+    if (!window.confirm(`Permanently delete ${j.role_title}? This also deletes all its candidates and scores. This CANNOT be undone.`)) return;
+    try {
+      await axios.delete(`/api/jobs/${j.job_id}`);
+      setArchivedJobs((js) => (js || []).filter((x) => x.job_id !== j.job_id));
+    } catch (err) {
+      window.alert(err?.response?.data?.error || "Couldn't delete this role.");
     }
   }
 
@@ -240,6 +275,35 @@ export default function JobSelector() {
           </div>
         )}
       </div>
+
+      {/* Archived roles — the only place to restore or permanently delete a
+          role once it's been archived. Level 1 (or staff) only, same as
+          archiving itself. Collapsed by default since most companies won't
+          have any. */}
+      {companyId && canArchiveJob && archivedJobs?.length > 0 && (
+        <div style={{ marginTop: 26 }}>
+          <div onClick={() => setShowArchived((v) => !v)} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: D.text3, cursor: "pointer" }}>
+            <span style={{ transform: showArchived ? "rotate(90deg)" : "none", transition: "transform .15s", display: "inline-block" }}>▸</span>
+            Archived roles ({archivedJobs.length})
+          </div>
+          {showArchived && (
+            <div style={{ marginTop: 12, background: D.cardBg, border: `0.5px solid ${D.border}`, borderRadius: 14, overflow: "hidden" }}>
+              {archivedJobs.map((j, i) => (
+                <div key={j.job_id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 18px", borderTop: i ? `0.5px solid ${D.hair}` : "none" }} className="flex-wrap">
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 600, color: D.text }}>{j.role_title}</div>
+                    <div style={{ fontSize: 12, color: D.text4, marginTop: 2 }}>Archived {j.archived_at ? new Date(j.archived_at).toLocaleDateString() : ""}</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <button onClick={() => unarchiveJob(j)} style={{ padding: "8px 14px", background: D.inset, color: D.text2, border: `0.5px solid ${D.border}`, borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Restore</button>
+                    <button onClick={() => deleteJobPermanently(j)} style={{ padding: "8px 14px", background: "transparent", color: D.red, border: `0.5px solid ${D.redBorder}`, borderRadius: 9, fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Delete permanently</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Cross-role candidate view — every candidate across this company's roles,
           filterable by fit lane, HR recommendation, assessment status, and risk
