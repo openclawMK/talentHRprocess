@@ -3,6 +3,7 @@
  */
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 import { readTable, writeTable } from "./store.js";
 import { resolvePermissions } from "./permissions.js";
 
@@ -42,7 +43,7 @@ export async function createUser(name, email, password, companyId = null, manage
     throw new Error("A user with that email already exists.");
   }
   const user = {
-    id: `user_${String(users.length + 1).padStart(3, "0")}`,
+    id: uuidv4(),
     name,
     email,
     password_hash: hashPassword(password),
