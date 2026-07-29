@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const VGRAD = "linear-gradient(135deg,#8B5CF6,#7C3AED)";
@@ -16,6 +16,7 @@ const lbl = { display: "block", fontSize: 14, fontWeight: 700, color: "#374151",
 
 export default function CandidatePortal() {
   const { token } = useParams();
+  const navigate = useNavigate();
   const [job, setJob] = useState(undefined);
   const [step, setStep] = useState("landing");
   const [consent, setConsent] = useState(false);
@@ -72,7 +73,14 @@ export default function CandidatePortal() {
   }
   async function submitFinal() {
     setSubmitting(true); setError("");
-    try { await axios.post(`/api/portal/${token}/ocean`, { candidate_id: candidateId, responses: answers }); setStep("confirm"); }
+    try {
+      await axios.post(`/api/portal/${token}/ocean`, { candidate_id: candidateId, responses: answers });
+      // If this company has the AI voice interview stage turned on, send the
+      // candidate straight into it while they're still engaged, rather than
+      // ending the flow here and relying on a separate link reaching them later.
+      if (job.voice_screening_enabled) navigate(`/voice-screen/${candidateId}`);
+      else setStep("confirm");
+    }
     catch (e) { setError(e.response?.data?.error || "Couldn't submit. Please try again."); }
     finally { setSubmitting(false); }
   }
@@ -238,6 +246,12 @@ export default function CandidatePortal() {
                 </div>
               ))}
             </div>
+            {job.voice_screening_enabled && (
+              <div style={{ background: "#F7F3FF", borderRadius: 14, padding: "16px 20px", marginTop: 20 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 700, color: "#6D28D9", marginBottom: 4 }}>Next: a short AI voice screening call</div>
+                <div style={{ fontSize: 13.5, color: "#7C4DDB", lineHeight: 1.5 }}>Right after you submit, you'll be taken straight into a ~5 minute voice call with our AI interviewer. Find somewhere quiet and make sure your microphone works before continuing.</div>
+              </div>
+            )}
             {error && <p style={{ color: "#DC2626", fontSize: 14, marginTop: 14 }}>{error}</p>}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24 }}>
               <span onClick={() => setStep("assessment")} style={{ fontSize: 15, fontWeight: 600, color: "#6B7280", cursor: "pointer" }}>← Edit answers</span>

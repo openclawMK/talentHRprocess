@@ -22,12 +22,14 @@ export default function VoiceScreen() {
   const [step, setStep] = useState("intro"); // intro | connecting | live | ending | confirm
   const [status, setStatus] = useState("Connecting…"); // shown during the call
   const [error, setError] = useState("");
+  const [subtitle, setSubtitle] = useState(""); // live caption of what the AI is currently saying
 
   const pcRef = useRef(null);
   const dcRef = useRef(null);
   const micStreamRef = useRef(null);
   const audioElRef = useRef(null);
   const transcriptRef = useRef([]); // [{role:'candidate'|'ai', text}]
+  const subtitleRef = useRef(""); // accumulates delta chunks for the AI's current line
   const safetyTimeoutRef = useRef(null);
   const candidateSpeakingRef = useRef(false);
   const endCallPendingRef = useRef(false); // model called end_call while candidate was still talking
@@ -77,6 +79,8 @@ export default function VoiceScreen() {
   async function startCall() {
     setError("");
     setStep("connecting");
+    subtitleRef.current = "";
+    setSubtitle("");
     try {
       const { data } = await axios.post(`/api/voice-screen/${candidateId}/session`);
       const clientSecret = data.client_secret;
@@ -100,14 +104,26 @@ export default function VoiceScreen() {
           const event = JSON.parse(e.data);
           if (event.type === "conversation.item.input_audio_transcription.completed" && event.transcript) {
             transcriptRef.current.push({ role: "candidate", text: event.transcript.trim() });
+          } else if (event.type === "response.output_audio_transcript.delta" || event.type === "response.audio_transcript.delta") {
+            // Live subtitle, built up chunk by chunk as the AI actually speaks.
+            subtitleRef.current += event.delta || "";
+            setSubtitle(subtitleRef.current);
           } else if (
             (event.type === "response.output_audio_transcript.done" || event.type === "response.audio_transcript.done") &&
             event.transcript
           ) {
             transcriptRef.current.push({ role: "ai", text: event.transcript.trim() });
+            // In case delta events weren't sent, make sure the finished line
+            // still ends up on screen rather than staying blank.
+            subtitleRef.current = event.transcript.trim();
+            setSubtitle(subtitleRef.current);
           } else if (event.type === "input_audio_buffer.speech_started") {
             candidateSpeakingRef.current = true;
             setStatus("Listening…");
+            // The candidate is talking now — the AI's last line has served
+            // its purpose, so clear it rather than leave a stale caption up.
+            subtitleRef.current = "";
+            setSubtitle("");
           } else if (event.type === "input_audio_buffer.speech_stopped") {
             candidateSpeakingRef.current = false;
             // end_call arrived while they were mid-answer — now that they've
@@ -118,6 +134,11 @@ export default function VoiceScreen() {
             }
           } else if (event.type === "response.output_audio.delta" || event.type === "response.audio.delta") {
             setStatus("AI speaking…");
+          } else if (event.type === "response.created") {
+            // A fresh AI turn is starting — clear out the previous line so
+            // captions don't run two questions together.
+            subtitleRef.current = "";
+            setSubtitle("");
           } else if (event.type === "response.output_item.done" && event.item?.type === "function_call" && event.item?.name === "end_call") {
             requestEndCall();
           }
@@ -227,8 +248,15 @@ export default function VoiceScreen() {
             </div>
             {step === "live" && (
               <>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: "#6D28D9", background: "#F7F3FF", padding: "8px 18px", borderRadius: 999, marginBottom: 30 }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 14, fontWeight: 600, color: "#6D28D9", background: "#F7F3FF", padding: "8px 18px", borderRadius: 999, marginBottom: 18 }}>
                   <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#7C3AED" }} /> {status}
+                </div>
+                {/* Live subtitle of what the AI is saying, so candidates can follow
+                    along even over a shaky connection or if they mishear a word. */}
+                <div style={{ minHeight: 64, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 24 }}>
+                  {subtitle && (
+                    <p style={{ fontSize: 16, lineHeight: 1.5, color: "#1F2430", background: "#F7F8FB", border: "1px solid #ECEDF2", borderRadius: 12, padding: "14px 20px", maxWidth: 480, margin: 0 }}>{subtitle}</p>
+                  )}
                 </div>
                 <div>
                   <button onClick={endCall} style={{ padding: "12px 24px", background: "#fff", color: "#DC2626", border: "1px solid #FCA5A5", borderRadius: 11, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>End screening</button>

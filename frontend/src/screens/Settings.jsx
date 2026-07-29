@@ -63,8 +63,21 @@ export default function Settings() {
       await axios.patch(`/api/companies/${companyId}/settings`, { voice_screening_mode: mode });
       setScreeningMode(mode);
       setCompanies((cs) => cs.map((c) => (c.id === companyId ? { ...c, voice_screening_mode: mode } : c)));
-    } catch (e) { setScreeningError(e.response?.data?.error || "Couldn't update this setting."); }
-    finally { setScreeningBusy(false); }
+    } catch (e) {
+      // The write may have gone through even if this response didn't (e.g. a
+      // dropped connection) — re-read from the server rather than trust the
+      // failed request either way, so the radio can't end up lying about
+      // what's actually saved.
+      try {
+        const r = await axios.get(`/api/companies/${companyId}`);
+        const actual = r.data.voice_screening_mode || "ai_scan";
+        setScreeningMode(actual);
+        setCompanies((cs) => cs.map((c) => (c.id === companyId ? { ...c, voice_screening_mode: actual } : c)));
+        if (actual !== mode) setScreeningError(e.response?.data?.error || "Couldn't update this setting.");
+      } catch {
+        setScreeningError(e.response?.data?.error || "Couldn't update this setting.");
+      }
+    } finally { setScreeningBusy(false); }
   }
 
   function loadLogins() {

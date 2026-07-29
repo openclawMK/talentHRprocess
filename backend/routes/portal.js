@@ -305,6 +305,7 @@ router.get("/portal/:token", async (req, res) => {
     key_responsibilities: job.requirements?.key_responsibilities || [],
     application_form: applicationFormFor(job),
     screening_questions: job.successProfile?.must_haves || [],
+    voice_screening_enabled: await voiceInterviewEnabled(job.company?.id),
   });
 });
 
