@@ -171,6 +171,32 @@ export function computeSuccessFit(candidate, job) {
 }
 
 /**
+ * Folds a completed voice-screen assessment into evidence_overrides — the
+ * same cache computeProfileFit() reads for every must-have/nice-to-have. The
+ * CV says what the candidate claims; the call is where that claim actually
+ * gets tested out loud, so a clear result there should outrank a keyword
+ * match against the CV text. Only confident results move the needle: a
+ * requirement the candidate visibly substantiated (score >= 70) is marked
+ * met, one they admitted lacking or clearly failed to substantiate (score
+ * <= 30) is marked unmet, and anything in between (vague, or "not covered"
+ * in this call) is left exactly as the CV-based check already had it — this
+ * call only ever narrows uncertainty, never invents evidence for a topic it
+ * didn't actually get to. Call this once per completed voice screen, before
+ * the next score_breakdown / profile_fit computation.
+ */
+export function applyVoiceScreenEvidence(candidate, assessment) {
+  const notes = assessment?.criteria_notes || [];
+  if (!notes.length) return;
+  const overrides = candidate.evidence_overrides || {};
+  for (const n of notes) {
+    if (!n?.criterion || n.score == null) continue;
+    if (n.score >= 70) overrides[n.criterion] = true;
+    else if (n.score <= 30) overrides[n.criterion] = false;
+  }
+  candidate.evidence_overrides = overrides;
+}
+
+/**
  * Two-directional AI correction for hasEvidence()'s keyword matching: re-checks
  * EVERY must-have/nice-to-have/cv-criterion the keyword pass hasn't already had
  * reviewed, whether the keyword pass called it met or unmet — a keyword hit

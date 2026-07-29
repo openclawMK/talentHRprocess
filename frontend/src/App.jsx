@@ -17,6 +17,7 @@ import CompareView from "./screens/CompareView.jsx";
 import SalaryCenter from "./screens/SalaryCenter.jsx";
 import CandidatePortal from "./screens/CandidatePortal.jsx";
 import CandidateAssessment from "./screens/CandidateAssessment.jsx";
+import VoiceScreen from "./screens/VoiceScreen.jsx";
 import InterviewBooking from "./screens/InterviewBooking.jsx";
 import Settings from "./screens/Settings.jsx";
 import Team from "./screens/Team.jsx";
@@ -72,6 +73,8 @@ export default function App() {
         <Route path="/apply/:token" element={<CandidatePortal />} />
         {/* Public standalone OCEAN questionnaire for an individual candidate */}
         <Route path="/assessment/:candidateId" element={<CandidateAssessment />} />
+        {/* Public AI voice screening for an individual candidate */}
+        <Route path="/voice-screen/:candidateId" element={<VoiceScreen />} />
         {/* Public interview-slot booking page for an individual candidate */}
         <Route path="/interview-booking/:candidateId" element={<InterviewBooking />} />
         {/* Public login */}

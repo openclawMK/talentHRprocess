@@ -13,6 +13,9 @@ import { createApiKey, listApiKeys, deleteApiKey } from "../services/apiKeyServi
 import { guardCompanyParam } from "../middleware/companyScope.js";
 import { atLoginLimit, getCompanyBilling, setCompanyPackage, addTokens, countCompanyUsers, PACKAGES } from "../services/billing.js";
 import { logAction } from "../services/auditLog.js";
+import { supabase } from "../services/supabaseClient.js";
+
+const VOICE_SCREENING_MODES = ["ai_scan", "ai_interview"];
 
 const router = Router();
 guardCompanyParam(router);
@@ -96,6 +99,36 @@ router.patch("/companies/:companyId/billing", async (req, res) => {
   } catch (err) {
     console.error("update company billing error:", err);
     res.status(500).json({ error: "Failed to update billing." });
+  }
+});
+
+// PATCH /api/companies/:companyId/settings  { voice_screening_mode }
+// Staff-only: 'ai_scan' (default) keeps profile-fit CV/keyword-only, same as
+// before this feature existed. 'ai_interview' turns on the AI voice-screen
+// call for this company's candidates — its per-requirement verdicts then
+// override the CV-based evidence check for the 35% profile-fit score (see
+// successFit.js's applyVoiceScreenEvidence). Kept switchable per company
+// while the call quality is still being validated.
+router.patch("/companies/:companyId/settings", async (req, res) => {
+  try {
+    if (!requirePlatformAdmin(req, res)) return;
+    const company = (await readTable("companies")).find((c) => c.id === req.params.companyId);
+    if (!company) return res.status(404).json({ error: "Company not found." });
+
+    const { voice_screening_mode } = req.body || {};
+    if (voice_screening_mode && !VOICE_SCREENING_MODES.includes(voice_screening_mode)) {
+      return res.status(400).json({ error: `voice_screening_mode must be one of: ${VOICE_SCREENING_MODES.join(", ")}` });
+    }
+    const before = { voice_screening_mode: company.voice_screening_mode || "ai_scan" };
+    const { error } = await supabase.from("companies").update({ voice_screening_mode }).eq("id", req.params.companyId);
+    if (error) throw new Error(error.message);
+
+    const after = { voice_screening_mode };
+    await logAction(req, { action: "company.settings_updated", target_type: "company", target_id: req.params.companyId, before, after, companyId: req.params.companyId });
+    res.json(after);
+  } catch (err) {
+    console.error("update company settings error:", err);
+    res.status(500).json({ error: "Failed to update settings." });
   }
 });
 

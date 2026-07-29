@@ -27,6 +27,18 @@ import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
 import { readTable, writeTable, insertRow, appendScore } from "../services/store.js";
 import { hasTokens, consumeToken } from "../services/billing.js";
+import { createVoiceScreenSession, summarizeVoiceScreen } from "../services/voiceScreen.js";
+import { applyVoiceScreenEvidence } from "../services/successFit.js";
+
+// 'ai_scan' (default) = CV/keyword-only profile fit, same as before this
+// feature existed. 'ai_interview' = this company has opted into the AI
+// voice-screen call. Kept switchable per company (Settings screen) while
+// call quality is still being validated.
+async function voiceInterviewEnabled(companyId) {
+  if (!companyId) return false;
+  const company = (await readTable("companies")).find((c) => c.id === companyId);
+  return company?.voice_screening_mode === "ai_interview";
+}
 
 const router = Router();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -75,6 +87,95 @@ router.get("/assessment/:candidateId", async (req, res) => {
   } catch (err) {
     console.error("assessment lookup error:", err);
     res.status(500).json({ error: "Couldn't load this assessment. Please try again." });
+  }
+});
+
+/**
+ * GET /api/voice-screen/:candidateId — public lookup for the AI voice-screen
+ * link. Same exposure level as the OCEAN assessment lookup: first name and
+ * role title only.
+ */
+router.get("/voice-screen/:candidateId", async (req, res) => {
+  try {
+    const candidate = (await readTable("candidates")).find((c) => c.candidate_id === req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "This link is invalid or has expired." });
+    const job = (await readTable("jobs")).find((j) => j.job_id === candidate.job_id);
+    if (!(await voiceInterviewEnabled(job?.company?.id))) {
+      return res.status(403).json({ error: "AI voice screening isn't enabled for this role yet.", disabled: true });
+    }
+    res.json({
+      name: candidate.profile?.name || "there",
+      role_title: job?.role_title || "the role",
+      company_name: job?.company?.name || "",
+      already_done: !!candidate.voice_screen,
+    });
+  } catch (err) {
+    console.error("voice-screen lookup error:", err);
+    res.status(500).json({ error: "Couldn't load this screening. Please try again." });
+  }
+});
+
+/**
+ * POST /api/voice-screen/:candidateId/session — mints a short-lived OpenAI
+ * Realtime credential scoped to this candidate's role, so the browser can
+ * open a WebRTC connection directly to OpenAI without ever seeing the real
+ * API key or the prompt-construction logic.
+ */
+router.post("/voice-screen/:candidateId/session", async (req, res) => {
+  try {
+    const candidate = (await readTable("candidates")).find((c) => c.candidate_id === req.params.candidateId);
+    if (!candidate) return res.status(404).json({ error: "This link is invalid or has expired." });
+    const job = (await readTable("jobs")).find((j) => j.job_id === candidate.job_id);
+    if (!job) return res.status(400).json({ error: "Unknown role for this candidate." });
+    if (!(await voiceInterviewEnabled(job.company?.id))) {
+      return res.status(403).json({ error: "AI voice screening isn't enabled for this role yet." });
+    }
+    const session = await createVoiceScreenSession(job, candidate);
+    res.json(session);
+  } catch (err) {
+    console.error("voice-screen session error:", err);
+    res.status(500).json({ error: "Couldn't start the voice screening. Please try again." });
+  }
+});
+
+/**
+ * POST /api/voice-screen/:candidateId/complete  { transcript }
+ * Stores the transcript and a first-pass AI assessment against this role's
+ * Success-Profile must-haves/nice-to-haves, then folds that assessment into
+ * evidence_overrides (see applyVoiceScreenEvidence) so the 35% profile-fit
+ * score reflects what the candidate actually said on the call, not just
+ * what their CV claims.
+ */
+router.post("/voice-screen/:candidateId/complete", async (req, res) => {
+  try {
+    const { transcript } = req.body || {};
+    if (!transcript?.trim()) return res.status(400).json({ error: "Missing transcript." });
+    const candidates = await readTable("candidates");
+    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
+    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    const job = (await readTable("jobs")).find((j) => j.job_id === candidates[idx].job_id);
+    if (!job) return res.status(400).json({ error: "Unknown role for this candidate." });
+
+    let assessment = null;
+    try {
+      assessment = await summarizeVoiceScreen(job, transcript);
+    } catch (e) {
+      console.error("voice-screen summarize error:", e.message);
+    }
+
+    candidates[idx].voice_screen = { transcript, assessment, completed_at: new Date().toISOString() };
+    // Fold into scoring only while this company still has ai_interview mode
+    // on — if it's since been switched back to ai_scan, still keep the
+    // transcript/assessment (never discard what the candidate did), just
+    // don't let it move the profile-fit score.
+    if (assessment && (await voiceInterviewEnabled(job.company?.id))) applyVoiceScreenEvidence(candidates[idx], assessment);
+    candidates[idx].score_breakdown = buildScoreBreakdown(candidates[idx], job);
+    candidates[idx].recommendation = await generateRecommendation(candidates[idx], job);
+    await writeTable("candidates", candidates);
+    res.json({ ok: true, assessment, score_breakdown: candidates[idx].score_breakdown });
+  } catch (err) {
+    console.error("voice-screen complete error:", err);
+    res.status(500).json({ error: "Couldn't save this screening. Please try again." });
   }
 });
 

@@ -11,7 +11,8 @@ create table if not exists companies (
   initials text,
   package_tier text,            -- 'basic' | 'intermediate' | 'pro'; null = not yet on the billing system (unmetered, nothing blocks them)
   cv_token_balance integer default 0,        -- decremented per successful CV scan
-  assistant_token_balance integer default 0  -- decremented per AI assistant question; separate pool from CV scans. login_limit is derived from package_tier in code, not stored
+  assistant_token_balance integer default 0, -- decremented per AI assistant question; separate pool from CV scans. login_limit is derived from package_tier in code, not stored
+  voice_screening_mode text default 'ai_scan' -- 'ai_scan' (CV/keyword-only, current default) | 'ai_interview' (adds the AI voice-screen call, which then verifies/overrides CV evidence for the 35% profile-fit score)
 );
 
 create table if not exists jobs (

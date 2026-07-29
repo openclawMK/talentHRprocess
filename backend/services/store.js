@@ -38,8 +38,8 @@ async function reconcile(table, keyCol, rows) {
   }
 }
 
-const companyToApi = (r) => ({ id: r.id, name: r.name, industry: r.industry, accent: r.accent, initials: r.initials, package_tier: r.package_tier ?? null, cv_token_balance: r.cv_token_balance ?? 0, assistant_token_balance: r.assistant_token_balance ?? 0 });
-const companyToRow = (o) => ({ id: o.id, name: o.name, industry: o.industry || "", accent: o.accent, initials: o.initials, package_tier: o.package_tier ?? null, cv_token_balance: o.cv_token_balance ?? 0, assistant_token_balance: o.assistant_token_balance ?? 0 });
+const companyToApi = (r) => ({ id: r.id, name: r.name, industry: r.industry, accent: r.accent, initials: r.initials, package_tier: r.package_tier ?? null, cv_token_balance: r.cv_token_balance ?? 0, assistant_token_balance: r.assistant_token_balance ?? 0, voice_screening_mode: r.voice_screening_mode || "ai_scan" });
+const companyToRow = (o) => ({ id: o.id, name: o.name, industry: o.industry || "", accent: o.accent, initials: o.initials, package_tier: o.package_tier ?? null, cv_token_balance: o.cv_token_balance ?? 0, assistant_token_balance: o.assistant_token_balance ?? 0, voice_screening_mode: o.voice_screening_mode || "ai_scan" });
 
 function jobToApi(r, companiesById) {
   return {

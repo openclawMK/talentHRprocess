@@ -33,6 +33,10 @@ export default function Settings() {
   const [billingBusy, setBillingBusy] = useState(false);
   const [billingError, setBillingError] = useState("");
 
+  const [screeningMode, setScreeningMode] = useState("ai_scan");
+  const [screeningBusy, setScreeningBusy] = useState(false);
+  const [screeningError, setScreeningError] = useState("");
+
   useEffect(() => {
     axios.get("/api/companies").then((r) => {
       setCompanies(r.data);
@@ -42,9 +46,26 @@ export default function Settings() {
 
   useEffect(() => {
     if (!companyId) return;
-    setLogins(null); setApiKeys(null); setRevealedKey(null); setBilling(null); setBillingError("");
+    setLogins(null); setApiKeys(null); setRevealedKey(null); setBilling(null); setBillingError(""); setScreeningError("");
     loadLogins(); loadApiKeys(); loadBilling();
   }, [companyId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The companies list already carries voice_screening_mode as a plain
+  // column, so this just mirrors it into local state to drive the select.
+  useEffect(() => {
+    const c = (companies || []).find((x) => x.id === companyId);
+    if (c) setScreeningMode(c.voice_screening_mode || "ai_scan");
+  }, [companyId, companies]);
+
+  async function setScreeningModeFor(mode) {
+    setScreeningError(""); setScreeningBusy(true);
+    try {
+      await axios.patch(`/api/companies/${companyId}/settings`, { voice_screening_mode: mode });
+      setScreeningMode(mode);
+      setCompanies((cs) => cs.map((c) => (c.id === companyId ? { ...c, voice_screening_mode: mode } : c)));
+    } catch (e) { setScreeningError(e.response?.data?.error || "Couldn't update this setting."); }
+    finally { setScreeningBusy(false); }
+  }
 
   function loadLogins() {
     axios.get(`/api/companies/${companyId}/users`).then((r) => setLogins(r.data)).catch(() => setLogins([]));
@@ -186,6 +207,44 @@ export default function Settings() {
               {billingError && <div style={{ fontSize: 12.5, color: D.red, marginTop: 12 }}>{billingError}</div>}
             </>
           )}
+        </div>
+      )}
+
+      {companyId && (
+        <div style={{ ...cardBox, marginBottom: 16 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 4 }}>🎙 AI screening method</div>
+          <div style={{ fontSize: 13, color: D.text4, marginBottom: 16 }}>
+            How {company?.name || "this company"}'s candidates get verified against the role's must-haves/nice-to-haves for the 35% profile-fit score. Still being validated, so this stays switchable per company.
+          </div>
+          <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
+            {[
+              { value: "ai_scan", title: "AI scan", desc: "CV/keyword match only — current default, no voice call." },
+              { value: "ai_interview", title: "AI voice interview", desc: "Adds a short AI phone-style call that verifies CV claims out loud before scoring." },
+            ].map((opt) => {
+              const active = screeningMode === opt.value;
+              return (
+                <div
+                  key={opt.value}
+                  onClick={() => !screeningBusy && opt.value !== screeningMode && setScreeningModeFor(opt.value)}
+                  style={{
+                    padding: "14px 16px", borderRadius: 12, cursor: screeningBusy ? "default" : "pointer",
+                    border: `1.5px solid ${active ? "#7C3AED" : D.border}`,
+                    background: active ? "#F7F3FF" : D.inset,
+                    opacity: screeningBusy ? 0.6 : 1,
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <span style={{ width: 16, height: 16, borderRadius: "50%", border: `2px solid ${active ? "#7C3AED" : D.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {active && <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#7C3AED" }} />}
+                    </span>
+                    <span style={{ fontSize: 13.5, fontWeight: 700, color: active ? "#6D28D9" : D.text }}>{opt.title}</span>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: D.text4, marginLeft: 24 }}>{opt.desc}</div>
+                </div>
+              );
+            })}
+          </div>
+          {screeningError && <div style={{ fontSize: 12.5, color: D.red, marginTop: 12 }}>{screeningError}</div>}
         </div>
       )}
 
