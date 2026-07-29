@@ -104,6 +104,14 @@ export default function VoiceScreen() {
 
       const dc = pc.createDataChannel("oai-events");
       dcRef.current = dc;
+      // With turn_detection on, the model otherwise just waits for the
+      // candidate to speak first — nothing prompts it to open the call
+      // itself, so candidates were left saying "hi?" into silence. Once the
+      // channel is actually open, explicitly ask for a first response so the
+      // AI greets them and asks its first question per buildInstructions.
+      dc.onopen = () => {
+        dc.send(JSON.stringify({ type: "response.create" }));
+      };
       dc.onmessage = (e) => {
         try {
           const event = JSON.parse(e.data);
