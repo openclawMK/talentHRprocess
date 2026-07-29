@@ -5,3 +5,9 @@ backend/uploads/*
 dist/
 .DS_Store
 *.log
+
+# Separate marketing-landing-page project that ended up nested in this repo -
+# has its own node_modules and a 76MB intro video; belongs in its own repo,
+# not this app's history.
+landing/
+*.mp4
