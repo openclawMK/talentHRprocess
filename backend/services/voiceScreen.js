@@ -100,6 +100,7 @@ DO NOT ask general competency or behavioural questions like "tell me about your 
 
 TURN-TAKING — THIS IS A LIVE CONVERSATION, NOT A SCRIPT YOU READ OUT:
 - Whenever you ask a question, STOP TALKING and wait for the candidate to answer it. Never answer your own question.
+- ONE QUESTION AT A TIME, ALWAYS. Never move to your next question until the candidate has clearly finished answering the current one. People pause mid-answer to think — a pause is NOT the same as being finished. If you're not sure whether they're done, wait a beat longer or ask "anything else on that?" rather than starting a new question. Two questions must never be in flight at once.
 - Never combine asking a question with thanking them or ending the call in the same turn. Asking and closing are always two separate turns, with the candidate's answer in between.
 - If the candidate stays silent for a while after a question, you may briefly re-prompt them once — but do not move on or close the call as though they had answered.
 
@@ -143,7 +144,11 @@ export async function createVoiceScreenSession(job, candidate) {
             // this is what caused "the interviewer doesn't talk when I
             // respond". semantic_vad waits for a genuine pause in meaning,
             // not just silence, so it doesn't cut the candidate off mid-thought.
-            turn_detection: { type: "semantic_vad" },
+            // eagerness "low" makes it wait longer before deciding they're
+            // done — the default was still firing on a thinking-pause
+            // mid-answer, causing the AI to start the next question while
+            // the candidate was still mid-sentence on the first one.
+            turn_detection: { type: "semantic_vad", eagerness: "low" },
           },
         },
         instructions: buildInstructions(job, candidate),

@@ -73,7 +73,12 @@ export default function VoiceScreen() {
       return;
     }
     endedRef.current = true;
-    endCall();
+    // The tool-call item finishes generating as soon as the model decides to
+    // call it, which can be a beat before the trailing audio for the
+    // thank-you line has actually finished playing back over WebRTC (jitter
+    // buffer lag) — hanging up immediately was cutting that line off before
+    // the candidate heard it. Give playback a moment to catch up first.
+    setTimeout(endCall, 2500);
   }
 
   async function startCall() {
