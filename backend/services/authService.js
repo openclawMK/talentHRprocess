@@ -9,6 +9,32 @@ import { resolvePermissions } from "./permissions.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "peoplequest_secret_2024";
 const TOKEN_TTL = "8h";
+const TOKEN_TTL_MS = 8 * 60 * 60 * 1000;
+
+export const COOKIE_NAME = "pq_token";
+
+/**
+ * Options for the httpOnly login cookie. secure/sameSite are driven by
+ * req.secure (real TLS status, see server.js's "trust proxy" setting) rather
+ * than NODE_ENV, so this is correct in production even if that env var was
+ * never set on the host: SameSite=None requires Secure, and that combination
+ * is only valid (and only needed) when the request actually arrived over
+ * HTTPS, which is exactly the cross-site Vercel-to-backend case.
+ * remember=false sets a session cookie (no maxAge) -- cleared when the
+ * browser closes, same intent as today's unchecked "remember me" not
+ * surviving past the current session, but improved from before, that meant
+ * losing the session on every refresh too.
+ */
+export function cookieOptions(req, remember) {
+  const crossSite = req.secure;
+  return {
+    httpOnly: true,
+    secure: crossSite,
+    sameSite: crossSite ? "none" : "lax",
+    path: "/",
+    ...(remember ? { maxAge: TOKEN_TTL_MS } : {}),
+  };
+}
 
 export function hashPassword(plaintext) {
   return bcrypt.hashSync(plaintext, 10);

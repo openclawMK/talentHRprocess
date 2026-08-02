@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
 import authRouter from "./routes/auth.js";
@@ -20,6 +21,13 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Render (and most hosts) terminate TLS at a proxy in front of this process,
+// so the request Express sees is always plain HTTP internally. Without this,
+// req.secure is always false, and the auth cookie logic below (which decides
+// Secure/SameSite based on req.secure) would think every request is
+// unencrypted even in production, breaking cross-site cookies there.
+app.set("trust proxy", 1);
 
 // The frontend (Vercel) and backend (this server) are on separate origins,
 // so cross-origin requests are real, not incidental -- but a bare cors()
@@ -42,8 +50,13 @@ app.use(cors({
     // dumps a full stack trace (server file paths included) to the caller.
     callback(null, !origin || ALLOWED_ORIGINS.includes(origin));
   },
+  // The HR login cookie is httpOnly and cross-site (Vercel frontend, this
+  // backend on a different origin) -- the browser only attaches it if the
+  // server explicitly opts in to sending/receiving credentials.
+  credentials: true,
 }));
 app.use(helmet());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false })); // Twilio webhook posts form-encoded
 

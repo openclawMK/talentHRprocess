@@ -8,18 +8,21 @@ import "./index.css";
 // In production set VITE_API_BASE to the deployed backend URL (e.g. Render).
 // Left empty for local dev, where Vite proxies /api -> http://localhost:3001.
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE || "";
+// The HR login lives in an httpOnly cookie now (see backend/routes/auth.js),
+// not an Authorization header -- without this, the browser won't send that
+// cookie on the cross-origin request to the deployed backend at all.
+axios.defaults.withCredentials = true;
 
 // Auto-recover from an expired/invalid session: if any protected call returns
-// 401, clear the stored token and bounce to /login instead of silently
-// rendering an empty page. The login call itself is excluded so a wrong-password
-// error can still surface on the form.
+// 401, clear the stored user/permissions and bounce to /login instead of
+// silently rendering an empty page. The login call itself is excluded so a
+// wrong-password error can still surface on the form.
 axios.interceptors.response.use(
   (res) => res,
   (err) => {
     const url = err.config?.url || "";
     if (err.response?.status === 401 && !url.includes("/auth/login")) {
       localStorage.removeItem("pq_auth");
-      delete axios.defaults.headers.common["Authorization"];
       if (!window.location.pathname.startsWith("/login")) {
         window.location.assign("/login");
       }

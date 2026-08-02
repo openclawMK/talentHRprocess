@@ -88,8 +88,8 @@ export default function Login() {
     setBusy(true);
     setError("");
     try {
-      const res = await axios.post("/api/auth/login", { email, password });
-      login(res.data.token, res.data.user, remember, res.data.permissions);
+      const res = await axios.post("/api/auth/login", { email, password, remember });
+      login(res.data.user, res.data.permissions);
       navigate("/home");
     } catch {
       setError("Invalid email or password");

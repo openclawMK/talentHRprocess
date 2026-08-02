@@ -22,9 +22,13 @@ import InterviewBooking from "./screens/InterviewBooking.jsx";
 import Settings from "./screens/Settings.jsx";
 import Team from "./screens/Team.jsx";
 
-// Redirect to /login unless authenticated.
+// Redirect to /login unless authenticated. If there's nothing cached to
+// optimistically show yet, wait for AuthContext's /api/auth/me check to
+// resolve rather than redirecting immediately — the cookie-based session
+// can be valid even with an empty local cache (see AuthContext.jsx).
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, checking } = useAuth();
+  if (checking && !isAuthenticated) return null;
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
 

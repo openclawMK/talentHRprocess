@@ -3,7 +3,7 @@
  */
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { login } from "../services/authService.js";
+import { login, COOKIE_NAME, cookieOptions } from "../services/authService.js";
 import { authenticateHR } from "../middleware/auth.js";
 import { resolvePermissions } from "../services/permissions.js";
 
@@ -20,17 +20,26 @@ const loginLimiter = rateLimit({
   message: { error: "Too many login attempts. Please try again in a few minutes." },
 });
 
-// POST /api/auth/login
+// POST /api/auth/login  { email, password, remember? }
+// The JWT is set as an httpOnly cookie -- page JS never touches it, which is
+// what actually protects it from XSS token theft. Still included in the
+// response body too, for non-browser callers (curl, scripts) that can't use
+// a cookie jar; that doesn't weaken the browser-side protection since using
+// it still requires already having a valid token.
 router.post("/login", loginLimiter, async (req, res) => {
-  const { email, password } = req.body || {};
+  const { email, password, remember } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
   const result = await login(email, password);
   if (!result) return res.status(401).json({ error: "Invalid email or password" });
+  res.cookie(COOKIE_NAME, result.token, cookieOptions(req, !!remember));
   res.json(result);
 });
 
-// POST /api/auth/logout — JWT is stateless; client just clears the token.
-router.post("/logout", (req, res) => res.json({ ok: true }));
+// POST /api/auth/logout
+router.post("/logout", (req, res) => {
+  res.clearCookie(COOKIE_NAME, { httpOnly: true, secure: req.secure, sameSite: req.secure ? "none" : "lax", path: "/" });
+  res.json({ ok: true });
+});
 
 // GET /api/auth/me — protected
 router.get("/me", authenticateHR, async (req, res) => {
