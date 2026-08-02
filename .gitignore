@@ -7,7 +7,12 @@ dist/
 *.log
 
 # Separate marketing-landing-page project that ended up nested in this repo -
-# has its own node_modules and a 76MB intro video; belongs in its own repo,
+# has its own node_modules and a build pipeline; belongs in its own repo,
 # not this app's history.
 landing/
+
+# *.mp4 blocks video files from bloating the repo by accident, EXCEPT the
+# one video actually deployed via frontend/public/ -- that's real content
+# the landing page's "How It Works" modal plays, not an accidental add.
 *.mp4
+!frontend/public/peoplehire-intro.mp4
