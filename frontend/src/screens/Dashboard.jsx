@@ -539,7 +539,7 @@ export default function Dashboard() {
           ].map((p) => {
             const active = filter === p.k;
             return (
-              <span key={p.k} onClick={() => setFilter(p.k)} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: active && p.k === "all" ? p.text : p.text, background: active ? p.bg : (p.k === "all" ? D.inset : p.bg), border: `1px solid ${active ? p.border : (p.k === "all" ? "transparent" : p.border)}`, opacity: active || p.k !== "all" ? 1 : 0.85 }}>{p.label}</span>
+              <span key={p.k} onClick={() => setFilter(p.k)} style={{ fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "7px 13px", borderRadius: 8, color: active ? p.text : (p.k === "all" ? D.text2 : p.text), background: active ? p.bg : (p.k === "all" ? D.inset : p.bg), border: `1px solid ${active ? p.border : (p.k === "all" ? "transparent" : p.border)}`, opacity: active || p.k !== "all" ? 1 : 0.85 }}>{p.label}</span>
             );
           })}
         </div>
