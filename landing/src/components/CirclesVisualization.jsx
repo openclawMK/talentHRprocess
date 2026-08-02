@@ -25,12 +25,15 @@ const AVATARS = [
   { orbit: 0, angle: 270, size: 58, shape: "square", glow: "purple", src: avatarUrl(26), delay: 2.45 },
 ];
 
-// Split into a positioning wrapper (static transform — where on the circle)
-// and an inner element (animated transform — the fly-in). Keyframes replace
-// the whole `transform` value while running/forwards, so the orbit placement
-// and the entrance animation can never share one element's transform.
-function Avatar({ orbit, angle, size, shape, glow, src, delay }) {
-  const radius = ORBITS[orbit].diameter / 2;
+// Split into a positioning wrapper (static transform — where on the circle,
+// relative to its OWN orbit ring's center) and an inner element (animated
+// transform — the fly-in). Keyframes replace the whole `transform` value
+// while running/forwards, so the orbit placement and the entrance animation
+// can never share one element's transform. Must be rendered INSIDE that
+// orbit's own .orbit-spin div (not as a sibling) so the avatar actually
+// travels around with the ring instead of sitting at a fixed point.
+function Avatar({ diameter, angle, size, shape, glow, src, delay }) {
+  const radius = diameter / 2;
   return (
     <div
       className="avatar-position"
@@ -53,13 +56,14 @@ function CenterStat() {
   );
 }
 
-function Orbit({ diameter, spin, duration, children }) {
+function Orbit({ diameter, spin, duration, avatars, counterStat }) {
   return (
     <div className="orbit-center" style={{ width: diameter, height: diameter }}>
       <div className={`orbit-spin spin-${spin}`} style={{ animationDuration: `${duration}s` }}>
         <div className="orbit-ring-border" />
+        {avatars}
       </div>
-      {children}
+      {counterStat}
     </div>
   );
 }
@@ -69,18 +73,24 @@ export default function CirclesVisualization() {
     <div className="circles-wrap">
       <div className="circles-stage anim-scale-in">
         {ORBITS.map((o, i) => (
-          <Orbit key={o.key} diameter={o.diameter} spin={o.spin} duration={o.duration}>
-            {i === 0 && (
-              // Cancels orbit-1's own rotation (opposite direction, same
-              // duration) so the stat stays upright while its ring spins.
-              <div className={`orbit-counter-spin spin-${o.spin === "left" ? "right" : "left"}`} style={{ animationDuration: `${o.duration}s` }}>
-                <CenterStat />
-              </div>
-            )}
-          </Orbit>
-        ))}
-        {AVATARS.map((a, i) => (
-          <Avatar key={i} {...a} />
+          <Orbit
+            key={o.key}
+            diameter={o.diameter}
+            spin={o.spin}
+            duration={o.duration}
+            avatars={AVATARS.filter((a) => a.orbit === i).map((a, j) => (
+              <Avatar key={j} diameter={o.diameter} angle={a.angle} size={a.size} shape={a.shape} glow={a.glow} src={a.src} delay={a.delay} />
+            ))}
+            counterStat={
+              i === 0 && (
+                // Cancels this orbit's own rotation (opposite direction, same
+                // duration) so the stat stays upright while its ring spins.
+                <div className={`orbit-counter-spin spin-${o.spin === "left" ? "right" : "left"}`} style={{ animationDuration: `${o.duration}s` }}>
+                  <CenterStat />
+                </div>
+              )
+            }
+          />
         ))}
       </div>
     </div>
