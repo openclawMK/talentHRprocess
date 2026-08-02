@@ -1,0 +1,555 @@
+.app {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: url("./assets/hero-bg.webp") center center / cover no-repeat;
+  overflow: hidden;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+  position: relative;
+  z-index: 10;
+}
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1920px;
+  margin: 0 auto;
+  padding: 24px 64px;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+.logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-word {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-dark);
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+.nav-link {
+  position: relative;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ink-dark);
+  padding-bottom: 4px;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+.nav-link-light {
+  color: #fff;
+  font-weight: 500;
+}
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* ---------- Buttons (rotating gradient border + sliding fill) ---------- */
+.btn-border-wrap {
+  position: relative;
+  display: inline-block;
+  border-radius: 50px;
+}
+.btn-border-wrap::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background: conic-gradient(from var(--border-angle), var(--accent-2), var(--bg-1), var(--accent), var(--bg-1), var(--accent-2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-spin 3s linear infinite;
+}
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 50px;
+  background: var(--bg-1);
+  color: #fff;
+  padding: 12px 26px;
+  font-size: 15px;
+  font-weight: 500;
+  overflow: hidden;
+}
+.btn-cta {
+  padding: 14px 28px;
+  font-size: 16px;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+}
+.btn-fill-left::after {
+  transform: translateX(-100%);
+}
+.btn-fill-left:hover::after {
+  transform: translateX(0);
+}
+.btn-fill-right::after {
+  transform: translateX(100%);
+}
+.btn-fill-right:hover::after {
+  transform: translateX(0);
+}
+.btn-content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Hero layout ---------- */
+.hero {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  max-width: 1920px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 64px 48px;
+}
+
+.hero-left {
+  flex: 0 1 600px;
+  padding-top: 40px;
+}
+
+.hero-heading {
+  font-size: 64px;
+  font-weight: 600;
+  line-height: 64px;
+  letter-spacing: -1.5px;
+  margin: 0 0 32px;
+}
+.hero-heading-dark {
+  color: var(--ink-dark);
+}
+.hero-heading-light {
+  color: var(--ink);
+}
+.hero-cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.85em;
+  margin-left: 3px;
+  vertical-align: -0.1em;
+  background: var(--accent-2);
+  animation: blink 0.9s steps(1) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.hero-cta-wrap {
+  opacity: 0;
+}
+
+/* Desktop reaches the video via the header's "How It Works" nav link, which
+   is hidden below 768px (see the responsive block) -- this is the mobile-only
+   substitute for that. */
+.hero-video-cta-mobile {
+  display: none;
+  margin-top: 14px;
+  border: 1.5px solid rgba(0, 0, 0, 0.18);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--ink-dark);
+  padding: 11px 22px;
+  font-size: 14.5px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Video modal (the header/mobile "How It Works" link) ---------- */
+.video-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(6, 3, 20, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.video-modal-box {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+}
+.video-modal-close {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.video-modal-player {
+  width: 100%;
+  max-height: 80vh;
+  border-radius: 16px;
+  display: block;
+  background: #000;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Circles visualization ---------- */
+.circles-wrap {
+  flex: 0 0 720px;
+  width: 720px;
+  height: 720px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.circles-stage {
+  position: relative;
+  width: 797px;
+  height: 797px;
+}
+.orbit-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+.orbit-spin,
+.orbit-counter-spin {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.orbit-counter-spin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spin-left {
+  animation-name: spin-ccw;
+}
+.spin-right {
+  animation-name: spin-cw;
+}
+@keyframes spin-cw {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin-ccw {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+.orbit-ring-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 1px;
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0) 0%, rgba(147, 130, 255, 0.85) 43%, rgba(124, 58, 237, 0) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.center-stat {
+  text-align: center;
+}
+.center-stat-number {
+  font-size: 64px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.center-stat-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  margin-top: 6px;
+}
+
+.avatar-position {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+.avatar {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  opacity: 0;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.avatar-square {
+  border-radius: 20px;
+}
+.avatar-square-lg {
+  border-radius: 24px;
+}
+.glow-purple {
+  box-shadow: 0 0 24px 4px rgba(124, 58, 237, 0.55), 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+.glow-pink {
+  box-shadow: 0 0 24px 4px rgba(236, 72, 153, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+.glow-blue {
+  box-shadow: 0 0 24px 4px rgba(14, 165, 233, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+.glow-orange {
+  box-shadow: 0 0 24px 4px rgba(249, 115, 22, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+.glow-yellow {
+  box-shadow: 0 0 24px 4px rgba(234, 179, 8, 0.5), 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- Entrance animations ---------- */
+.anim-fade-down {
+  animation: fade-down 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-fade-up {
+  animation: fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-scale-in {
+  animation: scale-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+}
+.anim-delayed {
+  animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.anim-fly-in {
+  animation: fly-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes fly-in {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-180deg);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: blur(0);
+  }
+}
+
+/* ---------- Logo ticker ---------- */
+.logo-ticker {
+  position: relative;
+  z-index: 5;
+  padding: 24px 0 36px;
+}
+.logo-ticker-mask {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+}
+.logo-ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  width: max-content;
+  animation: ticker-scroll 20s linear infinite;
+}
+.logo-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+@keyframes ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* TRACK is 4 copies of the 5-company set -- -25% of the whole track's
+       width is exactly one copy, however wide the names render, so this
+       stays seamless without depending on a fixed item width. */
+    transform: translateX(-25%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-down,
+  .anim-fade-up,
+  .anim-scale-in,
+  .anim-delayed,
+  .anim-fly-in,
+  .orbit-spin,
+  .orbit-counter-spin,
+  .logo-ticker-track,
+  .hero-cursor {
+    animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1280px) {
+  .circles-wrap {
+    transform: scale(0.85);
+  }
+}
+@media (max-width: 1024px) {
+  .hero {
+    flex-direction: column;
+    padding-bottom: 64px;
+  }
+  .hero-heading {
+    font-size: 48px;
+    line-height: 52px;
+  }
+  .circles-wrap {
+    transform: scale(0.7);
+  }
+  .header-left {
+    gap: 24px;
+  }
+  .cursor-callout {
+    margin-left: 0;
+  }
+}
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  .hero-video-cta-mobile {
+    display: inline-flex;
+  }
+  .hero-heading {
+    font-size: 36px;
+    line-height: 40px;
+  }
+  .circles-wrap {
+    transform: scale(0.5);
+  }
+  .site-header-inner,
+  .hero {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+@media (max-width: 480px) {
+  .hero-heading {
+    font-size: 28px;
+    line-height: 32px;
+  }
+  .circles-wrap {
+    transform: scale(0.4);
+  }
+  .btn,
+  .btn-cta {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  .logo-ticker-track {
+    gap: 40px;
+  }
+  .logo-ticker-item {
+    width: 96px;
+    height: 28px;
+  }
+}

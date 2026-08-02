@@ -6,10 +6,14 @@ dist/
 .DS_Store
 *.log
 
-# Separate marketing-landing-page project that ended up nested in this repo -
-# has its own node_modules and a build pipeline; belongs in its own repo,
-# not this app's history.
-landing/
+# landing/ is the real source for the marketing page deployed via
+# frontend/public/landing.html + landing-assets/ (see landing/README-less
+# build: `cd landing && npm run build`, then copy dist/* over). Only its
+# own build artifacts/deps are excluded -- the source itself is worth
+# keeping, since losing it means reverse-engineering the deployed bundle
+# again from scratch, as happened once already.
+landing/node_modules/
+landing/dist/
 
 # *.mp4 blocks video files from bloating the repo by accident, EXCEPT the
 # one video actually deployed via frontend/public/ -- that's real content
