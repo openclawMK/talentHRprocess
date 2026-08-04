@@ -142,20 +142,19 @@ export function computeSuccessFit(candidate, job) {
   if (benchExp > 0) benchmarks.push({ label: "Experience", target: `${benchExp} yrs`, actual: candExp != null ? `${candExp} yrs` : "—", met: candExp != null && candExp >= benchExp });
   if (benchTeam > 0) benchmarks.push({ label: "Team size led", target: `${benchTeam}`, actual: `${candTeam}`, met: candTeam >= benchTeam });
 
-  // ---- overall fit % (weighted over applicable components) ----
-  const comps = [];
-  if (must.length) comps.push({ w: 0.45, v: must.filter((m) => m.met).length / must.length });
-  if (nice.length) comps.push({ w: 0.15, v: nice.filter((m) => m.met).length / nice.length });
-  if (ocean && ocean.length) comps.push({ w: 0.25, v: ocean.filter((o) => o.match).length / ocean.length });
-  if (benchmarks.length) comps.push({ w: 0.15, v: benchmarks.filter((b) => b.met).length / benchmarks.length });
-  const wsum = comps.reduce((a, c) => a + c.w, 0) || 1;
-  let fit = Math.round((comps.reduce((a, c) => a + c.w * c.v, 0) / wsum) * 100);
+  // Overall fit % is computeProfileFit()'s number — the SAME 35%-weighted
+  // figure shown on the Score Breakdown card — not a separately-derived
+  // value, so this panel and that card can never disagree the way they used
+  // to. That formula deliberately excludes OCEAN (personality already has
+  // its own separate 15% slice of the overall score, and its own dashboard
+  // — folding it in here too would double-count it) and gives partial
+  // credit on benchmarks/salary rather than the pass/fail scoring below,
+  // which exists for a human reading this panel, not for the percentage.
+  const fit = computeProfileFit(candidate, job) ?? 0;
 
-  // A dealbreaker is a strong negative, not an automatic zero — apply a heavy
-  // penalty (so it still lands red) but keep the underlying fit visible, since a
-  // lexical/parsing miss shouldn't crush an otherwise-strong candidate to nothing.
+  // computeProfileFit() already applies the dealbreaker penalty to `fit` —
+  // this just drives the verdict/lane labels off the same trigger.
   const hasDealbreaker = dealbreakers.some((d) => d.triggered);
-  if (hasDealbreaker) fit = Math.max(0, fit - 35);
 
   const verdict = hasDealbreaker ? "Dealbreaker — review" : fit >= 75 ? "Strong fit" : fit >= 50 ? "Partial fit" : "Weak fit";
   const lane = hasDealbreaker || fit < 50 ? "red" : fit >= 75 ? "green" : "amber";

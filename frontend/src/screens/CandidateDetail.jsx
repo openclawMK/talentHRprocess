@@ -466,7 +466,7 @@ export default function CandidateDetail() {
                   )}
                   {sfit.has_ocean && sfit.ocean?.length > 0 && (
                     <div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Personality alignment · {sfit.ocean.filter((o) => o.match).length}/{sfit.ocean.length}</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Personality alignment · {sfit.ocean.filter((o) => o.match).length}/{sfit.ocean.length} <span style={{ fontWeight: 600, textTransform: "none", letterSpacing: 0, color: D.text5 }}>· not counted in fit % — see the Personality card above</span></div>
                       {sfit.ocean.map((o, i) => <Row key={i} ok={o.match} text={`${o.trait}: ${o.actual} (ideal ${o.ideal})`} />)}
                     </div>
                   )}
