@@ -9,7 +9,7 @@ import { extractText } from "../services/fileExtractor.js";
 import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
-import { computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { computeTraits, applyOceanScores, recomputeCombined } from "../services/oceanScorer.js";
 import { applyInterviewScores } from "../services/interviewScorer.js";
 import { applyHrNotes } from "../services/hrNotesScorer.js";
 import { generateFinalAnalysis } from "../services/finalAnalyser.js";
@@ -115,6 +115,11 @@ async function runScoring(candidate, job) {
  */
 async function refreshIntelligence(candidate, job) {
   await refreshEvidenceOverrides(candidate, job);
+  // Keeps candidate.score.combined_score/lane/component_scores in step with
+  // whatever changed evidence just refreshed — score_breakdown alone isn't
+  // enough, since the "Score so far" sidebar and anything else reading
+  // candidate.score directly would otherwise keep showing a frozen number.
+  recomputeCombined(candidate, job);
   candidate.score_breakdown = buildScoreBreakdown(candidate, job);
   candidate.recommendation = await generateRecommendation(candidate, job);
 }

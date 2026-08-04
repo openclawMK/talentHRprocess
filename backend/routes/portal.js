@@ -21,7 +21,7 @@ import { parseCVWithAI } from "../services/cvParser.js";
 import { scoreCandidate } from "../services/scorer.js";
 import { refreshEvidenceOverrides } from "../services/successFit.js";
 import { generateCandidateInsights } from "../services/languageGenerator.js";
-import { OCEAN_ITEMS, computeTraits, applyOceanScores } from "../services/oceanScorer.js";
+import { OCEAN_ITEMS, computeTraits, applyOceanScores, recomputeCombined } from "../services/oceanScorer.js";
 import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
@@ -169,6 +169,10 @@ router.post("/voice-screen/:candidateId/complete", async (req, res) => {
     // transcript/assessment (never discard what the candidate did), just
     // don't let it move the profile-fit score.
     if (assessment && (await voiceInterviewEnabled(job.company?.id))) applyVoiceScreenEvidence(candidates[idx], assessment);
+    // Keeps candidate.score.combined_score/lane/component_scores in step
+    // with the evidence change above -- score_breakdown alone isn't enough,
+    // since the "Score so far" sidebar reads candidate.score directly.
+    recomputeCombined(candidates[idx], job);
     candidates[idx].score_breakdown = buildScoreBreakdown(candidates[idx], job);
     candidates[idx].recommendation = await generateRecommendation(candidates[idx], job);
     await writeTable("candidates", candidates);
