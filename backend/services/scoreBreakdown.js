@@ -7,6 +7,7 @@
  * call, so it's cheap to refresh on every score change.
  */
 import { sourceShares, sourceEnabled } from "./pipeline.js";
+import { computeProfileFit } from "./successFit.js";
 
 const lc = (s) => (s || "").toLowerCase();
 
@@ -163,7 +164,12 @@ export function buildScoreBreakdown(candidate, job) {
   // Weighting model: Success-Profile-fit (35%) / Personality (15%) / Interview (50%).
   const comp = score.component_scores || {};
   const W = comp.weights || { profile: 0.35, ocean: 0.15, interview: 0.5 };
-  const profileScore = comp.profile_fit ?? score.cv_partial_score ?? sourceScore(score, "cv");
+  // Recomputed live rather than trusting comp.profile_fit, which is a
+  // snapshot frozen at whatever moment candidate.score was last written
+  // (e.g. the original CV-scoring pass) -- it never picks up a later
+  // evidence_overrides change (a voice-screen call confirming or
+  // contradicting a must-have, an HR override, etc.) without this.
+  const profileScore = computeProfileFit(candidate, job) ?? comp.profile_fit ?? score.cv_partial_score ?? sourceScore(score, "cv");
   const oceanScore = comp.ocean ?? sourceScore(score, "ocean");
   const interviewScore = comp.interview ?? sourceScore(score, "interview");
 
