@@ -13,7 +13,6 @@ const CHECKS = [
   { key: "health", icon: "🩺", label: "Health report", hint: "Pre-employment medical screening" },
   { key: "references", icon: "📞", label: "Previous employer review", hint: "Reference call with recent employer(s)" },
 ];
-const CONF_PCT = { High: 88, Medium: 64, Low: 42 };
 
 // Per-trait descriptive phrases: [high, moderate, low]
 const OCEAN_DESC = {
@@ -310,7 +309,6 @@ export default function CandidateDetail() {
                   <div style={{ textAlign: "right" }}>
                     <div style={{ fontSize: 12, color: "#6B7280", fontWeight: 600 }}>Confidence</div>
                     <div style={{ fontSize: 20, fontWeight: 800, color: "#111827" }}>{rec.confidence}</div>
-                    <div style={{ fontSize: 12, color: "#9AA0AE" }}>{CONF_PCT[rec.confidence] ?? 60}% certainty</div>
                   </div>
                 </div>
                 <div style={{ background: "rgba(255,255,255,.7)", borderRadius: 12, padding: "12px 16px", marginBottom: 14, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }} className="flex-wrap">
