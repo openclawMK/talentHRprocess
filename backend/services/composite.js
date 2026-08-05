@@ -57,7 +57,13 @@ export function composeScore(candidate, job, criteria) {
   const availW = part(profileDone, W.profile, 1) + part(oceanDone, W.ocean, 1) + part(interviewDone, W.interview, 1);
   const relative = availW > 0 ? combined / availW : 0;
   const availPreInterviewW = part(profileDone, W.profile, 1) + part(oceanDone, W.ocean, 1);
-  const relativeScreening = availPreInterviewW > 0 ? (screening / availPreInterviewW) * 100 : 0;
+  // Same convention as `relative` above: `screening` is already on a 0-100
+  // points scale, availPreInterviewW is a weight FRACTION (e.g. 0.5) - so
+  // dividing already yields the right percentage. The extra *100 that used
+  // to be here inflated this 100x (e.g. 50% became "5000"), meaning
+  // screening_pass was true for virtually any candidate with a nonzero
+  // pre-interview score, regardless of how weak it actually was.
+  const relativeScreening = availPreInterviewW > 0 ? screening / availPreInterviewW : 0;
   const green = job.thresholds?.green ?? HIRE_THRESHOLD;
   const red = job.thresholds?.red ?? 45;
   const lane = relative >= green ? "green" : relative < red ? "red" : "amber";
