@@ -21,7 +21,7 @@ import { buildScoreBreakdown } from "../services/scoreBreakdown.js";
 import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify, readLog, phoneDigits, whatsappConfigured } from "../services/whatsappService.js";
 import { chatJSON, chatText } from "../services/aiClient.js";
-import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra } from "../services/store.js";
+import { readTable, writeTable, insertRow, readScores, appendScore, deleteScoresForCandidate, patchCandidateExtra, getCandidate, updateCandidate } from "../services/store.js";
 import { guardJobParam, assertJobInScope } from "../middleware/companyScope.js";
 import { requireCandidateAccess, requirePermission } from "../middleware/requirePermission.js";
 import { logAction } from "../services/auditLog.js";
@@ -38,6 +38,27 @@ const DEMO_PATH = path.join(DATA_DIR, "demo-candidates.json");
 const readJSON = (p) => JSON.parse(fs.readFileSync(p, "utf-8"));
 const today = () => new Date().toISOString().slice(0, 10);
 const findJob = async (jobId) => (await readTable("jobs")).find((j) => j.job_id === jobId);
+
+// Serializes read-modify-write calls for the SAME candidate so two near-
+// simultaneous requests (e.g. clicking Flagged on two different pre-hire
+// checks within the same round trip) can never interleave: each queued call
+// only starts reading once the previous one has fully written, so the second
+// call always builds on the first's result instead of a stale snapshot that
+// silently overwrites it. This is what caused "clicking Flagged reverts back
+// to Pending" — two concurrent POSTs each read the candidate before the
+// other's write landed, so whichever response arrived last won and undid the
+// other. Scoped to this Node process — fine on a single instance (current
+// deploy), but wouldn't coordinate across multiple instances if ever scaled
+// horizontally.
+const candidateWriteQueues = new Map();
+function withCandidateLock(candidateId, fn) {
+  const prev = candidateWriteQueues.get(candidateId) || Promise.resolve();
+  const next = prev.then(fn, fn).finally(() => {
+    if (candidateWriteQueues.get(candidateId) === next) candidateWriteQueues.delete(candidateId);
+  });
+  candidateWriteQueues.set(candidateId, next);
+  return next;
+}
 
 // Hides direct contact details from a candidate payload for a Level 2 user
 // without view_contact_info — everything else (score, CV content, notes)
@@ -417,39 +438,47 @@ router.get("/jobs/:jobId/best-match", async (req, res) => {
  */
 router.post("/candidates/:jobId/:candidateId/pre-hire-checks", async (req, res) => {
   try {
-    const CHECK_KEYS = ["background", "health", "references"];
-    const STATUSES = ["pending", "clear", "flagged", "skipped"];
-    const candidates = await readTable("candidates");
-    const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
-    if (idx === -1) return res.status(404).json({ error: "Candidate not found." });
+    // Locked so two checks clicked within the same round trip are applied
+    // one after the other, each reading the previous one's already-saved
+    // state — see withCandidateLock's comment above for the bug this fixes.
+    const result = await withCandidateLock(req.params.candidateId, async () => {
+      const CHECK_KEYS = ["background", "health", "references"];
+      const STATUSES = ["pending", "clear", "flagged", "skipped"];
+      const cand = await getCandidate(req.params.candidateId);
+      if (!cand) return { notFound: true };
 
-    const cand = candidates[idx];
-    const before = JSON.stringify(cand.pre_hire_checks || {});
-    cand.pre_hire_checks = cand.pre_hire_checks || {};
-    for (const k of CHECK_KEYS) {
-      const inc = req.body?.[k];
-      if (!inc) continue;
-      const cur = cand.pre_hire_checks[k] || {};
-      cand.pre_hire_checks[k] = {
-        status: STATUSES.includes(inc.status) ? inc.status : cur.status || "pending",
-        notes: typeof inc.notes === "string" ? inc.notes : cur.notes || "",
-        updated: today(),
-      };
-    }
+      const before = JSON.stringify(cand.pre_hire_checks || {});
+      cand.pre_hire_checks = cand.pre_hire_checks || {};
+      for (const k of CHECK_KEYS) {
+        const inc = req.body?.[k];
+        if (!inc) continue;
+        const cur = cand.pre_hire_checks[k] || {};
+        cand.pre_hire_checks[k] = {
+          status: STATUSES.includes(inc.status) ? inc.status : cur.status || "pending",
+          notes: typeof inc.notes === "string" ? inc.notes : cur.notes || "",
+          updated: today(),
+        };
+      }
 
-    // Auto-refresh the AI suggestion so it reflects the latest checks — but only
-    // if a status actually changed, to avoid a needless LLM call on note edits.
-    const statusChanged = CHECK_KEYS.some(
-      (k) => (JSON.parse(before)[k]?.status || null) !== (cand.pre_hire_checks[k]?.status || null)
-    );
-    const job = await findJob(req.params.jobId);
-    if (statusChanged && job) {
-      try { cand.recommendation = await generateRecommendation(cand, job); }
-      catch (e) { console.error("recommendation refresh failed:", e.message); }
-    }
+      // Auto-refresh the AI suggestion so it reflects the latest checks — but only
+      // if a status actually changed, to avoid a needless LLM call on note edits.
+      const statusChanged = CHECK_KEYS.some(
+        (k) => (JSON.parse(before)[k]?.status || null) !== (cand.pre_hire_checks[k]?.status || null)
+      );
+      const job = await findJob(req.params.jobId);
+      if (statusChanged && job) {
+        try { cand.recommendation = await generateRecommendation(cand, job); }
+        catch (e) { console.error("recommendation refresh failed:", e.message); }
+      }
 
-    await writeTable("candidates", candidates);
-    res.json({ ok: true, candidate: cand, pre_hire_checks: cand.pre_hire_checks, recommendation: cand.recommendation });
+      // Single-row update — never touches any other candidate's data, unlike
+      // the old readTable()+writeTable() full-table round trip.
+      await updateCandidate(cand.candidate_id, { pre_hire_checks: cand.pre_hire_checks, recommendation: cand.recommendation });
+      return { cand };
+    });
+
+    if (result.notFound) return res.status(404).json({ error: "Candidate not found." });
+    res.json({ ok: true, candidate: result.cand, pre_hire_checks: result.cand.pre_hire_checks, recommendation: result.cand.recommendation });
   } catch (err) {
     console.error("pre-hire-checks error:", err);
     res.status(500).json({ error: "Failed to save checks." });

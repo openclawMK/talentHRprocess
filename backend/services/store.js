@@ -230,6 +230,52 @@ export async function patchCandidateExtra(candidateId, extraPatch) {
 }
 
 /**
+ * Single-row read for one candidate — for write paths that only need this
+ * one candidate (pre-hire-checks, etc.) instead of the full-table
+ * readTable()+writeTable() round trip. That pattern reads all rows, mutates
+ * one in memory, and writes all rows back — so two requests touching
+ * DIFFERENT candidates at nearly the same time can still race (the second
+ * writeTable() overwrites the table with a snapshot taken before the first
+ * one's change landed). getCandidate()/updateCandidate() below touch only
+ * the one row in question, so they can never clobber another candidate's
+ * concurrent write.
+ */
+export async function getCandidate(candidateId) {
+  const { data, error } = await supabase.from("candidates").select("*").eq("candidate_id", candidateId).single();
+  if (error) return null;
+  return candidateToApi(data);
+}
+
+/**
+ * Persist a partial patch to exactly one candidate row. Known columns (see
+ * CANDIDATE_KNOWN) go straight to their column; anything else merges into
+ * `extra`, same as candidateToRow(). This is the single-row-safe
+ * alternative to writeTable() — see getCandidate() above for why that
+ * matters. Still a read-then-write for the `extra` merge, so callers
+ * expecting several rapid patches to the SAME candidate (e.g. a user
+ * clicking through several fields quickly) should serialize those calls
+ * themselves — this alone only protects OTHER candidates' rows, not two
+ * overlapping calls for the same one.
+ */
+export async function updateCandidate(candidateId, patch) {
+  const known = {};
+  const extraPatch = {};
+  for (const k of Object.keys(patch)) {
+    if (CANDIDATE_KNOWN.has(k)) known[k] = patch[k];
+    else extraPatch[k] = patch[k];
+  }
+  const payload = { ...known };
+  if (Object.keys(extraPatch).length) {
+    const { data, error: readErr } = await supabase
+      .from("candidates").select("extra").eq("candidate_id", candidateId).single();
+    if (readErr) throw new Error(`updateCandidate read: ${readErr.message}`);
+    payload.extra = { ...(data?.extra || {}), ...extraPatch };
+  }
+  const { error } = await supabase.from("candidates").update(payload).eq("candidate_id", candidateId);
+  if (error) throw new Error(`updateCandidate write: ${error.message}`);
+}
+
+/**
  * Delete exactly one row by its primary key. For `jobs`, the DB foreign keys
  * (candidates -> jobs, scores -> candidates/jobs) are ON DELETE CASCADE, so
  * this also removes that role's candidates and their scores automatically.
