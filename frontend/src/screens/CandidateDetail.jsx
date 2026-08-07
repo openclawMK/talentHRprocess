@@ -97,6 +97,7 @@ export default function CandidateDetail() {
   const [expandedCriteria, setExpandedCriteria] = useState(() => new Set());
   const toggleCriterion = (id) => setExpandedCriteria((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const [showTranscript, setShowTranscript] = useState(false);
+  const [voiceCardMinimized, setVoiceCardMinimized] = useState(false);
   async function saveCheck(key, patch) {
     const next = { ...checks, [key]: { ...(checks[key] || { status: "pending", notes: "" }), ...patch } };
     setChecks(next);
@@ -516,15 +517,26 @@ export default function CandidateDetail() {
             }
             return (
               <div style={cardBox}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 6 }} className="flex-wrap">
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: voiceCardMinimized ? 0 : 6, cursor: "pointer" }}
+                  className="flex-wrap"
+                  onClick={() => setVoiceCardMinimized((v) => !v)}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700, color: D.text }}>🎙 AI Voice Interview</div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 12, fontWeight: 700, color: D.text3, background: D.pillBg, border: `1px solid ${D.border}`, padding: "4px 11px", borderRadius: 20 }}>{langLabel}</span>
                     {vs.completed_at && <span style={{ fontSize: 12, color: D.text4 }}>{new Date(vs.completed_at).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</span>}
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setVoiceCardMinimized((v) => !v); }}
+                      title={voiceCardMinimized ? "Expand" : "Minimize"}
+                      style={{ fontSize: 13, fontWeight: 700, color: D.text3, cursor: "pointer", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 7, border: `1px solid ${D.border}`, background: D.pillBg, flexShrink: 0 }}
+                    >
+                      {voiceCardMinimized ? "▾" : "▴"}
+                    </span>
                   </div>
                 </div>
 
-                {(a.red_flags || []).length > 0 && (
+                {!voiceCardMinimized && (a.red_flags || []).length > 0 && (
                   <div style={{ background: D.redBg, border: `1px solid ${D.redBorder}`, borderRadius: 11, padding: "12px 15px", margin: "12px 0" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: D.red, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 8 }}>⚠ Red flags raised on the call</div>
                     {a.red_flags.map((f, i) => (
@@ -536,9 +548,9 @@ export default function CandidateDetail() {
                   </div>
                 )}
 
-                {a.summary && <div style={{ fontSize: 13.5, color: D.text2, lineHeight: 1.6, margin: "12px 0" }}>{a.summary}</div>}
+                {!voiceCardMinimized && a.summary && <div style={{ fontSize: 13.5, color: D.text2, lineHeight: 1.6, margin: "12px 0" }}>{a.summary}</div>}
 
-                {(a.strengths?.length > 0 || a.concerns?.length > 0) && (
+                {!voiceCardMinimized && (a.strengths?.length > 0 || a.concerns?.length > 0) && (
                   <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2" style={{ marginBottom: 14 }}>
                     {a.strengths?.length > 0 && (
                       <div>
@@ -555,7 +567,7 @@ export default function CandidateDetail() {
                   </div>
                 )}
 
-                {(a.criteria_notes || []).length > 0 && (
+                {!voiceCardMinimized && (a.criteria_notes || []).length > 0 && (
                   <div style={{ marginBottom: 14 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>How each requirement held up</div>
                     {a.criteria_notes.map((c, i) => {
@@ -574,7 +586,7 @@ export default function CandidateDetail() {
                   </div>
                 )}
 
-                <div style={{ borderTop: `0.5px solid ${D.hair}`, paddingTop: 12 }}>
+                {!voiceCardMinimized && <div style={{ borderTop: `0.5px solid ${D.hair}`, paddingTop: 12 }}>
                   <span onClick={() => setShowTranscript((v) => !v)} style={{ fontSize: 13, fontWeight: 600, color: D.blue, cursor: "pointer" }}>
                     {showTranscript ? "▴ Hide full transcript" : "▾ View full transcript"}
                   </span>
@@ -596,7 +608,7 @@ export default function CandidateDetail() {
                       })}
                     </div>
                   )}
-                </div>
+                </div>}
               </div>
             );
           })()}

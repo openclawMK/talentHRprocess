@@ -146,8 +146,15 @@ export async function createVoiceScreenSession(job, candidate, language = "en") 
           input: {
             // Input transcription must be explicitly enabled, or the
             // candidate's own speech never gets transcribed — only the
-            // assistant's side would show up in the transcript.
-            transcription: { model: "whisper-1" },
+            // assistant's side would show up in the transcript. Without a
+            // language hint, Whisper has to auto-detect the language from
+            // audio alone and gets it wrong often enough to matter — a
+            // Malaysian-accented English answer would come back transcribed
+            // as Malay text, which is confusing garbage for HR to read even
+            // though the candidate never actually spoke Malay. CALL_LANGUAGES'
+            // keys (en/ms/zh) are already valid ISO-639-1 codes Whisper accepts,
+            // so passing the candidate's chosen language directly fixes this.
+            transcription: { model: "whisper-1", language: CALL_LANGUAGES[language] ? language : "en" },
             // Without this, the model has no reliable signal that the
             // candidate has finished talking, so it never auto-responds —
             // this is what caused "the interviewer doesn't talk when I
