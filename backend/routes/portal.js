@@ -27,7 +27,7 @@ import { generateRecommendation } from "../services/recommendationEngine.js";
 import { notify } from "../services/whatsappService.js";
 import { readTable, writeTable, insertRow, appendScore } from "../services/store.js";
 import { hasTokens, consumeToken } from "../services/billing.js";
-import { createVoiceScreenSession, summarizeVoiceScreen } from "../services/voiceScreen.js";
+import { createVoiceScreenSession, summarizeVoiceScreen, CALL_LANGUAGES } from "../services/voiceScreen.js";
 import { applyVoiceScreenEvidence } from "../services/successFit.js";
 
 // 'ai_scan' (default) = CV/keyword-only profile fit, same as before this
@@ -130,8 +130,11 @@ router.post("/voice-screen/:candidateId/session", async (req, res) => {
     if (!(await voiceInterviewEnabled(job.company?.id))) {
       return res.status(403).json({ error: "AI voice screening isn't enabled for this role yet." });
     }
-    const session = await createVoiceScreenSession(job, candidate);
-    res.json(session);
+    // Candidate picks this on the intro screen before starting the call —
+    // an unrecognised value falls back to English rather than failing the request.
+    const language = CALL_LANGUAGES[req.body?.language] ? req.body.language : "en";
+    const session = await createVoiceScreenSession(job, candidate, language);
+    res.json({ ...session, language });
   } catch (err) {
     console.error("voice-screen session error:", err);
     res.status(500).json({ error: "Couldn't start the voice screening. Please try again." });
@@ -148,7 +151,7 @@ router.post("/voice-screen/:candidateId/session", async (req, res) => {
  */
 router.post("/voice-screen/:candidateId/complete", async (req, res) => {
   try {
-    const { transcript } = req.body || {};
+    const { transcript, language } = req.body || {};
     if (!transcript?.trim()) return res.status(400).json({ error: "Missing transcript." });
     const candidates = await readTable("candidates");
     const idx = candidates.findIndex((c) => c.candidate_id === req.params.candidateId);
@@ -163,7 +166,10 @@ router.post("/voice-screen/:candidateId/complete", async (req, res) => {
       console.error("voice-screen summarize error:", e.message);
     }
 
-    candidates[idx].voice_screen = { transcript, assessment, completed_at: new Date().toISOString() };
+    candidates[idx].voice_screen = {
+      transcript, assessment, completed_at: new Date().toISOString(),
+      language: CALL_LANGUAGES[language] ? language : "en",
+    };
     // Fold into scoring only while this company still has ai_interview mode
     // on — if it's since been switched back to ai_scan, still keep the
     // transcript/assessment (never discard what the candidate did), just

@@ -22,7 +22,16 @@ dotenv.config();
 const REALTIME_MODEL = process.env.OPENAI_REALTIME_MODEL || "gpt-realtime-2.1";
 const REALTIME_VOICE = process.env.OPENAI_REALTIME_VOICE || "marin";
 
-function buildInstructions(job, candidate) {
+// Candidate picks this before the call starts (VoiceScreen.jsx's language
+// step). "en" stays the safe default for any old client that doesn't send one.
+export const CALL_LANGUAGES = {
+  en: "English",
+  ms: "Bahasa Malaysia",
+  zh: "Mandarin Chinese (中文)",
+};
+
+function buildInstructions(job, candidate, language = "en") {
+  const languageName = CALL_LANGUAGES[language] || CALL_LANGUAGES.en;
   const candidateName = candidate?.profile?.name || candidate?.name || "";
 
   const req = job.requirements || {};
@@ -79,7 +88,7 @@ ${cvBlock}
 
 HOW TO USE THE CV: spend roughly half your questions on their actual stated experience and half on the role itself. Reference specific things from their CV by name — a named employer, a specific skill, a duty they listed — and ask them to substantiate it with detail only someone who genuinely did it would know. If a claim is central to this role (for example supervising staff, handling cash, or a named system or certification), probe that one specifically. You are not trying to catch them out or interrogate them; you are giving them a fair chance to back up what they wrote. If they cannot substantiate a claim, or their answer contradicts their CV, do not argue — just note it and move on; the hiring team will weigh it.` : ""}
 
-This is a SCREENING call before any human interview — plan for around 5 to 6 questions, and keep questions and follow-ups reasonably tight so the call doesn't drag, but there is no clock forcing you to cut anything short. If you are probing a serious concern the candidate raised (see red flags below), take whatever time is needed to get their answer — that matters more than staying brief. Speak English for this call. Never mention age, race, religion, gender, nationality, or marital status, and never ask about them.
+This is a SCREENING call before any human interview — plan for around 5 to 6 questions, and keep questions and follow-ups reasonably tight so the call doesn't drag, but there is no clock forcing you to cut anything short. If you are probing a serious concern the candidate raised (see red flags below), take whatever time is needed to get their answer — that matters more than staying brief. The candidate chose to be interviewed in ${languageName} — conduct the ENTIRE call in ${languageName}: greeting, every question, every follow-up, and the closing. Never mention age, race, religion, gender, nationality, or marital status, and never ask about them.
 
 YOUR INTERVIEWING STYLE — this matters as much as the questions:
 - You are a discerning, professional interviewer, not a cheerleader. Do NOT praise or validate every answer by default ("great point", "that's excellent") — most real answers are just okay, and you should sound neutral or simply acknowledge them ("I see", "understood", "okay, thank you") unless an answer is genuinely strong.
@@ -91,7 +100,7 @@ YOUR INTERVIEWING STYLE — this matters as much as the questions:
     4. Never agree with it, never normalise it, never say it's understandable or fine. Stay professional and neutral in tone, but do not let it pass unexamined.
 - Never invent agreement. If you disagree or the answer doesn't meet the role's needs, it's fine to simply move on without endorsing it.
 - Speak naturally and at a normal pace, and always let the candidate finish their thought before you respond.
-- Conduct the call in English. Candidates may answer in Malay or mix Malay and English — that is completely fine and must never count against them. Understand their answer fully in whichever language they use, and continue speaking English yourself. Judge WHAT they said, never their language or accent.
+- Conduct the call in ${languageName}. If the candidate mixes in another language or a few words of English mid-answer, that is completely fine and must never count against them — understand their answer fully regardless, and continue speaking ${languageName} yourself. Judge WHAT they said, never their language, fluency, or accent.
 
 Cover these requirements, one question at a time — have a real adaptive conversation, not a rigid script. These are exactly what this role is checking a candidate for (must-haves first, nice-to-haves if time allows):
 ${topics}
@@ -121,7 +130,7 @@ There is no fixed time limit — take as long as the candidate needs to answer y
  * ever sees the ephemeral token, never the system prompt construction logic
  * or the API key.
  */
-export async function createVoiceScreenSession(job, candidate) {
+export async function createVoiceScreenSession(job, candidate, language = "en") {
   const res = await fetch("https://api.openai.com/v1/realtime/client_secrets", {
     method: "POST",
     headers: {
@@ -151,7 +160,7 @@ export async function createVoiceScreenSession(job, candidate) {
             turn_detection: { type: "semantic_vad", eagerness: "low" },
           },
         },
-        instructions: buildInstructions(job, candidate),
+        instructions: buildInstructions(job, candidate, language),
         // The call ends when the MODEL decides it's actually over (closing
         // question answered + thank-you said), not on a fixed timer — a
         // timer was cutting the call before the candidate got to say they
@@ -194,8 +203,9 @@ export async function summarizeVoiceScreen(job, transcript) {
     "You are an HR analyst reviewing a transcript of an AI-conducted voice screening call whose purpose was " +
     "to verify the candidate's CV claims against this role's must-have and nice-to-have requirements. " +
     "Be specific and evidence-based, quoting or paraphrasing what the candidate actually said. " +
-    "The transcript may contain Malay or mixed Malay-English — read it accurately and judge the SUBSTANCE " +
-    "of what the candidate said, never their language, fluency, or accent. " +
+    "The candidate may have been interviewed in English, Bahasa Malaysia, or Mandarin Chinese, and the transcript " +
+    "may mix languages — read it accurately regardless of language and judge the SUBSTANCE of what the candidate " +
+    "said, never their language, fluency, or accent. " +
     "Judge the CONTENT of each answer, not merely how detailed it was: an answer can be perfectly specific " +
     "and still be disqualifying. Do not reference gender, race, religion, nationality, age, or marital status. " +
     "Return valid JSON only.";

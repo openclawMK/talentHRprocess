@@ -4,6 +4,13 @@ import axios from "axios";
 
 const VGRAD = "linear-gradient(135deg,#8B5CF6,#7C3AED)";
 const cardBox = { background: "#fff", border: "1px solid #ECEDF2", borderRadius: 18, padding: 36 };
+// Keys must match backend/services/voiceScreen.js's CALL_LANGUAGES exactly —
+// this is what actually gets sent to pick the call's spoken language.
+const LANGUAGES = [
+  { code: "en", label: "English" },
+  { code: "ms", label: "Bahasa Malaysia" },
+  { code: "zh", label: "中文 Chinese" },
+];
 // The call now ends when the MODEL calls the end_call tool (see
 // voiceScreen.js) — only after it has asked if the candidate has more
 // questions, heard them confirm they don't, and said its closing line. Fixed
@@ -23,6 +30,7 @@ export default function VoiceScreen() {
   const [status, setStatus] = useState("Connecting…"); // shown during the call
   const [error, setError] = useState("");
   const [subtitle, setSubtitle] = useState(""); // live caption of what the AI is currently saying
+  const [language, setLanguage] = useState("en"); // candidate's pick, made on the intro screen before starting
 
   const pcRef = useRef(null);
   const dcRef = useRef(null);
@@ -87,7 +95,7 @@ export default function VoiceScreen() {
     subtitleRef.current = "";
     setSubtitle("");
     try {
-      const { data } = await axios.post(`/api/voice-screen/${candidateId}/session`);
+      const { data } = await axios.post(`/api/voice-screen/${candidateId}/session`, { language });
       const clientSecret = data.client_secret;
 
       const pc = new RTCPeerConnection();
@@ -191,7 +199,7 @@ export default function VoiceScreen() {
       .join("\n");
     try {
       if (transcript.trim()) {
-        await axios.post(`/api/voice-screen/${candidateId}/complete`, { transcript });
+        await axios.post(`/api/voice-screen/${candidateId}/complete`, { transcript, language });
       }
     } catch (e) {
       console.error("Failed to save screening:", e);
@@ -246,6 +254,28 @@ export default function VoiceScreen() {
             <div style={{ background: "#F7F3FF", borderRadius: 14, padding: "20px 22px", marginBottom: 26 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#6D28D9", marginBottom: 8 }}>What to expect</div>
               <div style={{ fontSize: 14.5, color: "#7C4DDB", lineHeight: 1.6 }}>About 5 to 6 questions, roughly 4-5 minutes · speak naturally, as if talking to a person · your microphone will be used only for this call.</div>
+            </div>
+            <div style={{ marginBottom: 26 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "#1F2430", marginBottom: 10 }}>Which language would you like to be interviewed in?</div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {LANGUAGES.map((l) => {
+                  const active = language === l.code;
+                  return (
+                    <button
+                      key={l.code}
+                      type="button"
+                      onClick={() => setLanguage(l.code)}
+                      style={{
+                        padding: "11px 18px", borderRadius: 11, fontSize: 14.5, fontWeight: 600, cursor: "pointer",
+                        border: `1.5px solid ${active ? "#7C3AED" : "#DDE0E9"}`,
+                        background: active ? "#F7F3FF" : "#fff", color: active ? "#6D28D9" : "#4B5563",
+                      }}
+                    >
+                      {active ? "✓ " : ""}{l.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             {error && <p style={{ color: "#DC2626", fontSize: 14, marginBottom: 16 }}>{error}</p>}
             <button onClick={startCall} style={{ width: "100%", padding: 15, background: VGRAD, color: "#fff", border: "none", borderRadius: 12, fontWeight: 700, fontSize: 16, cursor: "pointer" }}>🎙 Start voice screening</button>

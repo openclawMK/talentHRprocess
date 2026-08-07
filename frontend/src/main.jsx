@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import axios from "axios";
 import App from "./App.jsx";
+import { isPublicPath } from "./publicPaths.js";
 import "./index.css";
 
 // In production set VITE_API_BASE to the deployed backend URL (e.g. Render).
@@ -21,7 +22,10 @@ axios.interceptors.response.use(
   (res) => res,
   (err) => {
     const url = err.config?.url || "";
-    if (err.response?.status === 401 && !url.includes("/auth/login")) {
+    // Public candidate-facing pages (apply/, voice-screen/, etc.) never have
+    // an HR session — a 401 there is normal, not an expired login, and must
+    // never blow away whatever that page was doing (e.g. mid-application).
+    if (err.response?.status === 401 && !url.includes("/auth/login") && !isPublicPath(window.location.pathname)) {
       localStorage.removeItem("pq_auth");
       if (!window.location.pathname.startsWith("/login")) {
         window.location.assign("/login");

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { isPublicPath } from "../publicPaths.js";
 
 const AuthContext = createContext(null);
 const KEY = "pq_auth";
@@ -35,6 +36,14 @@ export function AuthProvider({ children }) {
   // immediately; ProtectedRoute below waits for it when there's nothing to
   // optimistically show yet.
   useEffect(() => {
+    // Public candidate-facing pages (apply/, voice-screen/, etc.) never have
+    // an HR session and never need one — calling /me there is not just
+    // wasted, its inevitable 401 used to get caught by main.jsx's global
+    // interceptor and hard-redirect the candidate to /login mid-application.
+    if (isPublicPath(window.location.pathname)) {
+      setAuth({ user: null, permissions: null, checking: false });
+      return;
+    }
     axios.get("/api/auth/me")
       .then((r) => {
         setAuth({ user: r.data.user, permissions: r.data.permissions, checking: false });
