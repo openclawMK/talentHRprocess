@@ -8,6 +8,8 @@ import { usePalette } from "../context/ThemeContext.jsx";
 
 const GRAD = "linear-gradient(135deg,#6366F1,#7C3AED)";
 const AVATARS = ["linear-gradient(135deg,#6366F1,#7C3AED)", "linear-gradient(135deg,#0EA5E9,#6366F1)", "linear-gradient(135deg,#059669,#0EA5E9)", "linear-gradient(135deg,#F59E0B,#EF4444)", "linear-gradient(135deg,#EC4899,#7C3AED)"];
+// Matches backend/services/voiceScreen.js's CALL_LANGUAGES keys exactly.
+const VOICE_LANGS = { en: "English", ms: "Bahasa Malaysia", zh: "中文 Chinese" };
 const CHECKS = [
   { key: "background", icon: "🛡", label: "Background check", hint: "Identity, criminal record, employment history" },
   { key: "health", icon: "🩺", label: "Health report", hint: "Pre-employment medical screening" },
@@ -94,6 +96,7 @@ export default function CandidateDetail() {
   const [recRefreshing, setRecRefreshing] = useState(false);
   const [expandedCriteria, setExpandedCriteria] = useState(() => new Set());
   const toggleCriterion = (id) => setExpandedCriteria((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const [showTranscript, setShowTranscript] = useState(false);
   async function saveCheck(key, patch) {
     const next = { ...checks, [key]: { ...(checks[key] || { status: "pending", notes: "" }), ...patch } };
     setChecks(next);
@@ -486,6 +489,114 @@ export default function CandidateDetail() {
                     <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: b.color, background: b.bg, border: `1px solid ${b.border}`, padding: "6px 13px", borderRadius: 20, whiteSpace: "nowrap" }}><span style={{ fontSize: 11 }}>{b.icon}</span>{sfit.budget.label}</span>
                   </div>
                 ); })()}
+              </div>
+            );
+          })()}
+
+          {/* AI Voice Interview — HR visibility into what the candidate actually
+              said on the call, not just the graded summary it feeds into
+              scoring. Only rendered when the candidate has actually done one. */}
+          {candidate.voice_screen && (() => {
+            const vs = candidate.voice_screen;
+            const a = vs.assessment || {};
+            const langLabel = VOICE_LANGS[vs.language] || VOICE_LANGS.en;
+            // A single turn's own text can itself contain a line break (the
+            // Realtime API's transcript sometimes does), which shows up here
+            // as a continuation line with no "Candidate:"/"Interviewer:"
+            // prefix — merge it into the previous bubble by the same speaker
+            // rather than defaulting it to a new, wrongly-attributed turn.
+            const lines = [];
+            for (const raw of (vs.transcript || "").split("\n")) {
+              const line = raw.trim();
+              if (!line) continue;
+              const m = line.match(/^(Candidate|Interviewer):\s*(.*)$/);
+              if (m) lines.push({ role: m[1], text: m[2] });
+              else if (lines.length) lines[lines.length - 1].text += " " + line;
+              else lines.push({ role: "Interviewer", text: line });
+            }
+            return (
+              <div style={cardBox}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, marginBottom: 6 }} className="flex-wrap">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 700, color: D.text }}>🎙 AI Voice Interview</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: D.text3, background: D.pillBg, border: `1px solid ${D.border}`, padding: "4px 11px", borderRadius: 20 }}>{langLabel}</span>
+                    {vs.completed_at && <span style={{ fontSize: 12, color: D.text4 }}>{new Date(vs.completed_at).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</span>}
+                  </div>
+                </div>
+
+                {(a.red_flags || []).length > 0 && (
+                  <div style={{ background: D.redBg, border: `1px solid ${D.redBorder}`, borderRadius: 11, padding: "12px 15px", margin: "12px 0" }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: D.red, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 8 }}>⚠ Red flags raised on the call</div>
+                    {a.red_flags.map((f, i) => (
+                      <div key={i} style={{ marginBottom: i < a.red_flags.length - 1 ? 8 : 0 }}>
+                        <div style={{ fontSize: 13.5, color: D.text, fontStyle: "italic", lineHeight: 1.5 }}>"{f.quote}"</div>
+                        <div style={{ fontSize: 12.5, color: D.text3, marginTop: 2 }}>{f.why}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {a.summary && <div style={{ fontSize: 13.5, color: D.text2, lineHeight: 1.6, margin: "12px 0" }}>{a.summary}</div>}
+
+                {(a.strengths?.length > 0 || a.concerns?.length > 0) && (
+                  <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2" style={{ marginBottom: 14 }}>
+                    {a.strengths?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Strengths from the call</div>
+                        {a.strengths.map((s, i) => <div key={i} style={{ fontSize: 13, color: D.text2, lineHeight: 1.5, marginBottom: 3 }}>✓ {s}</div>)}
+                      </div>
+                    )}
+                    {a.concerns?.length > 0 && (
+                      <div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>Concerns from the call</div>
+                        {a.concerns.map((s, i) => <div key={i} style={{ fontSize: 13, color: D.text2, lineHeight: 1.5, marginBottom: 3 }}>⚠ {s}</div>)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {(a.criteria_notes || []).length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".4px", marginBottom: 6 }}>How each requirement held up</div>
+                    {a.criteria_notes.map((c, i) => {
+                      const dot = c.score >= 70 ? D.green : c.score <= 30 ? D.red : D.amber;
+                      return (
+                        <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: "6px 0", borderBottom: i < a.criteria_notes.length - 1 ? `0.5px solid ${D.hair}` : "none" }}>
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: dot, marginTop: 5, flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{c.criterion}</div>
+                            <div style={{ fontSize: 12.5, color: D.text3, marginTop: 1 }}>{c.note}</div>
+                          </div>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: dot, flexShrink: 0 }}>{c.score}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div style={{ borderTop: `0.5px solid ${D.hair}`, paddingTop: 12 }}>
+                  <span onClick={() => setShowTranscript((v) => !v)} style={{ fontSize: 13, fontWeight: 600, color: D.blue, cursor: "pointer" }}>
+                    {showTranscript ? "▴ Hide full transcript" : "▾ View full transcript"}
+                  </span>
+                  {showTranscript && (
+                    <div style={{ marginTop: 14, maxHeight: 420, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10, paddingRight: 4 }}>
+                      {lines.length === 0 && <div style={{ fontSize: 13, color: D.text4 }}>No transcript was captured for this call.</div>}
+                      {lines.map((l, i) => {
+                        const isCandidate = l.role === "Candidate";
+                        return (
+                          <div key={i} style={{ display: "flex", justifyContent: isCandidate ? "flex-end" : "flex-start" }}>
+                            <div style={{ maxWidth: "78%" }}>
+                              <div style={{ fontSize: 10.5, fontWeight: 700, color: D.text4, textTransform: "uppercase", letterSpacing: ".3px", marginBottom: 3, textAlign: isCandidate ? "right" : "left" }}>{isCandidate ? "Candidate" : "AI Interviewer"}</div>
+                              <div style={{ fontSize: 13.5, lineHeight: 1.5, padding: "9px 13px", borderRadius: 12, color: isCandidate ? "#fff" : D.text, background: isCandidate ? "#7C3AED" : D.inset, borderTopRightRadius: isCandidate ? 3 : 12, borderTopLeftRadius: isCandidate ? 12 : 3 }}>
+                                {l.text}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })()}
